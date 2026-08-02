@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reddit 运营看板</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, 'Segoe UI', 'PingFang SC', sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* 顶部 Header */
+    .header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%);
+      border-bottom: 1px solid #1e2535;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 { font-size: 20px; font-weight: 700; color: #f8fafc; }
+    .header h1 span { color: #ff4500; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .update-info { font-size: 12px; color: #64748b; }
+    .refresh-btn {
+      background: #ff4500;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .refresh-btn:hover { opacity: 0.85; }
+    .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Tab 切换 */
+    .tab-bar {
+      padding: 0 32px;
+      background: #0f1117;
+      border-bottom: 1px solid #1e2535;
+      display: flex;
+      gap: 0;
+    }
+    .tab {
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active { color: #ff4500; border-bottom-color: #ff4500; }
+    .tab:hover:not(.active) { color: #94a3b8; }
+
+    /* 主体 */
+    .main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+
+    /* 加载/错误状态 */
+    .status-overlay {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 80px 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #1e2535;
+      border-top-color: #ff4500;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 数字卡片 */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #1a1f2e;
+      border: 1px solid #1e2535;
+      border-radius: 12px;
+      padding: 20px 24px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: #2d3a52; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 36px; font-weight: 700; color: #f8fafc; line-height: 1; }
+    .stat-sub { font-size: 12px; color: #475569; margin-top: 6px; }
+    .stat-card.highlight .stat-value { color: #ff4500; }
+    .stat-card.green .stat-value { color: #22c55e; }
+    .stat-card.blue .stat-value { color: #3b82f6; }
+
+    /* 图表网格 */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .chart-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .chart-full { grid-column: 1 / -1; }
+
+    .chart-card {
+      background: #1a1f2e;
+      border: 1px solid #1e2535;
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .chart-card h3 { font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .chart-box { width: 100%; height: 260px; }
+    .chart-box.tall { height: 320px; }
+    .chart-box.short { height: 200px; }
+
+    @media (max-width: 900px) {
+      .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
+      .main { padding: 16px; }
+      .header { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Reddit 运营看板 <span>●</span></h1>
+  <div class="header-right">
+    <span class="update-info" id="updateInfo">加载中...</span>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadData()">刷新数据</button>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('streamfab', this)">StreamFab</div>
+  <div class="tab" onclick="switchTab('dvdfab', this)">DVDFab</div>
+</div>
+
+<div class="main" id="main">
+  <div class="status-overlay" id="loading">
+    <div class="spinner"></div>
+    <span>正在从飞书加载数据...</span>
+  </div>
+</div>
+
+<script>
+let currentData = null;
+let currentBrand = 'streamfab';
+const charts = {};
+
+// 页面加载时拉数据
+loadData();
+
+async function loadData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  btn.textContent = '刷新中...';
+  showLoading();
+
+  try {
+    // 读同目录下的 stats.json（由 export-stats.js 每日生成）
+    const res = await fetch('./stats.json?t=' + Date.now());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    currentData = await res.json();
+    if (currentData.error) throw new Error(currentData.error);
+
+    const d = new Date(currentData.updatedAt);
+    document.getElementById('updateInfo').textContent =
+      `更新于 ${d.toLocaleDateString('zh-CN')} ${d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`;
+
+    render(currentBrand);
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '刷新数据';
+  }
+}
+
+function switchTab(brand, el) {
+  currentBrand = brand;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (currentData) render(brand);
+}
+
+function showLoading() {
+  document.getElementById('main').innerHTML = `
+    <div class="status-overlay" id="loading">
+      <div class="spinner"></div>
+      <span>正在从飞书加载数据...</span>
+    </div>`;
+}
+
+function showError(msg) {
+  document.getElementById('main').innerHTML = `
+    <div class="status-overlay">
+      <span style="font-size:32px">⚠️</span>
+      <span style="color:#f87171;font-weight:600">数据加载失败</span>
+      <span style="max-width:400px;text-align:center;line-height:1.6">${msg}</span>
+      <button class="refresh-btn" style="margin-top:8px" onclick="loadData()">重试</button>
+    </div>`;
+}
+
+function render(brand) {
+  const d = currentData[brand];
+  const publishedRate = d.total > 0 ? ((d.published / d.total) * 100).toFixed(1) : 0;
+  const mentionRate = (d.brandMention.YES + d.brandMention.NO) > 0
+    ? ((d.brandMention.YES / (d.brandMention.YES + d.brandMention.NO)) * 100).toFixed(1)
+    : 0;
+
+  document.getElementById('main').innerHTML = `
+    <!-- 数字卡片 -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">抓取总量</div>
+        <div class="stat-value">${d.total.toLocaleString()}</div>
+        <div class="stat-sub">帖子 ${d.posts} · 评论 ${d.comments}</div>
+      </div>
+      <div class="stat-card highlight">
+        <div class="stat-label">已发布回复</div>
+        <div class="stat-value">${d.published.toLocaleString()}</div>
+        <div class="stat-sub">发布率 ${publishedRate}%</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">产品提及（含品牌）</div>
+        <div class="stat-value">${d.brandMention.YES.toLocaleString()}</div>
+        <div class="stat-sub">提及率 ${mentionRate}%</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">覆盖关键词数</div>
+        <div class="stat-value">${Object.keys(d.intentCount).length > 0 ? Object.keys(d.topKeywords ? Object.fromEntries(d.topKeywords) : {}).length || d.topKeywords.length : 0}</div>
+        <div class="stat-sub">关键词维度覆盖</div>
+      </div>
+    </div>
+
+    <!-- 图表第一行 -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h3>每日抓取趋势</h3>
+        <div class="chart-box tall" id="chart-daily"></div>
+      </div>
+      <div class="chart-card">
+        <h3>处理状态分布</h3>
+        <div class="chart-box tall" id="chart-status"></div>
+      </div>
+    </div>
+
+    <!-- 图表第二行 -->
+    <div class="chart-grid-3">
+      <div class="chart-card">
+        <h3>意图分类</h3>
+        <div class="chart-box" id="chart-intent"></div>
+      </div>
+      <div class="chart-card">
+        <h3>产品提及率</h3>
+        <div class="chart-box" id="chart-mention"></div>
+      </div>
+      <div class="chart-card">
+        <h3>帖子 vs 评论</h3>
+        <div class="chart-box" id="chart-type"></div>
+      </div>
+    </div>
+
+    <!-- 关键词覆盖 -->
+    <div class="chart-card">
+      <h3>关键词覆盖量 Top 15</h3>
+      <div class="chart-box tall" id="chart-keywords"></div>
+    </div>
+  `;
+
+  // 渲染所有图表
+  renderDailyChart(d.dailyTrend);
+  renderStatusChart(d.statusCount);
+  renderIntentChart(d.intentCount);
+  renderMentionChart(d.brandMention);
+  renderTypeChart(d.posts, d.comments);
+  renderKeywordChart(d.topKeywords);
+}
+
+const ECHARTS_THEME = {
+  backgroundColor: 'transparent',
+  textStyle: { color: '#94a3b8' },
+  tooltip: {
+    backgroundColor: '#1e2535',
+    borderColor: '#2d3a52',
+    textStyle: { color: '#e2e8f0' },
+  },
+};
+
+function makeChart(id) {
+  if (charts[id]) charts[id].dispose();
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const c = echarts.init(el, null, { renderer: 'canvas' });
+  charts[id] = c;
+  return c;
+}
+
+function renderDailyChart(dailyTrend) {
+  const c = makeChart('chart-daily');
+  if (!c) return;
+  c.setOption({
+    ...ECHARTS_THEME,
+    grid: { left: 50, right: 20, top: 20, bottom: 40 },
+    xAxis: {
+      type: 'category',
+      data: dailyTrend.map(d => d[0]),
+      axisLabel: { color: '#475569', fontSize: 11, rotate: 30 },
+      axisLine: { lineStyle: { color: '#1e2535' } },
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: { color: '#475569', fontSize: 11 },
+      splitLine: { lineStyle: { color: '#1e2535' } },
+    },
+    tooltip: { ...ECHARTS_THEME.tooltip, trigger: 'axis' },
+    series: [{
+      type: 'line',
+      data: dailyTrend.map(d => d[1]),
+      smooth: true,
+      lineStyle: { color: '#ff4500', width: 2 },
+      itemStyle: { color: '#ff4500' },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(255,69,0,0.3)' }, { offset: 1, color: 'rgba(255,69,0,0)' }] } },
+    }],
+  });
+}
+
+function renderStatusChart(statusCount) {
+  const c = makeChart('chart-status');
+  if (!c) return;
+  const entries = Object.entries(statusCount).sort((a, b) => b[1] - a[1]);
+  const colors = { '已发布': '#22c55e', '已生成': '#3b82f6', '待处理': '#f59e0b', '已忽略': '#475569', '忽略': '#475569', '暂不回复': '#6b7280', '需要复核': '#a855f7', '待审核': '#06b6d4' };
+  c.setOption({
+    ...ECHARTS_THEME,
+    grid: { left: 90, right: 20, top: 20, bottom: 20 },
+    xAxis: { type: 'value', axisLabel: { color: '#475569', fontSize: 11 }, splitLine: { lineStyle: { color: '#1e2535' } } },
+    yAxis: { type: 'category', data: entries.map(e => e[0]), axisLabel: { color: '#94a3b8', fontSize: 12 }, axisLine: { lineStyle: { color: '#1e2535' } } },
+    tooltip: { ...ECHARTS_THEME.tooltip, trigger: 'axis' },
+    series: [{
+      type: 'bar',
+      data: entries.map(e => ({ value: e[1], itemStyle: { color: colors[e[0]] || '#3b82f6', borderRadius: [0, 4, 4, 0] } })),
+      label: { show: true, position: 'right', color: '#94a3b8', fontSize: 11 },
+    }],
+  });
+}
+
+function renderIntentChart(intentCount) {
+  const c = makeChart('chart-intent');
+  if (!c) return;
+  const colors = { '高意向用户': '#22c55e', '竞品抱怨': '#f59e0b', '技术求助': '#3b82f6', '方案探索': '#a855f7', '无关话题': '#475569', '未分类': '#334155' };
+  c.setOption({
+    ...ECHARTS_THEME,
+    tooltip: { ...ECHARTS_THEME.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { orient: 'vertical', right: 0, top: 'center', textStyle: { color: '#94a3b8', fontSize: 11 } },
+    series: [{
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['38%', '50%'],
+      data: Object.entries(intentCount).map(([name, value]) => ({ name, value, itemStyle: { color: colors[name] || '#334155' } })),
+      label: { show: false },
+    }],
+  });
+}
+
+function renderMentionChart(brandMention) {
+  const c = makeChart('chart-mention');
+  if (!c) return;
+  c.setOption({
+    ...ECHARTS_THEME,
+    tooltip: { ...ECHARTS_THEME.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    series: [{
+      type: 'pie',
+      radius: ['45%', '72%'],
+      data: [
+        { name: '已提及品牌', value: brandMention.YES, itemStyle: { color: '#22c55e' } },
+        { name: '未提及品牌', value: brandMention.NO, itemStyle: { color: '#f59e0b' } },
+        { name: '未标记', value: brandMention.未标记, itemStyle: { color: '#334155' } },
+      ].filter(d => d.value > 0),
+      label: { color: '#94a3b8', fontSize: 11 },
+      labelLine: { lineStyle: { color: '#475569' } },
+    }],
+  });
+}
+
+function renderTypeChart(posts, comments) {
+  const c = makeChart('chart-type');
+  if (!c) return;
+  c.setOption({
+    ...ECHARTS_THEME,
+    tooltip: { ...ECHARTS_THEME.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    series: [{
+      type: 'pie',
+      radius: ['45%', '72%'],
+      data: [
+        { name: '帖子（IP运营）', value: posts, itemStyle: { color: '#ff4500' } },
+        { name: '评论（监控回复）', value: comments, itemStyle: { color: '#3b82f6' } },
+      ].filter(d => d.value > 0),
+      label: { color: '#94a3b8', fontSize: 11 },
+      labelLine: { lineStyle: { color: '#475569' } },
+    }],
+  });
+}
+
+function renderKeywordChart(topKeywords) {
+  const c = makeChart('chart-keywords');
+  if (!c) return;
+  const reversed = [...topKeywords].reverse();
+  c.setOption({
+    ...ECHARTS_THEME,
+    grid: { left: 160, right: 60, top: 10, bottom: 10 },
+    xAxis: { type: 'value', axisLabel: { color: '#475569', fontSize: 11 }, splitLine: { lineStyle: { color: '#1e2535' } } },
+    yAxis: { type: 'category', data: reversed.map(k => k[0]), axisLabel: { color: '#94a3b8', fontSize: 12, width: 140, overflow: 'truncate' }, axisLine: { lineStyle: { color: '#1e2535' } } },
+    tooltip: { ...ECHARTS_THEME.tooltip, trigger: 'axis' },
+    series: [{
+      type: 'bar',
+      data: reversed.map((k, i) => ({ value: k[1], itemStyle: { color: `hsl(${210 + i * 8}, 70%, 55%)`, borderRadius: [0, 4, 4, 0] } })),
+      label: { show: true, position: 'right', color: '#94a3b8', fontSize: 11 },
+      barMaxWidth: 22,
+    }],
+  });
+}
+</script>
+
+</body>
+</html>

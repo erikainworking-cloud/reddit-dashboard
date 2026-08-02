@@ -6,164 +6,218 @@
   <title>Reddit 运营看板</title>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
+    :root {
+      --bg:        #f0f4f8;
+      --surface:   #ffffff;
+      --border:    #dde3ec;
+      --text-1:    #1a2332;
+      --text-2:    #4a5568;
+      --text-3:    #8896a7;
+      --accent:    #ff4500;
+      --accent-bg: #fff2ee;
+      --green:     #0ea371;
+      --green-bg:  #edfcf4;
+      --blue:      #2563eb;
+      --blue-bg:   #eff6ff;
+      --purple:    #7c3aed;
+      --purple-bg: #f5f3ff;
+      --amber:     #d97706;
+      --amber-bg:  #fffbeb;
+      --red:       #dc2626;
+      --red-bg:    #fef2f2;
+      --sidebar-w: 220px;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system,'Segoe UI','PingFang SC',sans-serif; background: var(--bg); color: var(--text-1); }
 
-    body {
-      font-family: -apple-system, 'Segoe UI', 'PingFang SC', sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
-      min-height: 100vh;
-    }
+    /* ── 整体布局 ───────────────── */
+    .app { display: flex; flex-direction: column; min-height: 100vh; }
+    .app-body { display: flex; flex: 1; height: calc(100vh - 60px); overflow: hidden; }
 
+    /* ── Header ───────────────────── */
     .header {
-      background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%);
-      border-bottom: 1px solid #1e2535;
-      padding: 20px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      height: 60px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
-    .header h1 { font-size: 20px; font-weight: 700; color: #f8fafc; }
-    .header h1 span { color: #ff4500; }
-    .header-right { display: flex; align-items: center; gap: 16px; }
-    .update-info { font-size: 12px; color: #64748b; }
+    .header-logo { font-size: 17px; font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
+    .header-logo .dot { color: var(--accent); font-size: 10px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .update-info { font-size: 12px; color: var(--text-3); }
     .refresh-btn {
-      background: #ff4500; color: white; border: none;
-      padding: 8px 16px; border-radius: 8px; font-size: 13px;
-      cursor: pointer; transition: opacity 0.2s;
+      background: var(--accent); color: #fff; border: none;
+      padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: opacity .2s;
     }
-    .refresh-btn:hover { opacity: 0.85; }
-    .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .refresh-btn:hover { opacity: .85; }
+    .refresh-btn:disabled { opacity: .5; cursor: not-allowed; }
 
-    .tab-bar {
-      padding: 0 32px; background: #0f1117;
-      border-bottom: 1px solid #1e2535; display: flex; gap: 0;
+    /* ── Sidebar ──────────────────── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--surface); border-right: 1px solid var(--border);
+      overflow-y: auto; padding: 20px 0;
     }
-    .tab {
-      padding: 14px 24px; font-size: 14px; font-weight: 500;
-      color: #64748b; cursor: pointer;
-      border-bottom: 2px solid transparent; transition: all 0.2s;
+    .nav-section { padding: 0 12px; margin-bottom: 6px; }
+    .nav-section-title {
+      font-size: 10.5px; font-weight: 700; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 4px 8px 8px; display: block;
     }
-    .tab.active { color: #ff4500; border-bottom-color: #ff4500; }
-    .tab:hover:not(.active) { color: #94a3b8; }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 10px; border-radius: 8px;
+      font-size: 13.5px; font-weight: 500; color: var(--text-2);
+      cursor: pointer; transition: all .15s; user-select: none; margin-bottom: 1px;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-1); }
+    .nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+    .nav-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .nav-dot.sf { background: var(--accent); }
+    .nav-dot.df { background: var(--blue); }
+    .nav-dot.ex { background: var(--purple); }
+    .nav-divider { height: 1px; background: var(--border); margin: 10px 12px; }
 
-    .main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+    /* ── Main ─────────────────────── */
+    .main { flex: 1; overflow-y: auto; padding: 24px 28px; background: var(--bg); }
 
+    /* ── Loading / Error ─────────── */
     .status-overlay {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; gap: 12px; padding: 80px 0;
-      color: #64748b; font-size: 14px;
+      color: var(--text-3); font-size: 14px;
     }
-    .spinner {
-      width: 36px; height: 36px; border: 3px solid #1e2535;
-      border-top-color: #ff4500; border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
+    .spinner { width: 34px; height: 34px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .stat-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px; margin-bottom: 24px;
-    }
+    /* ── Page header ─────────────── */
+    .page-header { margin-bottom: 20px; }
+    .page-title { font-size: 19px; font-weight: 700; color: var(--text-1); }
+    .page-desc  { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+
+    /* ── Stat cards ──────────────── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 14px; margin-bottom: 20px; }
     .stat-card {
-      background: #1a1f2e; border: 1px solid #1e2535;
-      border-radius: 12px; padding: 20px 24px; transition: border-color 0.2s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: box-shadow .2s;
     }
-    .stat-card:hover { border-color: #2d3a52; }
-    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-value { font-size: 36px; font-weight: 700; color: #f8fafc; line-height: 1; }
-    .stat-sub { font-size: 12px; color: #475569; margin-top: 6px; }
-    .stat-card.highlight .stat-value { color: #ff4500; }
-    .stat-card.green .stat-value   { color: #22c55e; }
-    .stat-card.blue .stat-value    { color: #3b82f6; }
-    .stat-card.purple .stat-value  { color: #a855f7; }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .stat-label { font-size: 11px; color: var(--text-3); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--text-1); line-height: 1.1; }
+    .stat-sub   { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+    .stat-card.accent  .stat-value { color: var(--accent); }
+    .stat-card.green   .stat-value { color: var(--green); }
+    .stat-card.blue    .stat-value { color: var(--blue); }
+    .stat-card.purple  .stat-value { color: var(--purple); }
 
-    .chart-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    .chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    /* WoW badge */
+    .wow { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-top: 6px; }
+    .wow.up   { background: var(--green-bg);  color: var(--green); }
+    .wow.down { background: var(--red-bg);    color: var(--red); }
+    .wow.flat { background: var(--bg);        color: var(--text-3); border: 1px solid var(--border); }
+
+    /* ── Chart cards ─────────────── */
+    .chart-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
     .chart-full   { grid-column: 1 / -1; }
-
     .chart-card {
-      background: #1a1f2e; border: 1px solid #1e2535;
-      border-radius: 12px; padding: 20px 24px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
     }
-    .chart-card h3 {
-      font-size: 13px; font-weight: 600; color: #94a3b8;
-      margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .chart-card .chart-subtitle { font-size: 11px; color: #475569; margin-bottom: 14px; }
-    .chart-box { width: 100%; height: 260px; }
-    .chart-box.tall  { height: 320px; }
-    .chart-box.short { height: 200px; }
+    .chart-title    { font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+    .chart-subtitle { font-size: 11px; color: var(--text-3); margin-bottom: 12px; line-height: 1.5; }
+    .chart-box      { width: 100%; height: 240px; }
+    .chart-box.tall  { height: 300px; }
+    .chart-box.short { height: 180px; }
 
-    /* 区块标题 */
+    /* 图表文字分析 */
+    .chart-insight {
+      margin-top: 10px; padding: 8px 12px;
+      background: #f8fafc; border-radius: 7px;
+      border-left: 3px solid #cbd5e1;
+      font-size: 12px; color: var(--text-2); line-height: 1.65;
+    }
+    .chart-insight b { color: var(--text-1); }
+
+    /* ── Section title ───────────── */
     .section-title {
-      font-size: 13px; font-weight: 700; color: #64748b;
-      text-transform: uppercase; letter-spacing: 1px;
-      margin: 28px 0 14px; padding-left: 12px;
-      border-left: 3px solid #ff4500;
+      font-size: 11.5px; font-weight: 700; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: .9px;
+      margin: 24px 0 12px; padding-left: 10px;
+      border-left: 3px solid var(--accent);
     }
 
-    /* 品牌标签 */
-    .brand-tag {
-      display: inline-block; font-size: 11px; padding: 2px 8px;
-      border-radius: 4px; font-weight: 600;
-    }
-    .brand-tag.sf { background: rgba(255,69,0,0.15); color: #ff6633; }
-    .brand-tag.df { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    /* Brand tag */
+    .brand-tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+    .brand-tag.sf { background: var(--accent-bg); color: var(--accent); }
+    .brand-tag.df { background: var(--blue-bg);   color: var(--blue); }
 
-    /* 工具进展时间线 */
-    .timeline { padding: 8px 0; }
-    .tl-item {
-      display: flex; gap: 16px; align-items: flex-start;
-      padding: 12px 0; border-bottom: 1px solid #1e2535;
-    }
+    /* ── Timeline ────────────────── */
+    .tl-item { display: flex; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--border); }
     .tl-item:last-child { border-bottom: none; }
-    .tl-dot {
-      width: 10px; height: 10px; border-radius: 50%; margin-top: 5px;
-      flex-shrink: 0;
-    }
-    .tl-dot.done { background: #22c55e; }
-    .tl-dot.progress { background: #f59e0b; }
-    .tl-dot.planned { background: #475569; }
-    .tl-week { font-size: 11px; color: #64748b; flex-shrink: 0; width: 64px; margin-top: 3px; }
-    .tl-content { flex: 1; }
-    .tl-title { font-size: 14px; color: #e2e8f0; font-weight: 500; }
-    .tl-desc  { font-size: 12px; color: #64748b; margin-top: 4px; line-height: 1.5; }
-    .tl-badge {
-      display: inline-block; font-size: 10px; padding: 2px 7px;
-      border-radius: 10px; margin-left: 8px; font-weight: 600;
-    }
-    .tl-badge.done     { background: rgba(34,197,94,0.15);  color: #22c55e; }
-    .tl-badge.progress { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .tl-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .tl-dot.done     { background: var(--green); }
+    .tl-dot.progress { background: var(--amber); }
+    .tl-week    { font-size: 11px; color: var(--text-3); flex-shrink: 0; width: 68px; margin-top: 3px; }
+    .tl-title   { font-size: 14px; color: var(--text-1); font-weight: 500; }
+    .tl-desc    { font-size: 12px; color: var(--text-3); margin-top: 4px; line-height: 1.5; }
+    .tl-badge   { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 8px; font-weight: 600; }
+    .tl-badge.done     { background: var(--green-bg);  color: var(--green); }
+    .tl-badge.progress { background: var(--amber-bg);  color: var(--amber); }
 
     @media (max-width: 900px) {
+      .sidebar { display: none; }
       .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
-      .main { padding: 16px; }
-      .header { padding: 16px; }
+      .main { padding: 14px; }
     }
   </style>
 </head>
 <body>
+<div class="app">
 
-<div class="header">
-  <h1>Reddit 运营看板 <span>●</span></h1>
-  <div class="header-right">
-    <span class="update-info" id="updateInfo">加载中...</span>
-    <button class="refresh-btn" id="refreshBtn" onclick="loadData()">刷新数据</button>
-  </div>
-</div>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#ff4500"/><path d="M16.67 10a1.46 1.46 0 0 0-2.47-1 7.12 7.12 0 0 0-3.85-1.23l.65-3.06 2.13.45a1 1 0 1 0 1.07-.97 1 1 0 0 0-.96.68l-2.38-.5a.18.18 0 0 0-.21.14l-.73 3.4a7.14 7.14 0 0 0-3.82 1.22 1.46 1.46 0 1 0-1.61 2.36 2.9 2.9 0 0 0 0 .4c0 2.03 2.36 3.67 5.27 3.67s5.27-1.64 5.27-3.67a2.9 2.9 0 0 0 0-.4 1.46 1.46 0 0 0 .55-1.19ZM7.5 11a1 1 0 1 1 1 1 1 1 0 0 1-1-1Zm5.57 2.65a3.47 3.47 0 0 1-3.07.7 3.47 3.47 0 0 1-3.07-.7.19.19 0 0 1 .26-.26 3.1 3.1 0 0 0 2.81.6 3.1 3.1 0 0 0 2.81-.6.19.19 0 0 1 .26.26Zm-.07-1.65a1 1 0 1 1 1-1 1 1 0 0 1-1 1Z" fill="#fff"/></svg>
+      Reddit 运营看板
+      <span class="dot">●</span>
+    </div>
+    <div class="header-right">
+      <span class="update-info" id="updateInfo">加载中...</span>
+      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">刷新数据</button>
+    </div>
+  </header>
 
-<div class="tab-bar">
-  <div class="tab active" onclick="switchTab('streamfab', this)">StreamFab 监控</div>
-  <div class="tab" onclick="switchTab('dvdfab', this)">DVDFab 监控</div>
-  <div class="tab" onclick="switchTab('execution', this)">执行动作</div>
-</div>
+  <div class="app-body">
 
-<div class="main" id="main">
-  <div class="status-overlay">
-    <div class="spinner"></div>
-    <span>正在加载数据...</span>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-section">
+        <span class="nav-section-title">运营看板</span>
+        <div class="nav-item active" id="nav-streamfab" onclick="navigate('streamfab', this)">
+          <span class="nav-dot sf"></span> StreamFab
+        </div>
+        <div class="nav-item" id="nav-dvdfab" onclick="navigate('dvdfab', this)">
+          <span class="nav-dot df"></span> DVDFab
+        </div>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <div class="nav-item" id="nav-execution" onclick="navigate('execution', this)">
+          <span class="nav-dot ex"></span> 执行动作
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main" id="main">
+      <div class="status-overlay"><div class="spinner"></div><span>正在加载数据...</span></div>
+    </main>
+
   </div>
 </div>
 
@@ -176,72 +230,116 @@ loadData();
 
 async function loadData() {
   const btn = document.getElementById('refreshBtn');
-  btn.disabled = true;
-  btn.textContent = '刷新中...';
+  btn.disabled = true; btn.textContent = '刷新中...';
   showLoading();
-
   try {
     const res = await fetch('./stats.json?t=' + Date.now());
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     currentData = await res.json();
     if (currentData.error) throw new Error(currentData.error);
-
     const d = new Date(currentData.updatedAt);
     document.getElementById('updateInfo').textContent =
-      `更新于 ${d.toLocaleDateString('zh-CN')} ${d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`;
-
+      `更新于 ${d.toLocaleDateString('zh-CN')} ${d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}`;
     renderTab(currentTab);
-  } catch (err) {
-    showError(err.message);
+  } catch(e) {
+    showError(e.message);
   } finally {
-    btn.disabled = false;
-    btn.textContent = '刷新数据';
+    btn.disabled = false; btn.textContent = '刷新数据';
   }
 }
 
-function switchTab(tabName, el) {
-  currentTab = tabName;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  if (currentData) renderTab(tabName);
+function navigate(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  (el || document.getElementById('nav-' + tab))?.classList.add('active');
+  if (currentData) renderTab(tab);
 }
 
 function renderTab(tab) {
   if (tab === 'execution') renderExecution();
-  else render(tab);
+  else renderMonitor(tab);
 }
 
 function showLoading() {
   document.getElementById('main').innerHTML =
-    `<div class="status-overlay"><div class="spinner"></div><span>正在加载数据...</span></div>`;
+    '<div class="status-overlay"><div class="spinner"></div><span>正在加载数据...</span></div>';
 }
-
 function showError(msg) {
   document.getElementById('main').innerHTML =
     `<div class="status-overlay">
       <span style="font-size:32px">⚠️</span>
-      <span style="color:#f87171;font-weight:600">数据加载失败</span>
-      <span style="max-width:400px;text-align:center;line-height:1.6">${msg}</span>
+      <span style="color:var(--red);font-weight:600">数据加载失败</span>
+      <span style="max-width:380px;text-align:center;line-height:1.6;color:var(--text-2)">${msg}</span>
       <button class="refresh-btn" style="margin-top:8px" onclick="loadData()">重试</button>
     </div>`;
 }
 
-// ─── 监控看板（精准词）──────────────────────────────────────────
+/* ══════════════ 工具函数 ══════════════ */
 
-function render(brand) {
+// 过滤掉「已忽略」系列
+function filterIgnored(obj) {
+  const ignoreKeys = new Set(['已忽略','忽略']);
+  return Object.fromEntries(Object.entries(obj || {}).filter(([k]) => !ignoreKeys.has(k)));
+}
+
+// 计算本周 / 上周新增量（从 dailyTrend）
+function calcWoW(dailyTrend) {
+  if (!dailyTrend || !dailyTrend.length) return { thisWeek: 0, lastWeek: 0 };
+  const today = new Date();
+  const dow = today.getDay();
+  const toMon = dow === 0 ? 6 : dow - 1;
+  const mon0 = new Date(today); mon0.setDate(today.getDate() - toMon); mon0.setHours(0,0,0,0);
+  const mon1 = new Date(mon0); mon1.setDate(mon0.getDate() - 7);
+  const sun1 = new Date(mon0); sun1.setDate(mon0.getDate() - 1);
+  const fmt  = d => d.toISOString().split('T')[0];
+  const s0 = fmt(mon0), s1 = fmt(mon1), e1 = fmt(sun1);
+  let tw = 0, lw = 0;
+  for (const [date, count] of dailyTrend) {
+    if (!date) continue;
+    if (date >= s0) tw += Number(count) || 0;
+    else if (date >= s1 && date <= e1) lw += Number(count) || 0;
+  }
+  return { thisWeek: tw, lastWeek: lw };
+}
+
+function wowHTML(thisWeek, lastWeek) {
+  if (lastWeek === 0) return `<span class="wow flat">本周新增 ${thisWeek}</span>`;
+  const pct = Math.round((thisWeek - lastWeek) / lastWeek * 100);
+  const cls = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+  const arrow = pct > 0 ? '↑' : pct < 0 ? '↓' : '→';
+  return `<span class="wow ${cls}">${arrow} ${Math.abs(pct)}% 环比上周</span>`;
+}
+
+// 取对象中占比最高的前 N 项
+function topN(obj, n = 2) {
+  return Object.entries(obj || {}).sort((a,b) => b[1]-a[1]).slice(0, n);
+}
+
+/* ══════════════ 监控看板渲染 ══════════════ */
+
+function renderMonitor(brand) {
   const d = currentData[brand];
+  const sc = filterIgnored(d.statusCount);
+  const wow = calcWoW(d.dailyTrend);
   const publishedRate = d.total > 0 ? ((d.published / d.total) * 100).toFixed(1) : 0;
   const mentionRate = (d.brandMention.YES + d.brandMention.NO) > 0
     ? ((d.brandMention.YES / (d.brandMention.YES + d.brandMention.NO)) * 100).toFixed(1) : 0;
+  const label = brand === 'streamfab' ? 'StreamFab' : 'DVDFab';
 
   document.getElementById('main').innerHTML = `
+    <div class="page-header">
+      <div class="page-title">${label} 精准词监控</div>
+      <div class="page-desc">基于精准关键词抓取的 Reddit 内容监控与回复数据</div>
+    </div>
+
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">抓取总量</div>
         <div class="stat-value">${d.total.toLocaleString()}</div>
         <div class="stat-sub">帖子 ${d.posts} · 评论 ${d.comments}</div>
+        ${wowHTML(wow.thisWeek, wow.lastWeek)}
       </div>
-      <div class="stat-card highlight">
+      <div class="stat-card accent">
         <div class="stat-label">已发布回复</div>
         <div class="stat-value">${d.published.toLocaleString()}</div>
         <div class="stat-sub">发布率 ${publishedRate}%</div>
@@ -254,51 +352,68 @@ function render(brand) {
       <div class="stat-card blue">
         <div class="stat-label">覆盖关键词数</div>
         <div class="stat-value">${d.topKeywords.length}</div>
-        <div class="stat-sub">关键词维度覆盖</div>
+        <div class="stat-sub">Top 关键词维度</div>
       </div>
     </div>
 
     <div class="chart-grid">
       <div class="chart-card">
-        <h3>每日抓取趋势</h3>
+        <div class="chart-title">每日抓取趋势</div>
+        <div class="chart-subtitle">近 60 天每日新增抓取量</div>
         <div class="chart-box tall" id="chart-daily"></div>
+        <div class="chart-insight" id="ins-daily"></div>
       </div>
       <div class="chart-card">
-        <h3>处理状态分布</h3>
+        <div class="chart-title">处理状态分布</div>
+        <div class="chart-subtitle">已过滤「已忽略」条目</div>
         <div class="chart-box tall" id="chart-status"></div>
+        <div class="chart-insight" id="ins-status"></div>
       </div>
     </div>
 
     <div class="chart-grid-3">
       <div class="chart-card">
-        <h3>意图分类</h3>
+        <div class="chart-title">意图分类</div>
         <div class="chart-box" id="chart-intent"></div>
+        <div class="chart-insight" id="ins-intent"></div>
       </div>
       <div class="chart-card">
-        <h3>产品提及率</h3>
+        <div class="chart-title">产品提及率</div>
         <div class="chart-box" id="chart-mention"></div>
+        <div class="chart-insight" id="ins-mention"></div>
       </div>
       <div class="chart-card">
-        <h3>帖子 vs 评论</h3>
+        <div class="chart-title">帖子 vs 评论</div>
         <div class="chart-box" id="chart-type"></div>
+        <div class="chart-insight" id="ins-type"></div>
       </div>
     </div>
 
     <div class="chart-card">
-      <h3>关键词覆盖量 Top 15</h3>
+      <div class="chart-title">关键词覆盖量 Top 15</div>
+      <div class="chart-subtitle">${label} 精准词频次排行</div>
       <div class="chart-box tall" id="chart-keywords"></div>
+      <div class="chart-insight" id="ins-keywords"></div>
     </div>
   `;
 
-  renderDailyChart(d.dailyTrend);
-  renderStatusChart(d.statusCount);
+  renderDailyChart(d.dailyTrend, wow);
+  renderStatusChart(sc);
   renderIntentChart(d.intentCount);
   renderMentionChart(d.brandMention);
   renderTypeChart(d.posts, d.comments);
   renderKeywordChart(d.topKeywords);
+
+  // 文字分析
+  setText('ins-daily', insightDaily(d.dailyTrend, wow));
+  setText('ins-status', insightStatus(sc, d.total));
+  setText('ins-intent', insightIntent(d.intentCount));
+  setText('ins-mention', insightMention(d.brandMention));
+  setText('ins-type', insightType(d.posts, d.comments));
+  setText('ins-keywords', insightKeywords(d.topKeywords));
 }
 
-// ─── 执行动作 Tab ────────────────────────────────────────────
+/* ══════════════ 执行动作渲染 ══════════════ */
 
 function renderExecution() {
   const bm = currentData.brandMonitoring || {};
@@ -306,21 +421,31 @@ function renderExecution() {
   const df = bm.dvdfab    || {};
   const pa = currentData.paidAccounts || {};
 
-  // 汇总卡片数值
-  const totalInternal = (sf.processed || 0) + (df.processed || 0)
-    + (currentData.streamfab?.published || 0) + (currentData.dvdfab?.published || 0);
-  const bmTotal     = (sf.total || 0) + (df.total || 0);
-  const bmProcessed = (sf.processed || 0) + (df.processed || 0);
-  const bmRate      = bmTotal > 0 ? ((bmProcessed / bmTotal) * 100).toFixed(1) : '—';
+  const totalInternal = (sf.processed||0) + (df.processed||0)
+    + (currentData.streamfab?.published||0) + (currentData.dvdfab?.published||0);
+  const bmTotal     = (sf.total||0) + (df.total||0);
+  const bmProcessed = (sf.processed||0) + (df.processed||0);
+  const bmRate      = bmTotal > 0 ? ((bmProcessed / bmTotal)*100).toFixed(1) : '—';
 
-  const s7Yes = pa.survive7day?.['是'] || 0;
-  const s7No  = pa.survive7day?.['否'] || 0;
-  const s7Rate = (s7Yes + s7No) > 0 ? ((s7Yes / (s7Yes + s7No)) * 100).toFixed(0) + '%' : '—';
+  const s7y = pa.survive7day?.['是']||0, s7n = pa.survive7day?.['否']||0;
+  const s7Rate = (s7y+s7n) > 0 ? ((s7y/(s7y+s7n))*100).toFixed(0)+'%' : '—';
+
+  const sfWow = calcWoW(sf.processingTrend||[]);
+  const dfWow = calcWoW(df.processingTrend||[]);
+
+  const sfPraise = sf.problemType?.['正向夸奖']||0;
+  const sfPraiseRate = sf.total > 0 ? ((sfPraise/sf.total)*100).toFixed(0) : '—';
+  const dfPraise = df.problemType?.['正向夸奖']||0;
+  const dfPraiseRate = df.total > 0 ? ((dfPraise/df.total)*100).toFixed(0) : '—';
 
   document.getElementById('main').innerHTML = `
-    <!-- 汇总卡片 -->
+    <div class="page-header">
+      <div class="page-title">执行动作</div>
+      <div class="page-desc">品牌舆情回复执行情况 · 第三方付费账号 · 工具进展</div>
+    </div>
+
     <div class="stat-grid">
-      <div class="stat-card highlight">
+      <div class="stat-card accent">
         <div class="stat-label">内部回复执行总量</div>
         <div class="stat-value">${totalInternal.toLocaleString()}</div>
         <div class="stat-sub">品牌舆情 + 精准词已处理合计</div>
@@ -332,13 +457,13 @@ function renderExecution() {
       </div>
       <div class="stat-card blue">
         <div class="stat-label">第三方投放总数</div>
-        <div class="stat-value">${(pa.total || 0).toLocaleString()}</div>
+        <div class="stat-value">${(pa.total||0).toLocaleString()}</div>
         <div class="stat-sub">付费账号累计回帖</div>
       </div>
       <div class="stat-card purple">
         <div class="stat-label">7天存活率</div>
         <div class="stat-value">${s7Rate}</div>
-        <div class="stat-sub">存活 ${s7Yes} / 已知 ${s7Yes + s7No} 条</div>
+        <div class="stat-sub">存活 ${s7y} / 已知 ${s7y+s7n} 条</div>
       </div>
     </div>
 
@@ -346,33 +471,45 @@ function renderExecution() {
     <div class="section-title">品牌舆情处理状态</div>
     <div class="chart-grid">
       <div class="chart-card">
-        <h3>StreamFab 处理状态 <span class="brand-tag sf">StreamFab</span></h3>
+        <div class="chart-title">StreamFab 处理状态 <span class="brand-tag sf">StreamFab</span></div>
         <div class="chart-subtitle">
-          已处理 ${sf.processed || 0} · 待处理 ${sf.pending || 0} · 已生成待发布 ${sf.generated || 0} · 无需处理 ${sf.noAction || 0}
+          已处理 ${sf.processed||0} · 已生成待发布 ${sf.generated||0} · 待处理 ${sf.pending||0} · 无需处理 ${sf.noAction||0}
+          &nbsp;${wowHTML(sfWow.thisWeek, sfWow.lastWeek)}
         </div>
         <div class="chart-box" id="chart-sf-status"></div>
+        <div class="chart-insight" id="ins-sf-status"></div>
       </div>
       <div class="chart-card">
-        <h3>DVDFab 处理状态 <span class="brand-tag df">DVDFab</span></h3>
+        <div class="chart-title">DVDFab 处理状态 <span class="brand-tag df">DVDFab</span></div>
         <div class="chart-subtitle">
-          已处理 ${df.processed || 0} · 待处理 ${df.pending || 0} · 已生成待发布 ${df.generated || 0} · 无需处理 ${df.noAction || 0}
+          已处理 ${df.processed||0} · 已生成待发布 ${df.generated||0} · 待处理 ${df.pending||0} · 无需处理 ${df.noAction||0}
+          &nbsp;${wowHTML(dfWow.thisWeek, dfWow.lastWeek)}
         </div>
         <div class="chart-box" id="chart-df-status"></div>
+        <div class="chart-insight" id="ins-df-status"></div>
       </div>
     </div>
 
-    <!-- 问题分类 -->
+    <!-- 用户问题分类 -->
     <div class="section-title">用户问题分类</div>
     <div class="chart-grid">
       <div class="chart-card">
-        <h3>StreamFab 问题分类 <span class="brand-tag sf">StreamFab</span></h3>
-        ${sf.avgQualityScore ? `<div class="chart-subtitle">平均回复质量分：<b style="color:#f8fafc">${sf.avgQualityScore}</b> / 10</div>` : ''}
-        <div class="chart-box" id="chart-sf-problem"></div>
+        <div class="chart-title">StreamFab 问题分类 <span class="brand-tag sf">StreamFab</span></div>
+        <div class="chart-subtitle">
+          正向夸奖占比 <b>${sfPraiseRate}%</b>
+          ${sf.avgQualityScore ? `&nbsp;·&nbsp;平均回复质量 <b>${sf.avgQualityScore}</b>/10` : ''}
+        </div>
+        <div class="chart-box" id="chart-sf-prob"></div>
+        <div class="chart-insight" id="ins-sf-prob"></div>
       </div>
       <div class="chart-card">
-        <h3>DVDFab 问题分类 <span class="brand-tag df">DVDFab</span></h3>
-        ${df.avgQualityScore ? `<div class="chart-subtitle">平均回复质量分：<b style="color:#f8fafc">${df.avgQualityScore}</b> / 10</div>` : ''}
-        <div class="chart-box" id="chart-df-problem"></div>
+        <div class="chart-title">DVDFab 问题分类 <span class="brand-tag df">DVDFab</span></div>
+        <div class="chart-subtitle">
+          正向夸奖占比 <b>${dfPraiseRate}%</b>
+          ${df.avgQualityScore ? `&nbsp;·&nbsp;平均回复质量 <b>${df.avgQualityScore}</b>/10` : ''}
+        </div>
+        <div class="chart-box" id="chart-df-prob"></div>
+        <div class="chart-insight" id="ins-df-prob"></div>
       </div>
     </div>
 
@@ -380,67 +517,170 @@ function renderExecution() {
     <div class="section-title">第三方付费账号</div>
     <div class="chart-grid-3">
       <div class="chart-card">
-        <h3>产线分布</h3>
+        <div class="chart-title">产线分布</div>
         <div class="chart-box" id="chart-pa-brand"></div>
+        <div class="chart-insight" id="ins-pa-brand"></div>
       </div>
       <div class="chart-card">
-        <h3>新帖 vs 旧帖</h3>
+        <div class="chart-title">新帖 vs 旧帖</div>
         <div class="chart-box" id="chart-pa-type"></div>
+        <div class="chart-insight" id="ins-pa-type"></div>
       </div>
       <div class="chart-card">
-        <h3>存活率对比</h3>
+        <div class="chart-title">存活率对比</div>
         <div class="chart-box" id="chart-pa-survive"></div>
+        <div class="chart-insight" id="ins-pa-survive"></div>
       </div>
     </div>
 
     <!-- 工具进展 -->
     <div class="section-title">工具搭建进展</div>
     <div class="chart-card">
-      <div class="timeline">
-        <div class="tl-item">
-          <div class="tl-dot done"></div>
-          <div class="tl-week">Week0723</div>
-          <div class="tl-content">
-            <div class="tl-title">DVDFab / StreamFab IP 账户建立 <span class="tl-badge done">已完成</span></div>
-            <div class="tl-desc">两个品牌的 Reddit IP 账户完成注册，用于品牌社区互动和内容发布。</div>
-          </div>
+      <div class="tl-item">
+        <div class="tl-dot done"></div>
+        <div class="tl-week">截至 0731</div>
+        <div>
+          <div class="tl-title">DVDFab / StreamFab IP 账户建立 <span class="tl-badge done">已完成</span></div>
+          <div class="tl-desc">两个品牌的 Reddit IP 账户完成注册，用于品牌社区互动和内容发布。</div>
         </div>
-        <div class="tl-item">
-          <div class="tl-dot done"></div>
-          <div class="tl-week">截至 0731</div>
-          <div class="tl-content">
-            <div class="tl-title">社区监控 + PIS 回复上云 <span class="tl-badge done">已完成</span></div>
-            <div class="tl-desc">DVDFab 和 StreamFab 相关社区监控与介入 PIS 回复已上云，每日自动运行。</div>
-          </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot done"></div>
+        <div class="tl-week">截至 0731</div>
+        <div>
+          <div class="tl-title">社区监控 + PIS 回复上云 <span class="tl-badge done">已完成</span></div>
+          <div class="tl-desc">DVDFab 和 StreamFab 相关社区监控与介入 PIS 回复已上云，每日自动运行。</div>
         </div>
-        <div class="tl-item">
-          <div class="tl-dot progress"></div>
-          <div class="tl-week">Week0723</div>
-          <div class="tl-content">
-            <div class="tl-title">自动化养号 Skill 搭建 <span class="tl-badge progress">优化中</span></div>
-            <div class="tl-desc">自动化养号 Skill 于 Week0723 启动搭建，截至 0731 仍在优化调整中。</div>
-          </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot progress"></div>
+        <div class="tl-week">Week0723</div>
+        <div>
+          <div class="tl-title">自动化养号 Skill 搭建 <span class="tl-badge progress">优化中</span></div>
+          <div class="tl-desc">自动化养号 Skill 于 Week0723 启动搭建，截至 0731 仍在优化调整中。</div>
         </div>
       </div>
     </div>
   `;
 
-  // 渲染图表
-  renderBrandMonStatusChart('chart-sf-status', sf.statusCount || {});
-  renderBrandMonStatusChart('chart-df-status', df.statusCount || {});
-  renderProblemChart('chart-sf-problem', sf.problemType || {});
-  renderProblemChart('chart-df-problem', df.problemType || {});
-  renderPaBrandChart(pa.byBrand || {});
-  renderPaTypeChart(pa.byType || {});
-  renderPaSurviveChart(pa.survive1day || {}, pa.survive7day || {});
+  renderBMStatusChart('chart-sf-status', filterIgnored(sf.statusCount));
+  renderBMStatusChart('chart-df-status', filterIgnored(df.statusCount));
+  renderProblemChart('chart-sf-prob', sf.problemType||{});
+  renderProblemChart('chart-df-prob', df.problemType||{});
+  renderPaBrandChart(pa.byBrand||{});
+  renderPaTypeChart(pa.byType||{});
+  renderPaSurviveChart(pa.survive1day||{}, pa.survive7day||{});
+
+  setText('ins-sf-status', insightBMStatus(sf));
+  setText('ins-df-status', insightBMStatus(df));
+  setText('ins-sf-prob', insightProblem(sf.problemType||{}, sf.avgQualityScore));
+  setText('ins-df-prob', insightProblem(df.problemType||{}, df.avgQualityScore));
+  setText('ins-pa-brand', insightPaBrand(pa.byBrand||{}));
+  setText('ins-pa-type',  insightPaType(pa.byType||{}));
+  setText('ins-pa-survive', insightPaSurvive(pa.survive1day||{}, pa.survive7day||{}));
 }
 
-// ─── 图表配置 ────────────────────────────────────────────────
+/* ══════════════ 文字分析函数 ══════════════ */
+
+function setText(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+function insightDaily(trend, wow) {
+  const { thisWeek, lastWeek } = wow;
+  const recentAvg = trend.slice(-7).reduce((s,[,v]) => s + (Number(v)||0), 0) / 7;
+  let txt = `本周新增 <b>${thisWeek}</b> 条`;
+  if (lastWeek > 0) {
+    const pct = Math.round((thisWeek - lastWeek) / lastWeek * 100);
+    txt += `，环比上周 <b>${pct > 0 ? '↑' : pct < 0 ? '↓' : '→'}${Math.abs(pct)}%</b>`;
+    txt += pct > 15 ? '，增长明显' : pct < -15 ? '，有所下滑，需关注' : '，趋势平稳';
+  }
+  txt += `；近 7 天日均 <b>${recentAvg.toFixed(0)}</b> 条。`;
+  return txt;
+}
+
+function insightStatus(sc, total) {
+  const published = sc['已发布']||0, pending = sc['待处理']||0;
+  const rate = total > 0 ? ((published / total) * 100).toFixed(1) : 0;
+  return `已发布回复 <b>${published}</b> 条（发布率 <b>${rate}%</b>），尚有 <b>${pending}</b> 条待处理。发布率越高代表回复覆盖越充分。`;
+}
+
+function insightIntent(intentCount) {
+  const entries = Object.entries(intentCount||{}).sort((a,b)=>b[1]-a[1]);
+  if (!entries.length) return '暂无意图分类数据。';
+  const total = entries.reduce((s,[,v])=>s+v, 0);
+  const top = entries[0];
+  const pct = total > 0 ? ((top[1]/total)*100).toFixed(0) : 0;
+  return `主要意图为「<b>${top[0]}</b>」，占比 <b>${pct}%</b>；共覆盖 ${entries.length} 种意图类型。高意向用户与竞品抱怨是介入回复的重点方向。`;
+}
+
+function insightMention(bm) {
+  const yes = bm.YES||0, no = bm.NO||0, tot = yes+no;
+  const rate = tot > 0 ? ((yes/tot)*100).toFixed(0) : 0;
+  const level = Number(rate) > 60 ? '较高' : Number(rate) > 30 ? '中等' : '偏低';
+  return `<b>${rate}%</b> 的帖子明确提及品牌，品牌曝光度 <b>${level}</b>。未提及品牌的帖子可通过回复策略引导品牌认知。`;
+}
+
+function insightType(posts, comments) {
+  const tot = posts + comments;
+  const commentRate = tot > 0 ? ((comments/tot)*100).toFixed(0) : 0;
+  return `内容以<b>${Number(commentRate) > 70 ? '评论（监控回复）' : '帖子与评论均衡'}</b>为主，评论占比 <b>${commentRate}%</b>。评论型内容更易精准介入目标用户讨论。`;
+}
+
+function insightKeywords(topKeywords) {
+  if (!topKeywords.length) return '暂无关键词数据。';
+  const top3 = topKeywords.slice(0, 3);
+  const tot  = topKeywords.reduce((s,[,v])=>s+(Number(v)||0), 0);
+  const top3sum = top3.reduce((s,[,v])=>s+(Number(v)||0), 0);
+  const pct = tot > 0 ? ((top3sum/tot)*100).toFixed(0) : 0;
+  return `Top 关键词「<b>${top3[0]?.[0]}</b>」出现 <b>${top3[0]?.[1]}</b> 次；前 3 关键词合计占比 <b>${pct}%</b>，关键词集中度${Number(pct) > 70 ? '较高' : '较为分散'}。`;
+}
+
+function insightBMStatus(data) {
+  const { total=0, processed=0, generated=0, pending=0 } = data;
+  const rate = total > 0 ? ((processed/total)*100).toFixed(0) : 0;
+  return `处理率 <b>${rate}%</b>，已处理 <b>${processed}</b> 条；AI 已生成待发布 <b>${generated}</b> 条，可优先跟进发布；尚有 <b>${pending}</b> 条待分配处理。`;
+}
+
+function insightProblem(pt, avgScore) {
+  const total = Object.values(pt).reduce((s,v)=>s+v, 0);
+  const praise  = pt['正向夸奖']||0, severe = pt['严重故障']||0;
+  const praiseR = total > 0 ? ((praise/total)*100).toFixed(0) : 0;
+  const severeR = total > 0 ? ((severe/total)*100).toFixed(0) : 0;
+  let txt = `正向夸奖占比 <b>${praiseR}%</b>，品牌口碑${Number(praiseR)>30?'良好':'有待提升'}；严重故障 <b>${severeR}%</b>${Number(severeR)>10?'，需优先处理':'，占比可控'}。`;
+  if (avgScore) txt += `平均回复质量分 <b>${avgScore}/10</b>。`;
+  return txt;
+}
+
+function insightPaBrand(byBrand) {
+  const tot = Object.values(byBrand).reduce((s,v)=>s+v, 0);
+  if (!tot) return '暂无第三方投放数据。';
+  const sf = byBrand['StreamFab']||0, df = byBrand['DVDFab']||0;
+  const lead = sf >= df ? 'StreamFab' : 'DVDFab';
+  const leadPct = tot > 0 ? (((sf>=df?sf:df)/tot)*100).toFixed(0) : 0;
+  return `<b>${lead}</b> 占主导，比例 <b>${leadPct}%</b>；共 <b>${tot}</b> 条投放记录。`;
+}
+
+function insightPaType(byType) {
+  const tot = Object.values(byType).reduce((s,v)=>s+v, 0);
+  if (!tot) return '暂无帖子类型数据。';
+  const newP = byType['新帖']||0;
+  const newR = tot > 0 ? ((newP/tot)*100).toFixed(0) : 0;
+  return `新帖占比 <b>${newR}%</b>，${Number(newR)>60?'以新帖为主，有利于获取自然流量':'旧帖维护为主，可增加新帖比例以扩大曝光'}。`;
+}
+
+function insightPaSurvive(s1, s7) {
+  const s1t = (s1['是']||0)+(s1['否']||0), s7t = (s7['是']||0)+(s7['否']||0);
+  const r1 = s1t > 0 ? ((s1['是']||0)/s1t*100).toFixed(0) : '—';
+  const r7 = s7t > 0 ? ((s7['是']||0)/s7t*100).toFixed(0) : '—';
+  const quality = Number(r7) >= 70 ? '投放质量稳定' : Number(r7) >= 40 ? '存活率中等，建议优化账号质量' : '存活率偏低，需检查内容与账号策略';
+  return `1天存活率 <b>${r1}%</b>，7天存活率 <b>${r7}%</b>。${quality}。`;
+}
+
+/* ══════════════ ECharts 图表 ══════════════ */
 
 const T = {
   backgroundColor: 'transparent',
-  textStyle: { color: '#94a3b8' },
-  tooltip: { backgroundColor: '#1e2535', borderColor: '#2d3a52', textStyle: { color: '#e2e8f0' } },
+  textStyle: { color: '#64748b' },
+  tooltip: { backgroundColor: '#fff', borderColor: '#e2e8f0', textStyle: { color: '#1e293b' }, shadowBlur: 12, shadowColor: 'rgba(0,0,0,.1)' },
 };
 
 function makeChart(id) {
@@ -452,177 +692,149 @@ function makeChart(id) {
   return c;
 }
 
-// 精准词 - 每日趋势
+function emptyChart(c) {
+  c.setOption({ ...T, graphic: [{ type: 'text', left: 'center', top: 'middle', style: { text: '暂无数据', fill: '#cbd5e1', fontSize: 14 } }] });
+}
+
 function renderDailyChart(dailyTrend) {
-  const c = makeChart('chart-daily');
-  if (!c) return;
-  c.setOption({
-    ...T,
-    grid: { left: 50, right: 20, top: 20, bottom: 40 },
-    xAxis: { type: 'category', data: dailyTrend.map(d => d[0]), axisLabel: { color: '#475569', fontSize: 11, rotate: 30 }, axisLine: { lineStyle: { color: '#1e2535' } } },
-    yAxis: { type: 'value', axisLabel: { color: '#475569', fontSize: 11 }, splitLine: { lineStyle: { color: '#1e2535' } } },
+  const c = makeChart('chart-daily'); if (!c) return;
+  c.setOption({ ...T,
+    grid: { left: 45, right: 16, top: 16, bottom: 36 },
+    xAxis: { type: 'category', data: dailyTrend.map(d=>d[0]), axisLabel: { color: '#94a3b8', fontSize: 10, rotate: 30 }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
+    yAxis: { type: 'value', axisLabel: { color: '#94a3b8', fontSize: 10 }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
     tooltip: { ...T.tooltip, trigger: 'axis' },
-    series: [{ type: 'line', data: dailyTrend.map(d => d[1]), smooth: true,
+    series: [{ type: 'line', data: dailyTrend.map(d=>d[1]), smooth: true,
       lineStyle: { color: '#ff4500', width: 2 }, itemStyle: { color: '#ff4500' },
-      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-        colorStops: [{ offset: 0, color: 'rgba(255,69,0,0.3)' }, { offset: 1, color: 'rgba(255,69,0,0)' }] } } }],
+      areaStyle: { color: { type:'linear', x:0, y:0, x2:0, y2:1, colorStops: [{ offset:0, color:'rgba(255,69,0,0.18)' },{ offset:1, color:'rgba(255,69,0,0)' }] } } }],
   });
 }
 
-// 精准词 - 处理状态横条
-function renderStatusChart(statusCount) {
-  const c = makeChart('chart-status');
-  if (!c) return;
-  const entries = Object.entries(statusCount).sort((a, b) => b[1] - a[1]);
-  const colors = { '已发布': '#22c55e', '已生成': '#3b82f6', '待处理': '#f59e0b', '已忽略': '#475569', '忽略': '#475569', '暂不回复': '#6b7280' };
-  c.setOption({
-    ...T,
-    grid: { left: 90, right: 20, top: 20, bottom: 20 },
-    xAxis: { type: 'value', axisLabel: { color: '#475569', fontSize: 11 }, splitLine: { lineStyle: { color: '#1e2535' } } },
-    yAxis: { type: 'category', data: entries.map(e => e[0]), axisLabel: { color: '#94a3b8', fontSize: 12 }, axisLine: { lineStyle: { color: '#1e2535' } } },
+function renderStatusChart(sc) {
+  const c = makeChart('chart-status'); if (!c) return;
+  const entries = Object.entries(sc).sort((a,b)=>b[1]-a[1]);
+  if (!entries.length) { emptyChart(c); return; }
+  const colors = { '已发布':'#0ea371','已生成':'#2563eb','待处理':'#d97706','需要复核':'#7c3aed','暂不回复':'#94a3b8','已处理':'#0ea371' };
+  c.setOption({ ...T,
+    grid: { left: 80, right: 24, top: 10, bottom: 10 },
+    xAxis: { type: 'value', axisLabel: { color: '#94a3b8', fontSize: 10 }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+    yAxis: { type: 'category', data: entries.map(e=>e[0]), axisLabel: { color: '#475569', fontSize: 12 }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
     tooltip: { ...T.tooltip, trigger: 'axis' },
-    series: [{ type: 'bar', data: entries.map(e => ({ value: e[1], itemStyle: { color: colors[e[0]] || '#3b82f6', borderRadius: [0, 4, 4, 0] } })), label: { show: true, position: 'right', color: '#94a3b8', fontSize: 11 } }],
+    series: [{ type: 'bar', barMaxWidth: 28, data: entries.map(e=>({ value:e[1], itemStyle:{ color: colors[e[0]]||'#64748b', borderRadius:[0,4,4,0] } })), label: { show:true, position:'right', color:'#64748b', fontSize:11 } }],
   });
 }
 
-// 精准词 - 意图饼图
 function renderIntentChart(intentCount) {
-  const c = makeChart('chart-intent');
-  if (!c) return;
-  const colors = { '高意向用户': '#22c55e', '竞品抱怨': '#f59e0b', '技术求助': '#3b82f6', '方案探索': '#a855f7', '无关话题': '#475569', '未分类': '#334155' };
-  c.setOption({
-    ...T,
-    tooltip: { ...T.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    legend: { orient: 'vertical', right: 0, top: 'center', textStyle: { color: '#94a3b8', fontSize: 11 } },
-    series: [{ type: 'pie', radius: ['40%', '70%'], center: ['38%', '50%'],
-      data: Object.entries(intentCount).map(([name, value]) => ({ name, value, itemStyle: { color: colors[name] || '#334155' } })),
-      label: { show: false } }],
+  const c = makeChart('chart-intent'); if (!c) return;
+  const colors = { '高意向用户':'#0ea371','竞品抱怨':'#f59e0b','技术求助':'#2563eb','方案探索':'#7c3aed','无关话题':'#94a3b8','未分类':'#cbd5e1' };
+  c.setOption({ ...T,
+    tooltip: { ...T.tooltip, trigger:'item', formatter:'{b}: {c} ({d}%)' },
+    legend: { orient:'vertical', right:0, top:'center', textStyle:{ color:'#475569', fontSize:11 } },
+    series: [{ type:'pie', radius:['38%','68%'], center:['36%','50%'],
+      data: Object.entries(intentCount).map(([name,value])=>({ name, value, itemStyle:{ color:colors[name]||'#e2e8f0' } })),
+      label:{ show:false } }],
   });
 }
 
-function renderMentionChart(brandMention) {
-  const c = makeChart('chart-mention');
-  if (!c) return;
-  c.setOption({
-    ...T,
-    tooltip: { ...T.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    series: [{ type: 'pie', radius: ['45%', '72%'],
+function renderMentionChart(bm) {
+  const c = makeChart('chart-mention'); if (!c) return;
+  c.setOption({ ...T,
+    tooltip: { ...T.tooltip, trigger:'item', formatter:'{b}: {c} ({d}%)' },
+    series: [{ type:'pie', radius:['42%','70%'],
       data: [
-        { name: '已提及品牌', value: brandMention.YES, itemStyle: { color: '#22c55e' } },
-        { name: '未提及品牌', value: brandMention.NO,  itemStyle: { color: '#f59e0b' } },
-      ].filter(d => d.value > 0),
-      label: { color: '#94a3b8', fontSize: 11 }, labelLine: { lineStyle: { color: '#475569' } } }],
+        { name:'已提及品牌', value:bm.YES, itemStyle:{ color:'#0ea371' } },
+        { name:'未提及品牌', value:bm.NO,  itemStyle:{ color:'#fbbf24' } },
+      ].filter(d=>d.value>0),
+      label:{ color:'#475569', fontSize:11 }, labelLine:{ lineStyle:{ color:'#cbd5e1' } } }],
   });
 }
 
 function renderTypeChart(posts, comments) {
-  const c = makeChart('chart-type');
-  if (!c) return;
-  c.setOption({
-    ...T,
-    tooltip: { ...T.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    series: [{ type: 'pie', radius: ['45%', '72%'],
+  const c = makeChart('chart-type'); if (!c) return;
+  c.setOption({ ...T,
+    tooltip: { ...T.tooltip, trigger:'item', formatter:'{b}: {c} ({d}%)' },
+    series: [{ type:'pie', radius:['42%','70%'],
       data: [
-        { name: '帖子（IP运营）',   value: posts,    itemStyle: { color: '#ff4500' } },
-        { name: '评论（监控回复）', value: comments, itemStyle: { color: '#3b82f6' } },
-      ].filter(d => d.value > 0),
-      label: { color: '#94a3b8', fontSize: 11 }, labelLine: { lineStyle: { color: '#475569' } } }],
+        { name:'帖子（IP运营）',   value:posts,    itemStyle:{ color:'#ff4500' } },
+        { name:'评论（监控回复）', value:comments, itemStyle:{ color:'#2563eb' } },
+      ].filter(d=>d.value>0),
+      label:{ color:'#475569', fontSize:11 }, labelLine:{ lineStyle:{ color:'#cbd5e1' } } }],
   });
 }
 
 function renderKeywordChart(topKeywords) {
-  const c = makeChart('chart-keywords');
-  if (!c) return;
-  const reversed = [...topKeywords].reverse();
-  c.setOption({
-    ...T,
-    grid: { left: 160, right: 60, top: 10, bottom: 10 },
-    xAxis: { type: 'value', axisLabel: { color: '#475569', fontSize: 11 }, splitLine: { lineStyle: { color: '#1e2535' } } },
-    yAxis: { type: 'category', data: reversed.map(k => k[0]), axisLabel: { color: '#94a3b8', fontSize: 12, width: 140, overflow: 'truncate' }, axisLine: { lineStyle: { color: '#1e2535' } } },
-    tooltip: { ...T.tooltip, trigger: 'axis' },
-    series: [{ type: 'bar', data: reversed.map((k, i) => ({ value: k[1], itemStyle: { color: `hsl(${210 + i * 8}, 70%, 55%)`, borderRadius: [0, 4, 4, 0] } })), label: { show: true, position: 'right', color: '#94a3b8', fontSize: 11 }, barMaxWidth: 22 }],
+  const c = makeChart('chart-keywords'); if (!c) return;
+  const rev = [...topKeywords].reverse();
+  c.setOption({ ...T,
+    grid: { left:160, right:56, top:8, bottom:8 },
+    xAxis: { type:'value', axisLabel:{ color:'#94a3b8', fontSize:10 }, splitLine:{ lineStyle:{ color:'#f1f5f9' } } },
+    yAxis: { type:'category', data:rev.map(k=>k[0]), axisLabel:{ color:'#475569', fontSize:12, width:140, overflow:'truncate' }, axisLine:{ lineStyle:{ color:'#e2e8f0' } } },
+    tooltip: { ...T.tooltip, trigger:'axis' },
+    series: [{ type:'bar', barMaxWidth:22, data:rev.map((k,i)=>({ value:k[1], itemStyle:{ color:`hsl(${215+i*7},65%,55%)`, borderRadius:[0,4,4,0] } })), label:{ show:true, position:'right', color:'#64748b', fontSize:11 } }],
   });
 }
 
-// 品牌舆情 - 处理状态
-function renderBrandMonStatusChart(id, statusCount) {
-  const c = makeChart(id);
-  if (!c) return;
-  const colorMap = { '已处理': '#22c55e', '已生成': '#3b82f6', '待处理': '#f59e0b', '无需处理': '#475569' };
-  const entries = Object.entries(statusCount).sort((a, b) => b[1] - a[1]);
-  if (entries.length === 0) { c.setOption({ ...T, graphic: [{ type: 'text', left: 'center', top: 'middle', style: { text: '暂无数据', fill: '#475569', fontSize: 14 } }] }); return; }
-  c.setOption({
-    ...T,
-    grid: { left: 90, right: 30, top: 10, bottom: 10 },
-    xAxis: { type: 'value', axisLabel: { color: '#475569', fontSize: 11 }, splitLine: { lineStyle: { color: '#1e2535' } } },
-    yAxis: { type: 'category', data: entries.map(e => e[0]), axisLabel: { color: '#94a3b8', fontSize: 12 }, axisLine: { lineStyle: { color: '#1e2535' } } },
-    tooltip: { ...T.tooltip, trigger: 'axis' },
-    series: [{ type: 'bar', barMaxWidth: 28, data: entries.map(e => ({ value: e[1], itemStyle: { color: colorMap[e[0]] || '#64748b', borderRadius: [0, 4, 4, 0] } })), label: { show: true, position: 'right', color: '#94a3b8', fontSize: 12 } }],
+function renderBMStatusChart(id, sc) {
+  const c = makeChart(id); if (!c) return;
+  const entries = Object.entries(sc).sort((a,b)=>b[1]-a[1]);
+  if (!entries.length) { emptyChart(c); return; }
+  const colors = { '已处理':'#0ea371','已生成':'#2563eb','待处理':'#f59e0b','无需处理':'#94a3b8' };
+  c.setOption({ ...T,
+    grid: { left:80, right:24, top:8, bottom:8 },
+    xAxis: { type:'value', axisLabel:{ color:'#94a3b8', fontSize:10 }, splitLine:{ lineStyle:{ color:'#f1f5f9' } } },
+    yAxis: { type:'category', data:entries.map(e=>e[0]), axisLabel:{ color:'#475569', fontSize:12 }, axisLine:{ lineStyle:{ color:'#e2e8f0' } } },
+    tooltip: { ...T.tooltip, trigger:'axis' },
+    series: [{ type:'bar', barMaxWidth:28, data:entries.map(e=>({ value:e[1], itemStyle:{ color:colors[e[0]]||'#94a3b8', borderRadius:[0,4,4,0] } })), label:{ show:true, position:'right', color:'#64748b', fontSize:12 } }],
   });
 }
 
-// 品牌舆情 - 问题分类
-function renderProblemChart(id, problemType) {
-  const c = makeChart(id);
-  if (!c) return;
-  const colorMap = { '体验吐槽': '#f59e0b', '咨询请求': '#3b82f6', '正向夸奖': '#22c55e', '严重故障': '#ef4444' };
-  const data = Object.entries(problemType).map(([name, value]) => ({ name, value, itemStyle: { color: colorMap[name] || '#475569' } }));
-  if (data.length === 0) { c.setOption({ ...T, graphic: [{ type: 'text', left: 'center', top: 'middle', style: { text: '暂无数据', fill: '#475569', fontSize: 14 } }] }); return; }
-  c.setOption({
-    ...T,
-    tooltip: { ...T.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    legend: { orient: 'vertical', right: 0, top: 'center', textStyle: { color: '#94a3b8', fontSize: 11 } },
-    series: [{ type: 'pie', radius: ['40%', '70%'], center: ['38%', '50%'], data, label: { show: false } }],
+function renderProblemChart(id, pt) {
+  const c = makeChart(id); if (!c) return;
+  const colors = { '体验吐槽':'#f59e0b','咨询请求':'#2563eb','正向夸奖':'#0ea371','严重故障':'#dc2626' };
+  const data = Object.entries(pt).map(([name,value])=>({ name, value, itemStyle:{ color:colors[name]||'#94a3b8' } }));
+  if (!data.length) { emptyChart(c); return; }
+  c.setOption({ ...T,
+    tooltip: { ...T.tooltip, trigger:'item', formatter:'{b}: {c} ({d}%)' },
+    legend: { orient:'vertical', right:0, top:'center', textStyle:{ color:'#475569', fontSize:11 } },
+    series: [{ type:'pie', radius:['38%','68%'], center:['36%','50%'], data, label:{ show:false } }],
   });
 }
 
-// 第三方 - 产线分布
 function renderPaBrandChart(byBrand) {
-  const c = makeChart('chart-pa-brand');
-  if (!c) return;
-  const data = Object.entries(byBrand).map(([name, value]) => ({
-    name, value, itemStyle: { color: name.includes('Stream') ? '#ff4500' : '#3b82f6' },
+  const c = makeChart('chart-pa-brand'); if (!c) return;
+  const data = Object.entries(byBrand).map(([name,value])=>({
+    name, value, itemStyle:{ color: name.includes('Stream') ? '#ff4500' : '#2563eb' },
   }));
-  c.setOption({
-    ...T,
-    tooltip: { ...T.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    series: [{ type: 'pie', radius: ['45%', '72%'],
-      data: data.length ? data : [{ name: '暂无数据', value: 1, itemStyle: { color: '#1e2535' } }],
-      label: { color: '#94a3b8', fontSize: 11 }, labelLine: { lineStyle: { color: '#475569' } } }],
+  c.setOption({ ...T,
+    tooltip: { ...T.tooltip, trigger:'item', formatter:'{b}: {c} ({d}%)' },
+    series: [{ type:'pie', radius:['42%','70%'],
+      data: data.length ? data : [{ name:'暂无数据', value:1, itemStyle:{ color:'#e2e8f0' } }],
+      label:{ color:'#475569', fontSize:11 }, labelLine:{ lineStyle:{ color:'#cbd5e1' } } }],
   });
 }
 
-// 第三方 - 新帖/旧帖
 function renderPaTypeChart(byType) {
-  const c = makeChart('chart-pa-type');
-  if (!c) return;
-  const colorMap = { '新帖': '#22c55e', '旧帖': '#a855f7' };
-  const data = Object.entries(byType).map(([name, value]) => ({ name, value, itemStyle: { color: colorMap[name] || '#475569' } }));
-  c.setOption({
-    ...T,
-    tooltip: { ...T.tooltip, trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-    series: [{ type: 'pie', radius: ['45%', '72%'],
-      data: data.length ? data : [{ name: '暂无数据', value: 1, itemStyle: { color: '#1e2535' } }],
-      label: { color: '#94a3b8', fontSize: 11 }, labelLine: { lineStyle: { color: '#475569' } } }],
+  const c = makeChart('chart-pa-type'); if (!c) return;
+  const cm = { '新帖':'#0ea371','旧帖':'#7c3aed' };
+  const data = Object.entries(byType).map(([name,value])=>({ name, value, itemStyle:{ color:cm[name]||'#94a3b8' } }));
+  c.setOption({ ...T,
+    tooltip: { ...T.tooltip, trigger:'item', formatter:'{b}: {c} ({d}%)' },
+    series: [{ type:'pie', radius:['42%','70%'],
+      data: data.length ? data : [{ name:'暂无数据', value:1, itemStyle:{ color:'#e2e8f0' } }],
+      label:{ color:'#475569', fontSize:11 }, labelLine:{ lineStyle:{ color:'#cbd5e1' } } }],
   });
 }
 
-// 第三方 - 存活率对比
 function renderPaSurviveChart(s1, s7) {
-  const c = makeChart('chart-pa-survive');
-  if (!c) return;
-  const s1y = s1['是'] || 0, s1n = s1['否'] || 0;
-  const s7y = s7['是'] || 0, s7n = s7['否'] || 0;
-  c.setOption({
-    ...T,
-    grid: { left: 60, right: 20, top: 20, bottom: 30 },
-    xAxis: { type: 'category', data: ['1天存活', '7天存活'], axisLabel: { color: '#94a3b8', fontSize: 12 }, axisLine: { lineStyle: { color: '#1e2535' } } },
-    yAxis: { type: 'value', axisLabel: { color: '#475569', fontSize: 11 }, splitLine: { lineStyle: { color: '#1e2535' } } },
-    tooltip: { ...T.tooltip, trigger: 'axis', axisPointer: { type: 'shadow' } },
-    legend: { top: 0, right: 0, textStyle: { color: '#94a3b8', fontSize: 11 } },
+  const c = makeChart('chart-pa-survive'); if (!c) return;
+  c.setOption({ ...T,
+    grid: { left:56, right:16, top:24, bottom:28 },
+    xAxis: { type:'category', data:['1天存活','7天存活'], axisLabel:{ color:'#475569', fontSize:12 }, axisLine:{ lineStyle:{ color:'#e2e8f0' } } },
+    yAxis: { type:'value', axisLabel:{ color:'#94a3b8', fontSize:10 }, splitLine:{ lineStyle:{ color:'#f1f5f9' } } },
+    tooltip: { ...T.tooltip, trigger:'axis', axisPointer:{ type:'shadow' } },
+    legend: { top:0, right:0, textStyle:{ color:'#475569', fontSize:11 } },
     series: [
-      { name: '存活', type: 'bar', stack: 'total', data: [s1y, s7y], itemStyle: { color: '#22c55e', borderRadius: [0, 0, 0, 0] } },
-      { name: '被删', type: 'bar', stack: 'total', data: [s1n, s7n], itemStyle: { color: '#ef4444' } },
+      { name:'存活', type:'bar', stack:'t', data:[s1['是']||0, s7['是']||0], itemStyle:{ color:'#0ea371' } },
+      { name:'被删', type:'bar', stack:'t', data:[s1['否']||0, s7['否']||0], itemStyle:{ color:'#f87171' } },
     ],
   });
 }

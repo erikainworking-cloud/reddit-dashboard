@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ascend-Reddit 运营看板</title>
+  <script src="./config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     :root {
@@ -188,7 +189,7 @@
     </div>
     <div class="header-right">
       <span class="update-info" id="updateInfo">加载中...</span>
-      <button class="refresh-btn" id="refreshBtn" onclick="loadData()">刷新数据</button>
+      <button class="refresh-btn" id="refreshBtn" onclick="triggerFullRefresh()">刷新数据</button>
     </div>
   </header>
 
@@ -230,7 +231,7 @@ loadData();
 
 async function loadData() {
   const btn = document.getElementById('refreshBtn');
-  btn.disabled = true; btn.textContent = '刷新中...';
+  btn.disabled = true; btn.textContent = '加载中...';
   showLoading();
   try {
     const res = await fetch('./stats.json?t=' + Date.now());
@@ -244,6 +245,69 @@ async function loadData() {
   } catch(e) {
     showError(e.message);
   } finally {
+    btn.disabled = false; btn.textContent = '刷新数据';
+  }
+}
+
+const GH_TOKEN = window.DISPATCH_TOKEN || '';
+const GH_REPO  = 'erikainworking-cloud/reddit-dashboard';
+
+async function triggerFullRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  const info = document.getElementById('updateInfo');
+  btn.disabled = true;
+  btn.textContent = '拉取中...';
+  info.textContent = '正在从飞书拉取最新数据，约需 1-2 分钟...';
+
+  try {
+    // Trigger workflow_dispatch on self-hosted runner
+    const res = await fetch(
+      `https://api.github.com/repos/${GH_REPO}/actions/workflows/update-stats.yml/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${GH_TOKEN}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ref: 'main' }),
+      }
+    );
+
+    if (res.status !== 204) {
+      const err = await res.json();
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    // Poll until new stats.json appears with a newer updatedAt
+    const oldUpdatedAt = currentData?.updatedAt || '';
+    btn.textContent = '部署中...';
+    info.textContent = '数据已拉取，等待 GitHub Pages 部署完成...';
+
+    let elapsed = 0;
+    const poll = setInterval(async () => {
+      elapsed += 15;
+      try {
+        const r = await fetch('./stats.json?t=' + Date.now());
+        if (!r.ok) return;
+        const d = await r.json();
+        if (d.updatedAt && d.updatedAt !== oldUpdatedAt) {
+          clearInterval(poll);
+          currentData = d;
+          const dt = new Date(d.updatedAt);
+          info.textContent = `更新于 ${dt.toLocaleDateString('zh-CN')} ${dt.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}`;
+          btn.disabled = false; btn.textContent = '刷新数据';
+          renderTab(currentTab);
+        } else if (elapsed >= 180) {
+          clearInterval(poll);
+          info.textContent = '部署可能仍在进行，请稍候手动刷新';
+          btn.disabled = false; btn.textContent = '刷新数据';
+        }
+      } catch(_) {}
+    }, 15000);
+
+  } catch(e) {
+    info.textContent = `触发失败: ${e.message}`;
     btn.disabled = false; btn.textContent = '刷新数据';
   }
 }

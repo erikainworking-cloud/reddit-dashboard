@@ -1,0 +1,12 @@
+name: Update Stats (Manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - name: Run export and push to GitHub
+        run: bash "/Users/erikaleen/Desktop/进行项目/reddit/dashboard/push-stats.sh"

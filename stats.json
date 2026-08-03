@@ -376,6 +376,36 @@
       ]
     }
   },
+  "aioBo": {
+    "streamfab": {
+      "current": 17.61,
+      "currentWords": 31,
+      "aioTriggerWords": 176,
+      "totalKeywords": 183,
+      "q3Target": 25.0,
+      "q3TargetWords": 44,
+      "q3Conservative": 20.0,
+      "q3Aggressive": 28.0,
+      "dataAsOf": "2026-07-10",
+      "weeks":  ["基准\n7/10", "W1\n7/17", "W2\n7/24", "W3\n7/31", "W4\n8/7", "W5\n8/14", "W6\n8/21", "W7\n8/28", "W8\n8/31"],
+      "actual": [17.61, null, null, null, null, null, null, null, null],
+      "target": [17.61, 18.2, 18.8, 20.0, 21.0, 22.2, 23.3, 24.4, 25.0]
+    },
+    "dvdfab": {
+      "current": 33.50,
+      "currentWords": 68,
+      "aioTriggerWords": 203,
+      "totalKeywords": 227,
+      "q3Target": 40.5,
+      "q3TargetWords": 82,
+      "q3Conservative": 35.5,
+      "q3Aggressive": 43.5,
+      "dataAsOf": "2026-07-15",
+      "weeks":  ["基准\n7/15", "W1\n7/24", "W2\n7/31", "W3\n8/7", "W4\n8/14", "W5\n8/21", "W6\n8/28", "W7\n9/4", "W8\n9/11", "W9\n9/18", "W10\n9/25", "W11\n9/30"],
+      "actual": [33.50, null, null, null, null, null, null, null, null, null, null, null],
+      "target": [33.50, 34.1, 34.7, 35.5, 36.1, 36.9, 37.6, 38.4, 38.9, 39.4, 39.9, 40.5]
+    }
+  },
   "paidAccounts": {
     "total": 3,
     "byBrand": {

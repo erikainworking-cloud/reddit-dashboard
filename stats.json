@@ -378,17 +378,17 @@
   },
   "aioBo": {
     "streamfab": {
-      "current": 17.61,
-      "currentWords": 31,
-      "aioTriggerWords": 176,
+      "current": 18.64,
+      "currentWords": 33,
+      "aioTriggerWords": 177,
       "totalKeywords": 183,
       "q3Target": 25.0,
       "q3TargetWords": 44,
       "q3Conservative": 20.0,
       "q3Aggressive": 28.0,
-      "dataAsOf": "2026-07-10",
+      "dataAsOf": "2026-07-31",
       "weeks":  ["基准\n7/10", "W1\n7/17", "W2\n7/24", "W3\n7/31", "W4\n8/7", "W5\n8/14", "W6\n8/21", "W7\n8/28", "W8\n8/31"],
-      "actual": [17.61, null, null, null, null, null, null, null, null],
+      "actual": [17.61, 18.08, 18.08, 18.64, null, null, null, null, null],
       "target": [17.61, 18.2, 18.8, 20.0, 21.0, 22.2, 23.3, 24.4, 25.0]
     },
     "dvdfab": {

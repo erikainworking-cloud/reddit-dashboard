@@ -170,6 +170,14 @@
     .tl-badge.done     { background: var(--green-bg);  color: var(--green); }
     .tl-badge.progress { background: var(--amber-bg);  color: var(--amber); }
 
+    /* ── AIO-BO Progress Bar ─────── */
+    .aiobo-progress { margin-top: 10px; }
+    .aiobo-progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+    .aiobo-progress-track { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .aiobo-progress-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+    .aiobo-progress-fill.sf { background: linear-gradient(90deg, #ff6b35, #ff4500); }
+    .aiobo-progress-fill.df { background: linear-gradient(90deg, #60a5fa, #2563eb); }
+
     @media (max-width: 900px) {
       .sidebar { display: none; }
       .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
@@ -210,6 +218,13 @@
       <div class="nav-section">
         <div class="nav-item" id="nav-execution" onclick="navigate('execution', this)">
           <span class="nav-dot ex"></span> 执行动作
+        </div>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <span class="nav-section-title">北极星目标</span>
+        <div class="nav-item" id="nav-aioBo" onclick="navigate('aioBo', this)">
+          <span class="nav-dot" style="background:var(--green)"></span> AIO-BO
         </div>
       </div>
     </aside>
@@ -321,6 +336,7 @@ function navigate(tab, el) {
 
 function renderTab(tab) {
   if (tab === 'execution') renderExecution();
+  else if (tab === 'aioBo') renderAiobo();
   else renderMonitor(tab);
 }
 
@@ -737,6 +753,177 @@ function insightPaSurvive(s1, s7) {
   const r7 = s7t > 0 ? ((s7['是']||0)/s7t*100).toFixed(0) : '—';
   const quality = Number(r7) >= 70 ? '投放质量稳定' : Number(r7) >= 40 ? '存活率中等，建议优化账号质量' : '存活率偏低，需检查内容与账号策略';
   return `1天存活率 <b>${r1}%</b>，7天存活率 <b>${r7}%</b>。${quality}。`;
+}
+
+/* ══════════════ 北极星目标 AIO-BO ══════════════ */
+
+function renderAiobo() {
+  const ab = currentData.aioBo || {};
+  const sf = ab.streamfab || {};
+  const df = ab.dvdfab    || {};
+
+  const sfPct  = sf.current || 0;
+  const dfPct  = df.current || 0;
+  const sfTgt  = sf.q3Target || 25;
+  const dfTgt  = df.q3Target || 40.5;
+  const sfFill = Math.min(100, (sfPct / sfTgt * 100).toFixed(1));
+  const dfFill = Math.min(100, (dfPct / dfTgt * 100).toFixed(1));
+  const sfGap  = (sfTgt - sfPct).toFixed(2);
+  const dfGap  = (dfTgt - dfPct).toFixed(2);
+  const sfWordGap = (sf.q3TargetWords || 44) - (sf.currentWords || 0);
+  const dfWordGap = (df.q3TargetWords || 82) - (df.currentWords || 0);
+
+  document.getElementById('main').innerHTML = `
+    <div class="page-header">
+      <div class="page-title">北极星目标：AIO-BO</div>
+      <div class="page-desc">AI Overview Brand Occupancy Rate — 关键词在 Google AIO Reddit 引用中的品牌占位率</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card" style="border-top:3px solid var(--accent)">
+        <div class="stat-label">StreamFab AIO-BO</div>
+        <div class="stat-value" style="color:var(--accent)">${sfPct}<span style="font-size:18px;font-weight:500">%</span></div>
+        <div class="stat-sub">${sf.currentWords||0}/${sf.aioTriggerWords||0}词 · 截至 ${sf.dataAsOf||'—'}</div>
+        <div class="aiobo-progress">
+          <div class="aiobo-progress-labels"><span>当前 ${sfPct}%</span><span>Q3目标 ${sfTgt}%</span></div>
+          <div class="aiobo-progress-track"><div class="aiobo-progress-fill sf" style="width:${sfFill}%"></div></div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px">缺口 <b style="color:var(--accent)">${sfGap}%</b>，还需增加 <b style="color:var(--accent)">${sfWordGap}</b> 个全链路关键词</div>
+        </div>
+      </div>
+      <div class="stat-card" style="border-top:3px solid var(--blue)">
+        <div class="stat-label">DVDFab AIO-BO</div>
+        <div class="stat-value" style="color:var(--blue)">${dfPct}<span style="font-size:18px;font-weight:500">%</span></div>
+        <div class="stat-sub">${df.currentWords||0}/${df.aioTriggerWords||0}词 · 截至 ${df.dataAsOf||'—'}</div>
+        <div class="aiobo-progress">
+          <div class="aiobo-progress-labels"><span>当前 ${dfPct}%</span><span>Q3目标 ${dfTgt}%</span></div>
+          <div class="aiobo-progress-track"><div class="aiobo-progress-fill df" style="width:${dfFill}%"></div></div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px">缺口 <b style="color:var(--blue)">${dfGap}%</b>，还需增加 <b style="color:var(--blue)">${dfWordGap}</b> 个全链路关键词</div>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">SF Q3 目标</div>
+        <div class="stat-value">${sfTgt}%</div>
+        <div class="stat-sub">保守 ${sf.q3Conservative||20}% / 激进 ${sf.q3Aggressive||28}%</div>
+        <div class="stat-sub" style="margin-top:4px">周均 +1.1词，截止 8/31</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">DVDFab Q3 目标</div>
+        <div class="stat-value">${dfTgt}%</div>
+        <div class="stat-sub">保守 ${df.q3Conservative||35.5}% / 激进 ${df.q3Aggressive||43.5}%</div>
+        <div class="stat-sub" style="margin-top:4px">周均 +1.2词，截止 9/30</div>
+      </div>
+    </div>
+
+    <div class="section-title">计算口径</div>
+    <div class="chart-card" style="margin-bottom:14px;padding:14px 20px">
+      <p style="font-size:13px;color:var(--text-2);line-height:1.8">
+        <b>AIO-BO = 完成「AIO → Reddit → 品牌提及」全链路的关键词数 ÷ AIO 触发的关键词总数</b><br>
+        某关键词触发 Google AIO，AIO 引用了 Reddit 帖子，且帖子中存在品牌提及（StreamFab / DVDFab），则该关键词视为「全链路完成」。以<b>关键词维度</b>统计（非帖子），因为一个优质帖子往往同时覆盖多个关键词，关键词维度更能体现内容资产的覆盖价值。
+      </p>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">StreamFab AIO-BO 周进展 <span class="brand-tag sf">StreamFab</span></div>
+        <div class="chart-subtitle">实际值 vs 目标路径（前低后高，规模化阶段贡献主要增量）</div>
+        <div class="chart-box tall" id="chart-sf-aiobo"></div>
+        <div class="chart-insight" id="ins-sf-aiobo"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">DVDFab AIO-BO 周进展 <span class="brand-tag df">DVDFab</span></div>
+        <div class="chart-subtitle">实际值 vs 目标路径（Q3 全程，截止 9/30）</div>
+        <div class="chart-box tall" id="chart-df-aiobo"></div>
+        <div class="chart-insight" id="ins-df-aiobo"></div>
+      </div>
+    </div>
+
+    <div class="section-title">月度里程碑</div>
+    <div class="chart-card">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border)">
+            <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:11px;text-transform:uppercase;font-weight:700">时间节点</th>
+            <th style="text-align:center;padding:8px 12px;color:var(--accent);font-size:11px;font-weight:700">SF 目标</th>
+            <th style="text-align:center;padding:8px 12px;color:var(--accent);font-size:11px;font-weight:700">SF 实际</th>
+            <th style="text-align:center;padding:8px 12px;color:var(--blue);font-size:11px;font-weight:700">DVDFab 目标</th>
+            <th style="text-align:center;padding:8px 12px;color:var(--blue);font-size:11px;font-weight:700">DVDFab 实际</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:11px;font-weight:700">说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px 12px;font-weight:600">基准（7月中）</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3)">—</td>
+            <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--accent)">17.61%（31词）</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3)">—</td>
+            <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--blue)">33.50%（68词）</td>
+            <td style="padding:10px 12px;color:var(--text-3)">数据基准确立</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px 12px;font-weight:600">2026-07-31</td>
+            <td style="text-align:center;padding:10px 12px">20%（35词）</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
+            <td style="text-align:center;padding:10px 12px">34.7%（70词）</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
+            <td style="padding:10px 12px;color:var(--text-3)">Phase 1 检查点 ①</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px 12px;font-weight:600">2026-08-31</td>
+            <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--green)">25%（44词）✓ SF Q3达成</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
+            <td style="text-align:center;padding:10px 12px">37.6%（76词）</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
+            <td style="padding:10px 12px;color:var(--text-3)">检查点 ②</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;font-weight:600">2026-09-30</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3)">25%（稳固）</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3)">—</td>
+            <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--green)">40.5%（82词）✓ DVDFab Q3达成</td>
+            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
+            <td style="padding:10px 12px;color:var(--text-3)">检查点 ③</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  const sfMin = Math.floor(Math.min(...(sf.target||[17])) - 1);
+  const sfMax = Math.ceil(Math.max(...(sf.target||[25])) + 1);
+  const dfMin = Math.floor(Math.min(...(df.target||[33])) - 1);
+  const dfMax = Math.ceil(Math.max(...(df.target||[41])) + 1);
+
+  renderAioboChart('chart-sf-aiobo', sf.weeks||[], sf.actual||[], sf.target||[], '#ff4500', '#fca07a', sfMin, sfMax);
+  renderAioboChart('chart-df-aiobo', df.weeks||[], df.actual||[], df.target||[], '#2563eb', '#93c5fd', dfMin, dfMax);
+
+  setText('ins-sf-aiobo', `基准 <b>${sfPct}%</b>（${sf.currentWords||0}/${sf.aioTriggerWords||0}词），Q3目标 <b>${sfTgt}%</b>，缺口 <b>${sfGap}%</b>，需在 Q3 内新增 <b>${sfWordGap}</b> 个全链路关键词。前 3 周缓坡（+1词/周），W4 起规模化阶段加速（+2词/周），预计 8/31 达标。`);
+  setText('ins-df-aiobo', `基准 <b>${dfPct}%</b>（${df.currentWords||0}/${df.aioTriggerWords||0}词），Q3目标 <b>${dfTgt}%</b>，缺口 <b>${dfGap}%</b>，需在 Q3 内新增 <b>${dfWordGap}</b> 个全链路关键词。线性递增，周均 +1.2词，预计 9/30 达标。`);
+}
+
+function renderAioboChart(id, weeks, actual, target, colorActual, colorTarget, yMin, yMax) {
+  const c = makeChart(id); if (!c) return;
+  const actualData = actual.map(v => (v === null || v === undefined) ? undefined : v);
+  c.setOption({ ...T,
+    grid: { left: 52, right: 16, top: 20, bottom: 64 },
+    xAxis: { type: 'category', data: weeks, axisLabel: { color: '#94a3b8', fontSize: 9.5, interval: 0, rotate: 30 }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
+    yAxis: { type: 'value', min: yMin, max: yMax, axisLabel: { color: '#94a3b8', fontSize: 10, formatter: '{value}%' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+    tooltip: { ...T.tooltip, trigger: 'axis', formatter: params => {
+      let html = `<div style="font-size:12px"><b>${params[0].axisValue.replace('\n',' ')}</b><br>`;
+      params.forEach(p => { if (p.value !== undefined && p.value !== null) html += `${p.seriesName}: <b>${p.value}%</b><br>`; });
+      return html + '</div>';
+    }},
+    legend: { bottom: 4, textStyle: { color: '#475569', fontSize: 11 } },
+    series: [
+      { name: '实际 AIO-BO', type: 'line', data: actualData, connectNulls: false,
+        lineStyle: { color: colorActual, width: 2.5 }, itemStyle: { color: colorActual }, symbolSize: 8,
+        label: { show: true, position: 'top', color: colorActual, fontSize: 10, formatter: p => p.value !== undefined && p.value !== null ? p.value + '%' : '' }
+      },
+      { name: '目标路径', type: 'line', data: target,
+        lineStyle: { color: colorTarget, width: 1.5, type: 'dashed' }, itemStyle: { color: colorTarget }, symbolSize: 4,
+        label: { show: false }
+      }
+    ],
+  });
 }
 
 /* ══════════════ ECharts 图表 ══════════════ */

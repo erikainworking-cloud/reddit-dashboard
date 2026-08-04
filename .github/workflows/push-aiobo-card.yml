@@ -1,0 +1,19 @@
+name: Push AIO-BO Weekly Card to Feishu
+
+on:
+  # 每周一 9:00 AM 北京时间（UTC+8 = UTC 1:00 AM）
+  schedule:
+    - cron: '0 1 * * 1'   # 周一 09:00 北京时间
+    - cron: '0 1 * * 5'   # 周五 09:00 北京时间
+  # 手动触发
+  workflow_dispatch:
+
+jobs:
+  push-card:
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Push AIO-BO Feishu card
+        env:
+          LARK_WEBHOOK: ${{ secrets.LARK_WEBHOOK }}
+        run: node "/Users/erikaleen/Desktop/进行项目/reddit/dashboard/push-lark-card.js"

@@ -7,14 +7,31 @@ on:
         description: '推送模式：test（默认测试群）或 prod（正式群）'
         required: false
         default: 'test'
+      chat_id:
+        description: '自定义群 chat_id（oc_xxx），留空则使用 mode 对应默认目标'
+        required: false
+      user_id:
+        description: '自定义用户 user_id（ou_xxx），留空则使用 mode 对应默认目标'
+        required: false
 
 jobs:
   push-card:
     runs-on: self-hosted
     timeout-minutes: 5
+    env:
+      LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
+      LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
     steps:
       - name: Push 精准词监控 Feishu card
         run: |
           ARGS=""
-          if [ "${{ github.event.inputs.mode }}" = "prod" ]; then ARGS="--prod"; fi
+          CHAT_ID="${{ github.event.inputs.chat_id }}"
+          USER_ID="${{ github.event.inputs.user_id }}"
+          if [ -n "$CHAT_ID" ]; then
+            ARGS="--chat-id $CHAT_ID"
+          elif [ -n "$USER_ID" ]; then
+            ARGS="--user-id $USER_ID"
+          elif [ "${{ github.event.inputs.mode }}" = "prod" ]; then
+            ARGS="--prod"
+          fi
           node "/Users/erikaleen/Desktop/进行项目/reddit/dashboard/push-lark-keyword.js" $ARGS

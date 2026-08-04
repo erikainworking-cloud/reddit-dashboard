@@ -430,7 +430,7 @@ function renderMonitor(brand) {
         <div class="page-title">${label} 精准词监控</div>
         <div class="page-desc">基于精准关键词抓取的 Reddit 内容监控与回复数据</div>
       </div>
-      <button class="push-btn" id="pushKeywordBtn" onclick="dispatchSimplePush('push-keyword-card.yml','pushKeywordBtn')" title="推送精准词监控日报到飞书群">
+      <button class="push-btn" id="pushKeywordBtn" onclick="openSimplePushModal('push-keyword-card.yml','pushKeywordBtn','推送精准词监控日报')" title="推送精准词监控日报到飞书群">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
         推送飞书卡片
       </button>
@@ -548,7 +548,7 @@ function renderExecution() {
         <div class="page-title">执行动作</div>
         <div class="page-desc">品牌舆情回复执行情况 · 第三方付费账号 · 工具进展</div>
       </div>
-      <button class="push-btn" id="pushBrandBtn" onclick="dispatchSimplePush('push-brand-card.yml','pushBrandBtn')" title="推送品牌舆情监控周报到飞书群">
+      <button class="push-btn" id="pushBrandBtn" onclick="openSimplePushModal('push-brand-card.yml','pushBrandBtn','推送品牌舆情监控周报')" title="推送品牌舆情监控周报到飞书群">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
         推送飞书卡片
       </button>
@@ -1352,8 +1352,97 @@ async function executePush() {
 
 function pushToLark() { openPushModal(); }
 
-// 通用：直接 dispatch 指定 workflow（无弹窗，默认 test 模式）
-async function dispatchSimplePush(workflowFile, btnId) {
+// 通用：带收件人弹窗 dispatch 指定 workflow
+function openSimplePushModal(workflowFile, btnId, title) {
+  const existing = document.getElementById('simplePushModal');
+  if (existing) existing.remove();
+
+  const presetHtml = LARK_CHAT_PRESETS.map(p => `
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;border-bottom:1px solid #f1f5f9">
+      <input type="checkbox" name="simpleTarget" value="${p.id}" ${p.isDefault ? 'checked' : ''} style="width:14px;height:14px;cursor:pointer">
+      <span style="font-size:13px">${p.name}</span>
+      ${p.isDefault ? '<span style="font-size:10px;background:#eff6ff;color:#2563eb;padding:1px 6px;border-radius:8px">默认</span>' : ''}
+    </label>`).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'simplePushModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;padding:24px;width:400px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px">${title}</div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:16px">选择推送目标群组</div>
+      <div style="margin-bottom:16px">${presetHtml}</div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">自定义群 chat_id（选填）</div>
+        <input id="simpleCustomChatId" placeholder="oc_xxx（从飞书群设置中获取）"
+          style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;box-sizing:border-box">
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="document.getElementById('simplePushModal').remove()"
+          style="padding:8px 16px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;font-size:13px;cursor:pointer">取消</button>
+        <button onclick="executeSimplePush('${workflowFile}','${btnId}')"
+          style="padding:8px 20px;border-radius:8px;border:none;background:#1677ff;color:#fff;font-size:13px;font-weight:600;cursor:pointer">
+          立即推送
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+async function executeSimplePush(workflowFile, btnId) {
+  const modal   = document.getElementById('simplePushModal');
+  const checked = [...document.querySelectorAll('input[name="simpleTarget"]:checked')].map(el => el.value);
+  const custom  = (document.getElementById('simpleCustomChatId')?.value || '').trim();
+  const chatIds = [...new Set([...checked, ...(custom ? [custom] : [])])];
+  if (!chatIds.length) { alert('请至少选择一个目标群组'); return; }
+
+  const ghToken = (typeof GH_TOKEN !== 'undefined') ? GH_TOKEN : '';
+  const ghRepo  = (typeof GH_REPO  !== 'undefined') ? GH_REPO  : 'erikainworking-cloud/reddit-dashboard';
+  if (!ghToken) {
+    if (modal) modal.remove();
+    alert('⚠️ 未配置 GitHub Token（config.js）');
+    return;
+  }
+  if (modal) modal.remove();
+
+  const svgIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>';
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.disabled = true; btn.innerHTML = '…推送中'; }
+
+  let ok = 0;
+  for (const chatId of chatIds) {
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${ghRepo}/actions/workflows/${workflowFile}/dispatches`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `token ${ghToken}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/vnd.github+json',
+          },
+          body: JSON.stringify({ ref: 'main', inputs: { mode: 'test', chat_id: chatId } }),
+        }
+      );
+      if (res.status === 204) ok++;
+      else { const err = await res.json().catch(()=>({})); console.warn('dispatch err', chatId, err); }
+    } catch(e) { console.error(e); }
+  }
+
+  if (ok > 0) {
+    if (btn) { btn.classList.add('sending'); btn.innerHTML = `✓ 已触发（${ok}/${chatIds.length}）`; }
+    setTimeout(() => {
+      if (btn) { btn.classList.remove('sending'); btn.disabled = false; btn.innerHTML = `${svgIcon} 推送飞书卡片`; }
+    }, 4000);
+  } else {
+    alert('触发失败，请检查网络或 GitHub Token 权限（需要 workflow write 权限）');
+    if (btn) { btn.disabled = false; btn.innerHTML = `${svgIcon} 推送飞书卡片`; }
+  }
+}
+
+// 通用：直接 dispatch 指定 workflow（无弹窗，保留向后兼容）
+async function dispatchSimplePush(workflowFile, btnId, chatId) {
   const ghToken = (typeof GH_TOKEN !== 'undefined') ? GH_TOKEN : '';
   const ghRepo  = (typeof GH_REPO  !== 'undefined') ? GH_REPO  : 'erikainworking-cloud/reddit-dashboard';
   const btn     = document.getElementById(btnId);
@@ -1366,6 +1455,9 @@ async function dispatchSimplePush(workflowFile, btnId) {
 
   if (btn) { btn.disabled = true; btn.innerHTML = '…推送中'; }
 
+  const inputs = { mode: 'test' };
+  if (chatId) inputs.chat_id = chatId;
+
   try {
     const res = await fetch(
       `https://api.github.com/repos/${ghRepo}/actions/workflows/${workflowFile}/dispatches`,
@@ -1376,7 +1468,7 @@ async function dispatchSimplePush(workflowFile, btnId) {
           'Content-Type': 'application/json',
           Accept: 'application/vnd.github+json',
         },
-        body: JSON.stringify({ ref: 'main', inputs: { mode: 'test' } }),
+        body: JSON.stringify({ ref: 'main', inputs }),
       }
     );
     if (res.status === 204) {

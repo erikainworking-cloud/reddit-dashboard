@@ -80,13 +80,15 @@ async function uploadImageApi(token, imagePath) {
 }
 
 function uploadImageCli(imagePath) {
-  const relPath = path.relative(process.cwd(), imagePath);
+  // Use cwd = image directory + bare filename so the path is always resolvable
+  const dir      = path.dirname(imagePath);
+  const filename = path.basename(imagePath);
   const r = spawnSync(LARK_CLI, [
     'api', 'POST', '/open-apis/im/v1/images',
-    '--file', `image=${relPath}`,
+    '--file', `image=${filename}`,
     '--data', '{"image_type":"message"}',
     '--as', 'bot',
-  ], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
+  ], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024, cwd: dir });
   const raw = (r.stdout || '') + (r.stderr || '');
   const d   = JSON.parse(raw.slice(raw.indexOf('{')));
   if (!d.data?.image_key) throw new Error('cli upload: ' + JSON.stringify(d));

@@ -282,7 +282,7 @@ async function loadData() {
   }
 }
 
-const GH_TOKEN = window.DISPATCH_TOKEN || '';
+const GH_TOKEN = window.GH_TOKEN || window.DISPATCH_TOKEN || '';
 const GH_REPO  = 'erikainworking-cloud/reddit-dashboard';
 
 async function triggerFullRefresh() {

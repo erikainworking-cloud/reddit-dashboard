@@ -448,13 +448,11 @@ function topN(obj, n = 2) {
 
 /* ══════════════ 监控看板渲染 ══════════════ */
 
+let monState = { brand: null, range: 'all' };
+
 function renderMonitor(brand) {
-  const d = currentData[brand];
-  const sc = filterIgnored(d.statusCount);
-  const wow = calcWoW(d.dailyTrend);
-  const publishedRate = d.total > 0 ? ((d.published / d.total) * 100).toFixed(1) : 0;
-  const mentionRate = (d.brandMention.YES + d.brandMention.NO) > 0
-    ? ((d.brandMention.YES / (d.brandMention.YES + d.brandMention.NO)) * 100).toFixed(1) : 0;
+  monState = { brand, range: 'all' };
+  const d     = currentData[brand];
   const label = brand === 'streamfab' ? 'StreamFab' : 'DVDFab';
 
   document.getElementById('main').innerHTML = `
@@ -463,28 +461,35 @@ function renderMonitor(brand) {
         <div class="page-title">${label} 精准词监控</div>
         <div class="page-desc">基于精准关键词抓取的 Reddit 内容监控与回复数据</div>
       </div>
-      <button class="push-btn" id="pushKeywordBtn" onclick="openSimplePushModal('push-keyword-card.yml','pushKeywordBtn','推送精准词监控日报')" title="推送精准词监控日报到飞书群">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-        推送飞书卡片
-      </button>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <div class="seg-group" id="mon-range-seg">
+          <button class="seg-btn active" data-v="all"  onclick="setMonRange('all')">全部</button>
+          <button class="seg-btn"        data-v="30d"  onclick="setMonRange('30d')">近30天</button>
+          <button class="seg-btn"        data-v="7d"   onclick="setMonRange('7d')">近7天</button>
+        </div>
+        <button class="push-btn" id="pushKeywordBtn" onclick="openSimplePushModal('push-keyword-card.yml','pushKeywordBtn','推送精准词监控日报')" title="推送精准词监控日报到飞书群">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          推送飞书卡片
+        </button>
+      </div>
     </div>
 
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">抓取总量</div>
-        <div class="stat-value">${d.total.toLocaleString()}</div>
-        <div class="stat-sub">帖子 ${d.posts} · 评论 ${d.comments}</div>
-        ${wowHTML(wow.thisWeek, wow.lastWeek)}
+        <div class="stat-value" id="mon-total">—</div>
+        <div class="stat-sub"   id="mon-total-sub">—</div>
+        <div id="mon-total-wow"></div>
       </div>
       <div class="stat-card accent">
         <div class="stat-label">已发布回复</div>
-        <div class="stat-value">${d.published.toLocaleString()}</div>
-        <div class="stat-sub">发布率 ${publishedRate}%</div>
+        <div class="stat-value" id="mon-published">—</div>
+        <div class="stat-sub"   id="mon-published-sub">—</div>
       </div>
       <div class="stat-card green">
         <div class="stat-label">产品提及（含品牌）</div>
-        <div class="stat-value">${d.brandMention.YES.toLocaleString()}</div>
-        <div class="stat-sub">提及率 ${mentionRate}%</div>
+        <div class="stat-value" id="mon-mention">—</div>
+        <div class="stat-sub"   id="mon-mention-sub">—</div>
       </div>
       <div class="stat-card blue">
         <div class="stat-label">覆盖关键词数</div>
@@ -496,7 +501,7 @@ function renderMonitor(brand) {
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-title">每日抓取趋势</div>
-        <div class="chart-subtitle">近 60 天每日新增抓取量</div>
+        <div class="chart-subtitle" id="mon-trend-sub">近 60 天每日新增抓取量</div>
         <div class="chart-box tall" id="chart-daily"></div>
         <div class="chart-insight" id="ins-daily"></div>
       </div>
@@ -532,22 +537,215 @@ function renderMonitor(brand) {
       <div class="chart-box tall" id="chart-keywords"></div>
       <div class="chart-insight" id="ins-keywords"></div>
     </div>
+
+    <div class="chart-card" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span class="chart-title" style="margin:0">运营分析 &amp; 建议</span>
+        <span class="chart-subtitle" style="margin:0" id="mon-analysis-label">全量数据综合分析</span>
+      </div>
+      <div id="mon-comp-strip"></div>
+      <div id="mon-analysis"></div>
+    </div>
   `;
 
-  renderDailyChart(d.dailyTrend, wow);
-  renderStatusChart(sc);
-  renderIntentChart(d.intentCount);
-  renderMentionChart(d.brandMention);
-  renderTypeChart(d.posts, d.comments);
+  // 关键词图表不随时间范围变化，只渲染一次
   renderKeywordChart(d.topKeywords);
-
-  // 文字分析
-  setText('ins-daily', insightDaily(d.dailyTrend, wow));
-  setText('ins-status', insightStatus(sc, d.total));
-  setText('ins-intent', insightIntent(d.intentCount));
-  setText('ins-mention', insightMention(d.brandMention));
-  setText('ins-type', insightType(d.posts, d.comments));
   setText('ins-keywords', insightKeywords(d.topKeywords));
+  updateMonUI();
+}
+
+function setMonRange(range) {
+  monState.range = range;
+  document.querySelectorAll('#mon-range-seg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === range));
+  updateMonUI();
+}
+
+// ── 按时间范围过滤精准词数据 ─────────────────────────────────
+function monGetRangeData(d, range) {
+  if (range === 'all') {
+    return {
+      total: d.total, published: d.published,
+      posts: d.posts, comments: d.comments,
+      statusCount: { ...d.statusCount },
+      intentCount: { ...d.intentCount },
+      brandMention: { ...d.brandMention },
+      trend: d.dailyTrend,
+      wow: calcWoW(d.dailyTrend),
+      prevTotal: null
+    };
+  }
+  const days     = range === '7d' ? 7 : 30;
+  const now      = new Date(); now.setHours(0, 0, 0, 0);
+  const currFrom = new Date(now); currFrom.setDate(now.getDate() - days);
+  const prevFrom = new Date(now); prevFrom.setDate(now.getDate() - days * 2);
+
+  const currTrend = d.dailyTrend.filter(([dt]) => { const dd = new Date(dt+'T00:00:00'); return dd >= currFrom && dd < now; });
+  const prevTrend = d.dailyTrend.filter(([dt]) => { const dd = new Date(dt+'T00:00:00'); return dd >= prevFrom && dd < currFrom; });
+
+  const currTotal = currTrend.reduce((s,[,v]) => s+v, 0);
+  const prevTotal = prevTrend.reduce((s,[,v]) => s+v, 0);
+  const ratio     = d.total > 0 ? currTotal / d.total : 0;
+
+  function scale(obj) {
+    const res = {};
+    for (const [k, v] of Object.entries(obj || {})) res[k] = Math.round(v * ratio);
+    return res;
+  }
+
+  // WoW 取时间段内前半 vs 后半
+  const half      = Math.ceil(days / 2);
+  const halfFrom  = new Date(now); halfFrom.setDate(now.getDate() - half);
+  const recentH   = currTrend.filter(([dt]) => new Date(dt+'T00:00:00') >= halfFrom);
+  const priorH    = currTrend.filter(([dt]) => new Date(dt+'T00:00:00') <  halfFrom);
+  const wow       = { thisWeek: recentH.reduce((s,[,v])=>s+v,0), lastWeek: priorH.reduce((s,[,v])=>s+v,0) };
+
+  return {
+    total: currTotal,
+    published: Math.round(d.published * ratio),
+    posts: Math.round(d.posts * ratio),
+    comments: Math.round(d.comments * ratio),
+    statusCount: scale(d.statusCount),
+    intentCount: scale(d.intentCount),
+    brandMention: { YES: Math.round(d.brandMention.YES * ratio), NO: Math.round(d.brandMention.NO * ratio) },
+    trend: currTrend,
+    wow,
+    prevTotal
+  };
+}
+
+// ── 刷新精准词监控页面内所有动态内容 ──────────────────────────
+function updateMonUI() {
+  const d  = currentData[monState.brand];
+  const rd = monGetRangeData(d, monState.range);
+  const sc = filterIgnored(rd.statusCount);
+
+  const pubRate  = rd.total > 0 ? ((rd.published / rd.total) * 100).toFixed(1) : 0;
+  const mentTot  = (rd.brandMention.YES||0) + (rd.brandMention.NO||0);
+  const mentRate = mentTot > 0 ? ((rd.brandMention.YES / mentTot) * 100).toFixed(1) : 0;
+
+  setText('mon-total',         rd.total.toLocaleString());
+  setText('mon-total-sub',     `帖子 ${rd.posts} · 评论 ${rd.comments}`);
+  setText('mon-total-wow',     wowHTML(rd.wow.thisWeek, rd.wow.lastWeek));
+  setText('mon-published',     rd.published.toLocaleString());
+  setText('mon-published-sub', `发布率 ${pubRate}%`);
+  setText('mon-mention',       rd.brandMention.YES.toLocaleString());
+  setText('mon-mention-sub',   `提及率 ${mentRate}%`);
+
+  const trendLabels = { all: '近 60 天每日新增抓取量', '30d': '近 30 天每日新增抓取量', '7d': '近 7 天每日新增抓取量' };
+  setText('mon-trend-sub', trendLabels[monState.range]);
+
+  renderDailyChart(rd.trend, rd.wow);
+  renderStatusChart(sc);
+  renderIntentChart(rd.intentCount);
+  renderMentionChart(rd.brandMention);
+  renderTypeChart(rd.posts, rd.comments);
+
+  setText('ins-daily',   insightDaily(rd.trend, rd.wow));
+  setText('ins-status',  insightStatus(sc, rd.total));
+  setText('ins-intent',  insightIntent(rd.intentCount));
+  setText('ins-mention', insightMention(rd.brandMention));
+  setText('ins-type',    insightType(rd.posts, rd.comments));
+
+  const rangeLabels = { all: '全量数据综合分析', '30d': '近30天数据分析（含比例估算）', '7d': '近7天数据分析（含比例估算）' };
+  setText('mon-analysis-label', rangeLabels[monState.range]);
+  setText('mon-comp-strip', monBuildCompStrip(rd, monState.range));
+  setText('mon-analysis',   insightMonitorFull(d, rd, monState.range));
+}
+
+// ── 精准词环比对比条 ──────────────────────────────────────────
+function monBuildCompStrip(rd, range) {
+  if (!rd.prevTotal || range === 'all') return '';
+  const label = range === '7d' ? '近7天 vs 前7天' : '近30天 vs 前30天';
+  const cT = rd.total, pT = rd.prevTotal;
+  const cPub = rd.published, pPub = Math.round(rd.published * (pT / (cT||1)));
+  const cMen = rd.brandMention.YES, pMen = Math.round(rd.brandMention.YES * (pT / (cT||1)));
+
+  function delta(c, p, posIsGood) {
+    if (!p && !c) return `<span class="comp-flat">—</span>`;
+    if (!p) return `<span class="comp-up">新增</span>`;
+    const pct = Math.round((c - p) / p * 100);
+    const up  = c >= p;
+    const good = posIsGood ? up : !up;
+    return `<span class="${good ? 'comp-up' : 'comp-down'}">${up ? '↑' : '↓'}${Math.abs(pct)}%</span>`;
+  }
+
+  return `<div class="comp-strip">
+    <span class="comp-label">${label}</span>
+    <span class="comp-item">抓取量 <b>${cT}</b> ${delta(cT, pT, true)}</span>
+    <span class="comp-item">已发布 <b>${cPub}</b> ${delta(cPub, pPub, true)}</span>
+    <span class="comp-item">品牌提及 <b>${cMen}</b> ${delta(cMen, pMen, true)}</span>
+  </div>`;
+}
+
+// ── 精准词运营分析全文 ────────────────────────────────────────
+function insightMonitorFull(d, rd, range) {
+  const rangeLabel    = { all: '全部数据', '30d': '近30天', '7d': '近7天' }[range];
+  const total         = rd.total;
+  const published     = rd.published;
+  const pubRate       = total > 0 ? ((published / total) * 100).toFixed(0) : 0;
+  const sc            = filterIgnored(rd.statusCount);
+  const pending       = sc['待处理']  || 0;
+  const generated     = sc['已生成']  || 0;
+  const pendingRate   = total > 0 ? ((pending / total) * 100).toFixed(0) : 0;
+  const intentEntries = Object.entries(rd.intentCount || {}).sort((a,b) => b[1]-a[1]);
+  const topIntent     = intentEntries[0];
+  const mentTot       = (rd.brandMention.YES||0) + (rd.brandMention.NO||0);
+  const mentRate      = mentTot > 0 ? ((rd.brandMention.YES / mentTot) * 100).toFixed(0) : 0;
+  const topKw         = d.topKeywords.slice(0,3).map(kw=>kw[0]).join('、');
+  const wowPct        = rd.wow.lastWeek > 0
+    ? Math.round((rd.wow.thisWeek - rd.wow.lastWeek) / rd.wow.lastWeek * 100) : null;
+
+  // ① 抓取概况
+  let s1 = `<div class="analysis-section"><div class="analysis-title">📊 抓取概况 · ${rangeLabel}</div><div class="analysis-body">`;
+  s1 += `共抓取 <b>${total.toLocaleString()}</b> 条内容（帖子 <b>${rd.posts}</b>，评论 <b>${rd.comments}</b>）。`;
+  if (wowPct !== null) {
+    const marker = wowPct >= 0 ? '↑' : '↓';
+    s1 += ` 本周期新增 <b>${rd.wow.thisWeek}</b> 条，环比上期 <b>${marker}${Math.abs(wowPct)}%</b>`;
+    s1 += wowPct > 20 ? '，增长显著，关键词覆盖扩张有效。' : wowPct < -20 ? '，有所下滑，建议检查关键词列表是否需要更新扩充。' : '，趋势平稳。';
+  }
+  s1 += `</div></div>`;
+
+  // ② 回复处理效率
+  let s2 = `<div class="analysis-section"><div class="analysis-title">⚡ 回复处理效率</div><div class="analysis-body">`;
+  s2 += `${rangeLabel}已发布 <b>${published}</b> 条，综合发布率 <b>${pubRate}%</b>。`;
+  if (generated > 0) s2 += ` AI 已生成待审 <b>${generated}</b> 条，建议优先跟进评审发布，可直接提升发布率。`;
+  s2 += Number(pubRate) < 20
+    ? ' 发布率偏低，需重点提速审核与发布流程。'
+    : Number(pubRate) < 50
+      ? ' 发布率中等，仍有较大提升空间。'
+      : ' 发布率良好，回复覆盖充分。';
+  if (pending > 0) s2 += ` 待处理积压 <b>${pending}</b> 条（占比 ${pendingRate}%），建议按内容时效性优先清化。`;
+  s2 += `</div></div>`;
+
+  // ③ 内容洞察
+  let s3 = `<div class="analysis-section"><div class="analysis-title">🔍 内容洞察</div><div class="analysis-body">`;
+  s3 += `品牌提及率 <b>${mentRate}%</b>${Number(mentRate) < 20 ? '（偏低，多数帖子未直接提及品牌）' : Number(mentRate) > 60 ? '（较高，品牌话题集中）' : '（适中）'}。`;
+  if (topIntent) {
+    const iTotal = intentEntries.reduce((s,[,v])=>s+v, 0);
+    const iPct   = iTotal > 0 ? ((topIntent[1]/iTotal)*100).toFixed(0) : 0;
+    s3 += ` 主要用户意图为「<b>${topIntent[0]}</b>」（约占 <b>${iPct}%</b>）`;
+    if (intentEntries.length > 1) s3 += `，其次为「${intentEntries[1][0]}」`;
+    s3 += '。';
+  }
+  if (d.topKeywords.length) s3 += ` 核心关键词集中于「<b>${topKw}</b>」，这些词代表高频需求场景，应保持优先回复。`;
+  s3 += `</div></div>`;
+
+  // ④ 运营建议
+  const recs = [];
+  if (generated > 0)                   recs.push(`优先跟进 <b>${generated}</b> 条 AI 已生成回复，评审后发布可快速提升品牌覆盖度。`);
+  if (Number(pubRate) < 30)            recs.push(`发布率仅 ${pubRate}%，建议设定每日处理配额（如 10–15 条），形成规律处理节奏。`);
+  if (pending > 30)                    recs.push(`积压 ${pending} 条待处理内容存在时效风险，建议今日起每天额外处理 ${Math.ceil(pending/5)} 条。`);
+  if (topIntent?.[0] === '方案探索')   recs.push('「方案探索」类用户购买意向强，建议准备更详细的使用场景回复模板，覆盖常见使用方式与对比优势。');
+  if (topIntent?.[0] === '竞品抱怨')   recs.push('「竞品抱怨」是切入良机，及时以专业态度介入，引导用户了解本品优势，转化率较高。');
+  if (topIntent?.[0] === '技术求助')   recs.push('「技术求助」帖需要专业解答，建议配置专属技术回复模板，提升解答质量与可信度。');
+  if (Number(mentRate) < 20)           recs.push(`品牌提及率偏低（${mentRate}%），在回复中可自然带入产品名称与核心功能点，提升品牌曝光。`);
+  if (d.topKeywords[0]?.[1] > total*0.3) recs.push(`关键词「${d.topKeywords[0][0]}」占比超30%，是核心流量词，建议针对该词设计专属高质量回复，提升品牌在该词下的曝光比例。`);
+  if (!recs.length)                    recs.push('当前整体运营状态良好，维持现有处理节奏，持续关注关键词覆盖与发布率变化。');
+
+  const recLabel = range === 'all' ? '整体运营建议' : `本${range === '7d' ? '周' : '月'}运营建议`;
+  const s4 = `<div class="analysis-section"><div class="analysis-title">💡 ${recLabel}</div><div class="analysis-body"><ol>${recs.map(r=>`<li>${r}</li>`).join('')}</ol></div></div>`;
+
+  return s1 + s2 + s3 + s4;
 }
 
 /* ══════════════ 品牌舆情看板渲染 ══════════════ */

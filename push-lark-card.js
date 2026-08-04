@@ -213,6 +213,135 @@ async function generateChartPng(title, weeks, actual, target, accentColor, targe
   });
 }
 
+// ── QuickChart 进度摘要图 ──────────────────────────────────────
+
+async function generateProgressPng(sf, df, outPath) {
+  const sfPct    = sf.current    || 0;
+  const dfPct    = df.current    || 0;
+  const sfTarget = sf.q3Target   || 25;
+  const dfTarget = df.q3Target   || 40.5;
+  const sfGap    = Math.max(0, sfTarget - sfPct);
+  const dfGap    = Math.max(0, dfTarget - dfPct);
+  const sfWords  = sf.currentWords    || 0;
+  const sfTotal  = sf.aioTriggerWords || 177;
+  const dfWords  = df.currentWords    || 0;
+  const dfTotal  = df.aioTriggerWords || 203;
+  const sfNeeded = Math.max(0, (sf.q3TargetWords  || 44) - sfWords);
+  const dfNeeded = Math.max(0, (df.q3TargetWords  || 82) - dfWords);
+  const sfFill   = (sfPct / sfTarget * 100).toFixed(1);
+  const dfFill   = (dfPct / dfTarget * 100).toFixed(1);
+  const maxX     = Math.ceil(Math.max(sfTarget, dfTarget) + 6);
+
+  const chartCfg = {
+    type: 'bar',
+    data: {
+      labels: [
+        `StreamFab — ${sfFill}% 达成`,
+        `DVDFab — ${dfFill}% 达成`,
+      ],
+      datasets: [
+        {
+          label: '当前 AIO-BO',
+          data: [sfPct, dfPct],
+          backgroundColor: ['#ff4500', '#2563eb'],
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+        {
+          label: '距 Q3 目标',
+          data: [sfGap, dfGap],
+          backgroundColor: ['rgba(255,69,0,0.18)', 'rgba(37,99,235,0.18)'],
+          borderRadius: 6,
+          borderSkipped: false,
+        },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: {
+        title: {
+          display: true,
+          text: 'Q3 目标进度一览',
+          font: { size: 13, weight: 'bold' },
+          color: '#1a2332',
+          padding: { bottom: 10 },
+        },
+        legend: {
+          position: 'bottom',
+          labels: { usePointStyle: true, padding: 16, font: { size: 11 }, color: '#475569' },
+        },
+        datalabels: {
+          display: true,
+          align: 'center',
+          anchor: 'center',
+          font: { size: 10.5, weight: 'bold' },
+          color: `function(ctx) { return ctx.datasetIndex === 0 ? '#ffffff' : '#64748b'; }`,
+          formatter: `function(v, ctx) {
+            if (v < 0.3) return null;
+            var a = ['${sfPct}% (${sfWords}/${sfTotal}词)', '${dfPct}% (${dfWords}/${dfTotal}词)'];
+            var g = ['还需 ${sfNeeded} 词', '还需 ${dfNeeded} 词'];
+            return ctx.datasetIndex === 0 ? a[ctx.dataIndex] : g[ctx.dataIndex];
+          }`,
+        },
+      },
+      scales: {
+        x: {
+          stacked: true,
+          max: maxX,
+          ticks: {
+            callback: 'function(v) { return v + "%"; }',
+            font: { size: 10 },
+            color: '#94a3b8',
+          },
+          grid: { color: '#f1f5f9' },
+          border: { color: '#e2e8f0' },
+        },
+        y: {
+          stacked: true,
+          ticks: { font: { size: 11 }, color: '#334155' },
+          grid: { display: false },
+          border: { color: '#e2e8f0' },
+        },
+      },
+    },
+  };
+
+  const body = JSON.stringify({
+    chart: chartCfg,
+    width: 600,
+    height: 200,
+    backgroundColor: 'white',
+    devicePixelRatio: 2,
+  });
+
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'quickchart.io',
+      path: '/chart',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }, res => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => {
+        const buf = Buffer.concat(chunks);
+        if (res.statusCode !== 200) {
+          reject(new Error(`QuickChart HTTP ${res.statusCode}: ${buf.toString().slice(0, 200)}`));
+          return;
+        }
+        fs.writeFileSync(outPath, buf);
+        resolve(outPath);
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
 // ── 飞书图片上传 ──────────────────────────────────────────────
 
 function uploadImageToFeishu(pngPath) {
@@ -236,7 +365,7 @@ function uploadImageToFeishu(pngPath) {
 
 // ── 构建卡片 ──────────────────────────────────────────────────
 
-function buildCard(sfImgKey, dfImgKey) {
+function buildCard(progressImgKey, sfImgKey, dfImgKey) {
   const today    = new Date().toISOString().slice(0, 10);
   const sfPct    = sf.current || 0;
   const dfPct    = df.current || 0;
@@ -279,9 +408,19 @@ function buildCard(sfImgKey, dfImgKey) {
       },
     },
     { tag: 'hr' },
+  ];
 
-    // 进度摘要
-    {
+  // 进度摘要：有图用图，没图退回文字双列
+  if (progressImgKey) {
+    elements.push({
+      tag: 'img',
+      img_key: progressImgKey,
+      alt: { tag: 'plain_text', content: 'AIO-BO Q3 目标进度' },
+      mode: 'fit_horizontal',
+      preview: false,
+    });
+  } else {
+    elements.push({
       tag: 'column_set',
       flex_mode: 'bisect',
       background_style: 'default',
@@ -289,9 +428,9 @@ function buildCard(sfImgKey, dfImgKey) {
         { tag: 'column', width: 'weighted', weight: 1, elements: [{ tag: 'div', text: { content: sfStats, tag: 'lark_md' } }] },
         { tag: 'column', width: 'weighted', weight: 1, elements: [{ tag: 'div', text: { content: dfStats, tag: 'lark_md' } }] },
       ],
-    },
-    { tag: 'hr' },
-  ];
+    });
+  }
+  elements.push({ tag: 'hr' });
 
   // SF 折线图
   elements.push({
@@ -378,12 +517,25 @@ function sendCard(target, cardContent) {
   console.log(`数据：SF ${sf.dataAsOf||'—'} ${sf.current}% | DF ${df.dataAsOf||'—'} ${df.current}%`);
   console.log(`目标：${targets.map(t => t.name).join(', ')}\n`);
 
+  const progressChartPath = path.join(__dirname, '_chart_progress.png');
   const sfChartPath = path.join(__dirname, '_chart_sf.png');
   const dfChartPath = path.join(__dirname, '_chart_df.png');
 
-  let sfImgKey = null, dfImgKey = null;
+  let progressImgKey = null, sfImgKey = null, dfImgKey = null;
 
   if (!noChart) {
+    // 生成进度摘要横向条形图
+    process.stdout.write('  ⏳ 生成进度摘要图...');
+    try {
+      await generateProgressPng(sf, df, progressChartPath);
+      console.log(' ✓');
+      process.stdout.write('  ⏳ 上传进度图到飞书...');
+      progressImgKey = uploadImageToFeishu(progressChartPath);
+      console.log(' ✓', progressImgKey);
+    } catch(e) {
+      console.log(` ⚠️ 跳过（${e.message}）`);
+    }
+
     // 计算 Y 轴范围（加一点 padding）
     const sfActualVals = (sf.actual||[]).filter(v => v !== null);
     const dfActualVals = (df.actual||[]).filter(v => v !== null);
@@ -439,7 +591,7 @@ function sendCard(target, cardContent) {
 
   // 构建并发送卡片
   console.log('\n  ⏳ 发送卡片...');
-  const cardContent = buildCard(sfImgKey, dfImgKey);
+  const cardContent = buildCard(progressImgKey, sfImgKey, dfImgKey);
 
   let ok = 0;
   for (const t of targets) {
@@ -447,7 +599,7 @@ function sendCard(target, cardContent) {
   }
 
   // 清理临时文件
-  [sfChartPath, dfChartPath].forEach(p => {
+  [progressChartPath, sfChartPath, dfChartPath].forEach(p => {
     if (fs.existsSync(p)) fs.unlinkSync(p);
   });
 

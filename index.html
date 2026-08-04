@@ -1242,40 +1242,103 @@ function buildLarkCard(sf, df, milestones) {
   };
 }
 
-async function pushToLark() {
-  const webhookUrl = (typeof LARK_WEBHOOK !== 'undefined' && LARK_WEBHOOK) ? LARK_WEBHOOK : '';
-  if (!webhookUrl) {
-    alert('⚠️ 尚未配置飞书 Webhook URL。\n\n请在 config.js 中设置：\nwindow.LARK_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/..."');
+/* 已知群组列表（bot 所在群）—— 上线后可扩展 */
+const LARK_CHAT_PRESETS = [
+  { id: 'oc_25770fbdf3c7f0736f128e10fb0a83ed', name: 'erika消息推送接收群', isDefault: true },
+  { id: 'oc_ce3ae6654c1eea0947922d7c30109e00', name: 'Wilson频道的啦啦队' },
+  { id: 'oc_a97231ffaba1424d90ff1c3c1e4ba407', name: '🦥英语组消息推送群' },
+  // 上线后在此添加更多正式群组
+];
+
+function openPushModal() {
+  const existing = document.getElementById('pushModal');
+  if (existing) existing.remove();
+
+  const presetHtml = LARK_CHAT_PRESETS.map(p => `
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;border-bottom:1px solid #f1f5f9">
+      <input type="checkbox" name="chatTarget" value="${p.id}" ${p.isDefault ? 'checked' : ''} style="width:14px;height:14px;cursor:pointer">
+      <span style="font-size:13px">${p.name}</span>
+      ${p.isDefault ? '<span style="font-size:10px;background:#eff6ff;color:#2563eb;padding:1px 6px;border-radius:8px">默认</span>' : ''}
+    </label>`).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'pushModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;padding:24px;width:400px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px">推送 AIO-BO 进展卡片</div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:16px">选择推送目标群组</div>
+      <div style="margin-bottom:16px">${presetHtml}</div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">自定义群 chat_id（选填）</div>
+        <input id="customChatId" placeholder="oc_xxx（从飞书群设置中获取）"
+          style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;box-sizing:border-box">
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="document.getElementById('pushModal').remove()"
+          style="padding:8px 16px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;font-size:13px;cursor:pointer">取消</button>
+        <button onclick="executePush()"
+          style="padding:8px 20px;border-radius:8px;border:none;background:#1677ff;color:#fff;font-size:13px;font-weight:600;cursor:pointer">
+          立即推送
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+async function executePush() {
+  const modal   = document.getElementById('pushModal');
+  const checked = [...document.querySelectorAll('input[name="chatTarget"]:checked')].map(el => el.value);
+  const custom  = (document.getElementById('customChatId')?.value || '').trim();
+  const chatIds = [...new Set([...checked, ...(custom ? [custom] : [])])];
+  if (!chatIds.length) { alert('请至少选择一个目标群组'); return; }
+
+  const ghToken = (typeof GH_TOKEN !== 'undefined') ? GH_TOKEN : '';
+  const ghRepo  = (typeof GH_REPO  !== 'undefined') ? GH_REPO  : 'erikainworking-cloud/reddit-dashboard';
+  if (!ghToken) {
+    if (modal) modal.remove();
+    alert('⚠️ 未配置 GitHub Token（config.js）\n\n可改为本地运行：\nnode dashboard/push-lark-card.js');
     return;
   }
+  if (modal) modal.remove();
+
   const btn = document.getElementById('pushLarkBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '推送中...'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '…推送中'; }
 
-  const ab = currentData.aioBo || {};
-  const sf = ab.streamfab || {};
-  const df = ab.dvdfab    || {};
-  const card = buildLarkCard(sf, df, currentData.milestones || []);
+  let ok = 0;
+  for (const chatId of chatIds) {
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${ghRepo}/actions/workflows/push-aiobo-card.yml/dispatches`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `token ${ghToken}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/vnd.github+json',
+          },
+          body: JSON.stringify({ ref: 'main', inputs: { mode: 'test', chat_id: chatId } }),
+        }
+      );
+      if (res.status === 204) ok++;
+      else { const err = await res.json().catch(()=>({})); console.warn('dispatch err', chatId, err); }
+    } catch(e) { console.error(e); }
+  }
 
-  try {
-    const res = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(card),
-    });
-    const data = await res.json();
-    if (data.code === 0 || data.StatusCode === 0) {
-      if (btn) { btn.classList.add('sending'); btn.textContent = '✓ 已推送'; }
-      setTimeout(() => {
-        if (btn) { btn.classList.remove('sending'); btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> 推送飞书卡片'; }
-      }, 3000);
-    } else {
-      throw new Error(JSON.stringify(data));
-    }
-  } catch(e) {
-    alert('推送失败：' + e.message);
-    if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> 推送飞书卡片'; }
+  const svgIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>';
+  if (ok > 0) {
+    if (btn) { btn.classList.add('sending'); btn.innerHTML = `✓ 已触发（${ok}/${chatIds.length}）`; }
+    setTimeout(() => {
+      if (btn) { btn.classList.remove('sending'); btn.disabled = false; btn.innerHTML = `${svgIcon} 推送飞书卡片`; }
+    }, 4000);
+  } else {
+    alert('触发失败，请检查网络或 GitHub Token 权限（需要 workflow write 权限）');
+    if (btn) { btn.disabled = false; btn.innerHTML = `${svgIcon} 推送飞书卡片`; }
   }
 }
+
+function pushToLark() { openPushModal(); }
 
 function renderPaSurviveChart(s1, s7) {
   const c = makeChart('chart-pa-survive'); if (!c) return;

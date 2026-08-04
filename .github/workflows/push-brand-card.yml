@@ -1,0 +1,20 @@
+name: Push Brand Monitor Card to Feishu
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: '推送模式：test（默认测试群）或 prod（正式群）'
+        required: false
+        default: 'test'
+
+jobs:
+  push-card:
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Push 品牌舆情监控 Feishu card
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.mode }}" = "prod" ]; then ARGS="--prod"; fi
+          node "/Users/erikaleen/Desktop/进行项目/reddit/dashboard/push-lark-brand.js" $ARGS

@@ -1,7 +1,7 @@
 name: Push AIO-BO Weekly Card to Feishu
 
 on:
-  # 每周一 9:00 AM 北京时间（UTC+8 = UTC 1:00 AM）
+  # 每周一、周五 9:00 AM 北京时间（UTC+8 = UTC 1:00 AM）
   schedule:
     - cron: '0 1 * * 1'   # 周一 09:00 北京时间
     - cron: '0 1 * * 5'   # 周五 09:00 北京时间
@@ -23,6 +23,9 @@ jobs:
   push-card:
     runs-on: self-hosted
     timeout-minutes: 5
+    env:
+      LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
+      LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
     steps:
       - name: Push AIO-BO Feishu card
         run: |
@@ -39,4 +42,4 @@ jobs:
             ARGS="--prod"
           fi
 
-          node "/Users/erikaleen/Desktop/进行项目/reddit/dashboard/push-lark-card.js" $ARGS
+          node "/Users/erikaleen/Desktop/进行项目/reddit/dashboard/push-lark-card-v2.js" $ARGS

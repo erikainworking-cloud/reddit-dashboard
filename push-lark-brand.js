@@ -11,12 +11,10 @@
 
 'use strict';
 
-const { spawnSync } = require('child_process');
 const fs   = require('fs');
 const path = require('path');
 const { createCanvas, GlobalFonts } = require(path.join(__dirname, 'node_modules/@napi-rs/canvas'));
-
-const LARK        = '/Users/erikaleen/.npm-global/lib/node_modules/@larksuite/cli/bin/lark-cli';
+const larkApi = require('./push-lark-api');
 const STATS_FILE  = path.join(__dirname, 'stats.json');
 const DASHBOARD_URL = 'https://erikainworking-cloud.github.io/reddit-dashboard/';
 
@@ -187,18 +185,8 @@ async function generateBrandPng(sfData, dfData, outPath) {
 
 // ── 飞书图片上传 ──────────────────────────────────────────────
 
-function uploadImage(pngPath) {
-  const rel = path.relative(process.cwd(), pngPath);
-  const r = spawnSync(LARK, [
-    'api', 'POST', '/open-apis/im/v1/images',
-    '--file', `image=${rel}`,
-    '--data', '{"image_type":"message"}',
-    '--as', 'bot',
-  ], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024, cwd: process.cwd() });
-  const raw = (r.stdout || '') + (r.stderr || '');
-  const d = JSON.parse(raw.slice(raw.indexOf('{')));
-  if (!d.data?.image_key) throw new Error('upload no key');
-  return d.data.image_key;
+async function uploadImage(pngPath) {
+  return larkApi.uploadImage(pngPath);
 }
 
 // ── 卡片构建 ──────────────────────────────────────────────────
@@ -284,20 +272,8 @@ function buildCard(imgKey) {
 
 // ── 发送 ──────────────────────────────────────────────────────
 
-function sendCard(target, content) {
-  const flag = target.type === 'chat' ? '--chat-id' : '--user-id';
-  const r = spawnSync(LARK, [
-    'im', '+messages-send', flag, target.id,
-    '--msg-type', 'interactive', '--content', content, '--as', 'bot',
-  ], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
-  const raw = (r.stdout || '') + (r.stderr || '');
-  const d = JSON.parse(raw.slice(raw.indexOf('{')));
-  if (d.ok || d.code === 0) {
-    console.log(`  ✅ [${target.name}] 发送成功 · ${d.data?.message_id || '—'}`);
-    return true;
-  }
-  console.error(`  ❌ [${target.name}] ${d.error?.message || d.msg || '未知'}`);
-  return false;
+async function sendCard(target, content) {
+  return larkApi.sendCard(target, content);
 }
 
 // ── 主流程 ────────────────────────────────────────────────────
@@ -314,7 +290,7 @@ function sendCard(target, content) {
     await generateBrandPng(sfBm, dfBm, pngPath);
     console.log(' ✓');
     process.stdout.write('  ⏳ 上传图片...');
-    imgKey = uploadImage(pngPath);
+    imgKey = await uploadImage(pngPath);
     console.log(` ✓ ${imgKey}`);
   } catch (e) {
     console.log(` ⚠️  图片跳过（${e.message}）`);
@@ -324,7 +300,7 @@ function sendCard(target, content) {
 
   const content = buildCard(imgKey);
   let ok = 0;
-  for (const t of targets) { if (sendCard(t, content)) ok++; }
+  for (const t of targets) { if (await sendCard(t, content)) ok++; }
   console.log(`\n${ok}/${targets.length} 发送成功`);
   if (ok < targets.length) process.exitCode = 1;
 })().catch(e => {

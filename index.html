@@ -425,9 +425,15 @@ function renderMonitor(brand) {
   const label = brand === 'streamfab' ? 'StreamFab' : 'DVDFab';
 
   document.getElementById('main').innerHTML = `
-    <div class="page-header">
-      <div class="page-title">${label} 精准词监控</div>
-      <div class="page-desc">基于精准关键词抓取的 Reddit 内容监控与回复数据</div>
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div>
+        <div class="page-title">${label} 精准词监控</div>
+        <div class="page-desc">基于精准关键词抓取的 Reddit 内容监控与回复数据</div>
+      </div>
+      <button class="push-btn" id="pushKeywordBtn" onclick="dispatchSimplePush('push-keyword-card.yml','pushKeywordBtn')" title="推送精准词监控日报到飞书群">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        推送飞书卡片
+      </button>
     </div>
 
     <div class="stat-grid">
@@ -537,9 +543,15 @@ function renderExecution() {
   const dfPraiseRate = df.total > 0 ? ((dfPraise/df.total)*100).toFixed(0) : '—';
 
   document.getElementById('main').innerHTML = `
-    <div class="page-header">
-      <div class="page-title">执行动作</div>
-      <div class="page-desc">品牌舆情回复执行情况 · 第三方付费账号 · 工具进展</div>
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div>
+        <div class="page-title">执行动作</div>
+        <div class="page-desc">品牌舆情回复执行情况 · 第三方付费账号 · 工具进展</div>
+      </div>
+      <button class="push-btn" id="pushBrandBtn" onclick="dispatchSimplePush('push-brand-card.yml','pushBrandBtn')" title="推送品牌舆情监控周报到飞书群">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        推送飞书卡片
+      </button>
     </div>
 
     <div class="stat-grid">
@@ -1339,6 +1351,49 @@ async function executePush() {
 }
 
 function pushToLark() { openPushModal(); }
+
+// 通用：直接 dispatch 指定 workflow（无弹窗，默认 test 模式）
+async function dispatchSimplePush(workflowFile, btnId) {
+  const ghToken = (typeof GH_TOKEN !== 'undefined') ? GH_TOKEN : '';
+  const ghRepo  = (typeof GH_REPO  !== 'undefined') ? GH_REPO  : 'erikainworking-cloud/reddit-dashboard';
+  const btn     = document.getElementById(btnId);
+  const svgIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>';
+
+  if (!ghToken) {
+    alert('⚠️ 未配置 GitHub Token（config.js）\n\n可改为本地运行：\nnode dashboard/' + workflowFile.replace('-card.yml','').replace('push-','push-lark-') + '.js');
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.innerHTML = '…推送中'; }
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${ghRepo}/actions/workflows/${workflowFile}/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `token ${ghToken}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.github+json',
+        },
+        body: JSON.stringify({ ref: 'main', inputs: { mode: 'test' } }),
+      }
+    );
+    if (res.status === 204) {
+      if (btn) { btn.classList.add('sending'); btn.innerHTML = '✓ 已触发'; }
+      setTimeout(() => {
+        if (btn) { btn.classList.remove('sending'); btn.disabled = false; btn.innerHTML = `${svgIcon} 推送飞书卡片`; }
+      }, 4000);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(`触发失败：${err.message || res.status}\n请检查 GitHub Token 是否有 workflow write 权限`);
+      if (btn) { btn.disabled = false; btn.innerHTML = `${svgIcon} 推送飞书卡片`; }
+    }
+  } catch(e) {
+    alert('网络错误：' + e.message);
+    if (btn) { btn.disabled = false; btn.innerHTML = `${svgIcon} 推送飞书卡片`; }
+  }
+}
 
 function renderPaSurviveChart(s1, s7) {
   const c = makeChart('chart-pa-survive'); if (!c) return;

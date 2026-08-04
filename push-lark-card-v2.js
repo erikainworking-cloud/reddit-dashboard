@@ -21,14 +21,12 @@
 
 'use strict';
 
-const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const { createCanvas, GlobalFonts } = require(path.join(__dirname, 'node_modules/@napi-rs/canvas'));
+const larkApi = require('./push-lark-api');
 
 // ── 配置 ──────────────────────────────────────────────────────
-
-const LARK = '/Users/erikaleen/.npm-global/lib/node_modules/@larksuite/cli/bin/lark-cli';
 const STATS_FILE = path.join(__dirname, 'stats.json');
 const DASHBOARD_URL = 'https://erikainworking-cloud.github.io/reddit-dashboard/';
 
@@ -522,23 +520,8 @@ async function generateTrendPng(item, brandName, accent, accentSoft, outPath) {
 
 // ── 飞书图片上传 ──────────────────────────────────────────────
 
-function uploadImageToFeishu(pngPath) {
-  const relPath = path.relative(process.cwd(), pngPath);
-  const result = spawnSync(LARK, [
-    'api', 'POST', '/open-apis/im/v1/images',
-    '--file', `image=${relPath}`,
-    '--data', '{"image_type":"message"}',
-    '--as', 'bot',
-  ], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024, cwd: process.cwd() });
-
-  const raw = `${result.stdout || ''}${result.stderr || ''}`;
-  const start = raw.indexOf('{');
-  if (start < 0) throw new Error(`upload: no JSON: ${raw.slice(0, 240)}`);
-  const data = JSON.parse(raw.slice(start));
-  if (data.code !== 0 && !data.ok) throw new Error(`upload failed: ${JSON.stringify(data.error || data)}`);
-  const key = data.data?.image_key;
-  if (!key) throw new Error(`upload: no image_key: ${JSON.stringify(data)}`);
-  return key;
+async function uploadImageToFeishu(pngPath) {
+  return larkApi.uploadImage(pngPath);
 }
 
 // ── 卡片构建 ──────────────────────────────────────────────────
@@ -647,28 +630,8 @@ function buildCard(summaryImgKey, sfImgKey, dfImgKey) {
 
 // ── 发送 ──────────────────────────────────────────────────────
 
-function sendCard(target, cardContent) {
-  const flag = target.type === 'chat' ? '--chat-id' : '--user-id';
-  const result = spawnSync(LARK, [
-    'im', '+messages-send', flag, target.id,
-    '--msg-type', 'interactive',
-    '--content', cardContent,
-    '--as', 'bot',
-  ], { encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 });
-
-  const raw = `${result.stdout || ''}${result.stderr || ''}`;
-  const start = raw.indexOf('{');
-  if (start < 0) {
-    console.error(`  ❌ [${target.name}] 无 JSON 输出：${raw.slice(0, 200)}`);
-    return false;
-  }
-  const data = JSON.parse(raw.slice(start));
-  if (data.ok || data.code === 0) {
-    console.log(`  ✅ [${target.name}] 发送成功 · ${data.data?.message_id || '—'}`);
-    return true;
-  }
-  console.error(`  ❌ [${target.name}] ${data.error?.code || data.code} ${data.error?.message || data.msg || '未知错误'}`);
-  return false;
+async function sendCard(target, cardContent) {
+  return larkApi.sendCard(target, cardContent);
 }
 
 // ── 主流程 ────────────────────────────────────────────────────
@@ -692,21 +655,21 @@ function sendCard(target, cardContent) {
       await generateSummaryPng(sf, df, summaryPath);
       console.log(' ✓');
       process.stdout.write('  ⏳ 上传 KPI 摘要图...');
-      summaryImgKey = uploadImageToFeishu(summaryPath);
+      summaryImgKey = await uploadImageToFeishu(summaryPath);
       console.log(` ✓ ${summaryImgKey}`);
 
       process.stdout.write('  ⏳ 生成 StreamFab 趋势图...');
       await generateTrendPng(sf, 'StreamFab', COLORS.sf, '#FFB39A', sfPath);
       console.log(' ✓');
       process.stdout.write('  ⏳ 上传 StreamFab 趋势图...');
-      sfImgKey = uploadImageToFeishu(sfPath);
+      sfImgKey = await uploadImageToFeishu(sfPath);
       console.log(` ✓ ${sfImgKey}`);
 
       process.stdout.write('  ⏳ 生成 DVDFab 趋势图...');
       await generateTrendPng(df, 'DVDFab', COLORS.df, '#AFC8FF', dfPath);
       console.log(' ✓');
       process.stdout.write('  ⏳ 上传 DVDFab 趋势图...');
-      dfImgKey = uploadImageToFeishu(dfPath);
+      dfImgKey = await uploadImageToFeishu(dfPath);
       console.log(` ✓ ${dfImgKey}`);
     } else {
       console.log('  ℹ️ --no-chart 模式：跳过图片生成和上传');
@@ -716,7 +679,7 @@ function sendCard(target, cardContent) {
     const content = buildCard(summaryImgKey, sfImgKey, dfImgKey);
     let success = 0;
     for (const target of targets) {
-      if (sendCard(target, content)) success++;
+      if (await sendCard(target, content)) success++;
     }
     console.log(`\n${success}/${targets.length} 发送成功`);
     if (success < targets.length) process.exitCode = 1;

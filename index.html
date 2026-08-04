@@ -201,6 +201,27 @@
     .ms-badge.behind  { background: var(--red-bg);   color: var(--red); }
     .ms-badge.pending { background: var(--bg);        color: var(--text-3); font-style: italic; font-weight: 400; }
     .ms-badge.nosync  { background: var(--amber-bg);  color: var(--amber); }
+
+    /* ── Brand monitor interactive controls ─── */
+    .section-header-row { display:flex; justify-content:space-between; align-items:center; margin:20px 0 10px; }
+    .seg-group { display:flex; gap:2px; background:#f1f5f9; padding:2px; border-radius:8px; }
+    .seg-btn { padding:4px 12px; border:none; background:transparent; border-radius:6px; font-size:12px; color:var(--text-2); cursor:pointer; font-weight:500; transition:all .15s; }
+    .seg-btn.active { background:var(--surface); color:var(--text-1); box-shadow:0 1px 3px rgba(0,0,0,.1); font-weight:600; }
+    .seg-btn:hover:not(.active) { background:rgba(255,255,255,.6); }
+    .comp-strip { display:flex; gap:16px; flex-wrap:wrap; align-items:center; padding:10px 14px; background:linear-gradient(135deg,#f8fafc,#f1f5f9); border-radius:8px; margin-bottom:14px; font-size:12.5px; border:1px solid var(--border); }
+    .comp-label { color:var(--text-3); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.4px; }
+    .comp-item { display:flex; align-items:center; gap:4px; color:var(--text-2); }
+    .comp-item b { color:var(--text-1); }
+    .comp-up   { color:var(--green); font-weight:600; }
+    .comp-down { color:var(--red);   font-weight:600; }
+    .comp-flat { color:var(--text-3); font-weight:600; }
+    .analysis-card { background:var(--surface); border-radius:12px; border:1px solid var(--border); padding:20px 24px; margin-top:8px; }
+    .analysis-section { padding:12px 0; border-bottom:1px solid #f1f5f9; }
+    .analysis-section:last-child { border-bottom:none; padding-bottom:0; }
+    .analysis-title { font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:6px; }
+    .analysis-body { font-size:13px; color:var(--text-2); line-height:1.75; }
+    .analysis-body ol { padding-left:18px; }
+    .analysis-body li { margin-bottom:4px; }
   </style>
 </head>
 <body>
@@ -531,16 +552,15 @@ function renderMonitor(brand) {
 
 /* ══════════════ 品牌舆情看板渲染 ══════════════ */
 
-function renderBrandMonitor(brand) {
-  const d = (currentData.brandMonitoring || {})[brand] || {};
-  const label    = brand === 'streamfab' ? 'StreamFab' : 'DVDFab';
-  const tagClass = brand === 'streamfab' ? 'sf' : 'df';
-  const lineColor = brand === 'streamfab' ? '#ff4500' : '#2563eb';
+let bmState = { brand: null, range: 'all', gran: 'day' };
 
-  const processRate  = d.total > 0 ? (((d.processed||0) / d.total) * 100).toFixed(1) : 0;
-  const praiseCount  = d.problemType?.['正向夸奖'] || 0;
-  const severeCount  = d.problemType?.['严重故障'] || 0;
-  const wow          = calcWoW(d.scrapingTrend || []);
+function renderBrandMonitor(brand) {
+  bmState = { brand, range: 'all', gran: 'day' };
+  const d         = (currentData.brandMonitoring || {})[brand] || {};
+  const label     = brand === 'streamfab' ? 'StreamFab' : 'DVDFab';
+  const tagClass  = brand === 'streamfab' ? 'sf' : 'df';
+  const wow       = calcWoW(d.scrapingTrend || []);
+  const processRate = d.total > 0 ? (((d.processed||0) / d.total) * 100).toFixed(1) : 0;
 
   document.getElementById('main').innerHTML = `
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
@@ -578,53 +598,292 @@ function renderBrandMonitor(brand) {
       </div>
     </div>
 
+    <!-- 状态 & 问题分类，带时间范围切换 -->
+    <div class="section-header-row">
+      <span class="section-title" style="margin:0">处理状态 &amp; 问题分类</span>
+      <div class="seg-group" id="bm-range-seg">
+        <button class="seg-btn active" data-v="all"  onclick="setBmRange('all')">全部</button>
+        <button class="seg-btn"        data-v="30d"  onclick="setBmRange('30d')">近30天</button>
+        <button class="seg-btn"        data-v="7d"   onclick="setBmRange('7d')">近7天</button>
+      </div>
+    </div>
+    <div id="bm-comp-strip"></div>
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-title">处理状态分布 <span class="brand-tag ${tagClass}">${label}</span></div>
-        <div class="chart-subtitle">待处理 ${d.pending||0} · 无需处理 ${d.noAction||0} · AI已生成 ${d.generated||0}</div>
+        <div class="chart-subtitle" id="bm-status-sub"></div>
         <div class="chart-box" id="chart-bm-status"></div>
         <div class="chart-insight" id="ins-bm-status"></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">用户问题分类 <span class="brand-tag ${tagClass}">${label}</span></div>
-        <div class="chart-subtitle">正向夸奖 ${praiseCount} · 严重故障 ${severeCount}${d.avgQualityScore ? ' · 平均回复质量 <b>' + d.avgQualityScore + '</b>/10' : ''}</div>
+        <div class="chart-subtitle" id="bm-prob-sub"></div>
         <div class="chart-box" id="chart-bm-prob"></div>
         <div class="chart-insight" id="ins-bm-prob"></div>
       </div>
     </div>
 
+    <!-- 趋势，带时间粒度切换 -->
+    <div class="section-header-row">
+      <span class="section-title" style="margin:0">抓取 &amp; 处理趋势</span>
+      <div class="seg-group" id="bm-gran-seg">
+        <button class="seg-btn active" data-v="day"   onclick="setBmGran('day')">日</button>
+        <button class="seg-btn"        data-v="week"  onclick="setBmGran('week')">周</button>
+        <button class="seg-btn"        data-v="month" onclick="setBmGran('month')">月</button>
+      </div>
+    </div>
     <div class="chart-card">
-      <div class="chart-title">每日抓取趋势</div>
-      <div class="chart-subtitle">近期品牌舆情每日新增抓取量</div>
+      <div class="chart-title">抓取趋势 <span class="brand-tag ${tagClass}">${label}</span></div>
+      <div class="chart-subtitle" id="bm-scraping-sub">近期品牌舆情抓取量</div>
       <div class="chart-box tall" id="chart-bm-scraping"></div>
       <div class="chart-insight" id="ins-bm-scraping"></div>
     </div>
-
     <div class="chart-card">
-      <div class="chart-title">处理时间趋势</div>
-      <div class="chart-subtitle">按实际处理时间统计的每日处理量</div>
+      <div class="chart-title">处理趋势 <span class="brand-tag ${tagClass}">${label}</span></div>
+      <div class="chart-subtitle" id="bm-trend-sub">按实际处理时间统计</div>
       <div class="chart-box tall" id="chart-bm-trend"></div>
       <div class="chart-insight" id="ins-bm-trend"></div>
     </div>
+
+    <!-- 运营分析建议 -->
+    <div class="analysis-card">
+      <div class="chart-title" style="margin-bottom:8px">运营分析 &amp; 建议</div>
+      <div id="bm-analysis"></div>
+    </div>
   `;
 
-  renderBMStatusChart('chart-bm-status', filterIgnored(d.statusCount || {}));
-  renderProblemChart('chart-bm-prob', d.problemType || {});
-  renderTrendChart('chart-bm-scraping', d.scrapingTrend || [], lineColor);
-  renderTrendChart('chart-bm-trend', d.processingTrend || [], '#0ea371');
+  updateBmDistCharts();
+  updateBmTrendCharts();
+}
 
-  setText('ins-bm-status', insightBMStatus(d));
-  setText('ins-bm-prob', insightProblem(d.problemType || {}, d.avgQualityScore));
+function setBmRange(range) {
+  bmState.range = range;
+  document.querySelectorAll('#bm-range-seg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === range));
+  updateBmDistCharts();
+}
 
-  const st = d.scrapingTrend || [];
+function setBmGran(gran) {
+  bmState.gran = gran;
+  document.querySelectorAll('#bm-gran-seg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === gran));
+  updateBmTrendCharts();
+}
+
+// ── 分布图（状态 + 问题分类）更新 ────────────────────────────
+function updateBmDistCharts() {
+  const d = (currentData.brandMonitoring || {})[bmState.brand] || {};
+  const { curr: currStatus, prev: prevStatus, currProb, prevProb } = bmGetRangeData(d, bmState.range);
+
+  renderBMStatusChart('chart-bm-status', filterIgnored(currStatus));
+  renderProblemChart('chart-bm-prob', currProb);
+
+  const currTotal = Object.values(currStatus).reduce((s,v)=>s+v, 0);
+  const praise  = currProb['正向夸奖']||0;
+  const severe  = currProb['严重故障']||0;
+  setText('bm-status-sub', `待处理 ${currStatus['待处理']||0} · 无需处理 ${currStatus['无需处理']||0} · AI已生成 ${currStatus['已生成']||0}`);
+  setText('bm-prob-sub',   `正向夸奖 ${praise} · 严重故障 ${severe}${d.avgQualityScore ? ' · 均分 <b>'+d.avgQualityScore+'</b>/10' : ''}`);
+
+  setText('ins-bm-status', insightBMStatus({ ...d, statusCount: currStatus }));
+  setText('ins-bm-prob',   insightProblem(currProb, d.avgQualityScore));
+  setText('bm-comp-strip', bmBuildCompStrip(currStatus, prevStatus, currProb, prevProb, bmState.range));
+  setText('bm-analysis',   insightBrandMonitorFull(d, currStatus, currProb, prevStatus, prevProb, bmState.range));
+}
+
+// ── 趋势图更新 ────────────────────────────────────────────────
+function updateBmTrendCharts() {
+  const d = (currentData.brandMonitoring || {})[bmState.brand] || {};
+  const lineColor = bmState.brand === 'streamfab' ? '#ff4500' : '#2563eb';
+  const st = bmAggTrend(d.scrapingTrend || [], bmState.gran);
+  const pt = bmAggTrend(d.processingTrend || [], bmState.gran);
+  const granLabel = { day:'天', week:'周', month:'月' }[bmState.gran];
+
+  renderTrendChart('chart-bm-scraping', st, lineColor);
+  renderTrendChart('chart-bm-trend',    pt, '#0ea371');
+
+  setText('bm-scraping-sub', `近 ${st.length||'—'} 个${granLabel}品牌舆情抓取量`);
+  setText('bm-trend-sub',    `近 ${pt.length||'—'} 个${granLabel}处理量（按处理时间统计）`);
+
   setText('ins-bm-scraping', st.length
-    ? `近 ${st.length} 天共抓取 <b>${st.reduce((s,[,v])=>s+(Number(v)||0),0)}</b> 条，最新一批于 ${st[st.length-1][0]} 抓取。`
+    ? `${granLabel}维度共 <b>${st.length}</b> 个数据点，累计抓取 <b>${st.reduce((s,[,v])=>s+(Number(v)||0),0)}</b> 条；最新一批于 <b>${st[st.length-1][0]}</b>。`
     : '暂无抓取趋势数据。');
-
-  const pt = d.processingTrend || [];
   setText('ins-bm-trend', pt.length
-    ? `近期共处理 <b>${pt.reduce((s,[,v])=>s+(Number(v)||0),0)}</b> 条，最近一次处理于 ${pt[pt.length-1][0]}。`
+    ? `${granLabel}维度共 <b>${pt.length}</b> 个数据点，累计处理 <b>${pt.reduce((s,[,v])=>s+(Number(v)||0),0)}</b> 条；最近处理日期 <b>${pt[pt.length-1][0]}</b>。`
     : '暂无处理趋势数据。');
+}
+
+// ── 辅助：按粒度聚合趋势数组 ─────────────────────────────────
+function bmAggTrend(trend, gran) {
+  if (gran === 'day' || !trend.length) return trend;
+  const map = new Map();
+  for (const [date, count] of trend) {
+    let key;
+    if (gran === 'week') {
+      const d = new Date(date + 'T00:00:00');
+      const dow = d.getDay();
+      const mon = new Date(d);
+      mon.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1));
+      key = mon.toISOString().slice(0, 10);
+    } else {
+      key = date.slice(0, 7);
+    }
+    map.set(key, (map.get(key) || 0) + (Number(count) || 0));
+  }
+  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+// ── 辅助：按时间范围取 curr/prev 分布数据 ───────────────────
+function bmGetRangeData(d, range) {
+  if (range === 'all') {
+    return { curr: d.statusCount || {}, prev: null, currProb: d.problemType || {}, prevProb: null };
+  }
+  const days = range === '7d' ? 7 : 30;
+  const now  = new Date(); now.setHours(0, 0, 0, 0);
+  const currFrom = new Date(now); currFrom.setDate(now.getDate() - days);
+  const prevFrom = new Date(now); prevFrom.setDate(now.getDate() - days * 2);
+
+  return {
+    curr:     bmAggByDate(d.statusByDate  || {}, currFrom, now),
+    prev:     bmAggByDate(d.statusByDate  || {}, prevFrom, currFrom),
+    currProb: bmAggByDate(d.problemByDate || {}, currFrom, now),
+    prevProb: bmAggByDate(d.problemByDate || {}, prevFrom, currFrom),
+  };
+}
+
+function bmAggByDate(byDate, fromDate, toDate) {
+  const result = {};
+  for (const [date, counts] of Object.entries(byDate)) {
+    const d = new Date(date + 'T00:00:00');
+    if (d >= fromDate && d < toDate) {
+      for (const [k, v] of Object.entries(counts)) {
+        result[k] = (result[k] || 0) + v;
+      }
+    }
+  }
+  return result;
+}
+
+// ── 环比对比条 ────────────────────────────────────────────────
+function bmBuildCompStrip(currSt, prevSt, currProb, prevProb, range) {
+  if (!prevSt || range === 'all') return '';
+  const label = range === '7d' ? '近7天 vs 前7天' : '近30天 vs 前30天';
+
+  function delta(curr, prev, posIsGood) {
+    const c = curr || 0, p = prev || 0;
+    if (!p && !c) return `<span class="comp-flat">—</span>`;
+    if (!p) return `<span class="comp-up">新增</span>`;
+    const pct = Math.round((c - p) / p * 100);
+    const up  = c >= p;
+    const good = posIsGood ? up : !up;
+    return `<span class="${good ? 'comp-up' : 'comp-down'}">${up ? '↑' : '↓'}${Math.abs(pct)}%</span>`;
+  }
+
+  const cT = Object.values(currSt).reduce((s,v)=>s+v,0);
+  const pT = Object.values(prevSt).reduce((s,v)=>s+v,0);
+  const cP = currSt['已处理']||0, pP = prevSt['已处理']||0;
+  const cSv = currProb['严重故障']||0, pSv = prevProb?.['严重故障']||0;
+  const cPr = currProb['正向夸奖']||0, pPr = prevProb?.['正向夸奖']||0;
+  const cIn = currProb['咨询请求']||0, pIn = prevProb?.['咨询请求']||0;
+
+  return `<div class="comp-strip">
+    <span class="comp-label">${label}</span>
+    <span class="comp-item">抓取量 <b>${cT}</b> ${delta(cT, pT, true)}</span>
+    <span class="comp-item">已处理 <b>${cP}</b> ${delta(cP, pP, true)}</span>
+    <span class="comp-item">严重故障 <b>${cSv}</b> ${delta(cSv, pSv, false)}</span>
+    <span class="comp-item">正向夸奖 <b>${cPr}</b> ${delta(cPr, pPr, true)}</span>
+    <span class="comp-item">咨询请求 <b>${cIn}</b> ${delta(cIn, pIn, true)}</span>
+  </div>`;
+}
+
+// ── 运营分析全文 ──────────────────────────────────────────────
+function insightBrandMonitorFull(d, currSt, currProb, prevSt, prevProb, range) {
+  const total    = Object.values(currSt).reduce((s,v)=>s+v, 0);
+  const processed = currSt['已处理']||0;
+  const generated = currSt['已生成']||0;
+  const pending   = currSt['待处理']||0;
+  const noAction  = currSt['无需处理']||0;
+  const processRate = total > 0 ? ((processed / total) * 100).toFixed(0) : 0;
+
+  const probTot  = Object.values(currProb).reduce((s,v)=>s+v, 0);
+  const severe   = currProb['严重故障']||0;
+  const praise   = currProb['正向夸奖']||0;
+  const inquiry  = currProb['咨询请求']||0;
+  const vent     = currProb['体验吐槽']||0;
+  const severeR  = probTot > 0 ? ((severe/probTot)*100).toFixed(0) : 0;
+  const praiseR  = probTot > 0 ? ((praise/probTot)*100).toFixed(0) : 0;
+  const rangeLabel = { all:'全部数据', '7d':'近7天', '30d':'近30天' }[range];
+
+  // ① 处理效率
+  let s1 = `<div class="analysis-section"><div class="analysis-title">📊 处理效率 · ${rangeLabel}</div><div class="analysis-body">`;
+  s1 += Number(processRate) < 20
+    ? `处理率仅 <b>${processRate}%</b>，积压较严重。`
+    : Number(processRate) < 50
+      ? `处理率 <b>${processRate}%</b>，仍有较大消化空间。`
+      : `处理率 <b>${processRate}%</b>，处理效率良好。`;
+  if (generated > 0) s1 += ` AI 已生成 <b>${generated}</b> 条回复待发布，<b>建议优先跟进发布</b>，直接或微调后上线。`;
+  if (pending > 0)   s1 += ` 尚有 <b>${pending}</b> 条待处理，建议按优先级（严重故障优先）逐步清化。`;
+  if (noAction > 0)  s1 += ` <b>${noAction}</b> 条已标记为无需处理，可定期抽查确认标记准确性。`;
+  s1 += `</div></div>`;
+
+  // ② 问题结构
+  let s2 = `<div class="analysis-section"><div class="analysis-title">🔍 用户问题结构分析</div><div class="analysis-body">`;
+  if (probTot === 0) {
+    s2 += '暂无问题分类数据。';
+  } else {
+    const topEntry = Object.entries(currProb).sort((a,b)=>b[1]-a[1])[0];
+    s2 += `当前主要问题类型为「<b>${topEntry[0]}</b>」（${topEntry[1]} 条，占比 ${probTot > 0 ? ((topEntry[1]/probTot)*100).toFixed(0) : 0}%）。`;
+    if (severe > 0) s2 += Number(severeR) > 15
+      ? ` ⚠️ 严重故障占比 <b>${severeR}%</b>（${severe} 条），比例偏高，应优先排查处理，避免负面口碑扩散。`
+      : ` 严重故障 <b>${severe}</b> 条（${severeR}%），当前比例可控，持续关注即可。`;
+    if (inquiry > 0) s2 += ` 咨询请求 <b>${inquiry}</b> 条，这类帖子是展示品牌专业度的机会，回复时加入产品优势说明，可有效提升转化率。`;
+    if (vent > 0)    s2 += ` 体验吐槽 <b>${vent}</b> 条，建议以同理心先承认问题，再给出解决方案，将负面体验转化为品牌展示机会。`;
+    if (praise > 0)  s2 += ` 正向夸奖 <b>${praise}</b> 条（${praiseR}%）—— ${Number(praiseR) > 30 ? '口碑表现良好，可引导用户分享体验，产出 UGC 内容。' : '口碑有提升空间，建议通过优质服务型回复提升用户满意度。'}`;
+  }
+  s2 += `</div></div>`;
+
+  // ③ 环比分析（仅有 prev 时显示）
+  let s3 = '';
+  if (prevSt && range !== 'all') {
+    const pT = Object.values(prevSt).reduce((s,v)=>s+v, 0);
+    const periodLabel = range === '7d' ? '7' : '30';
+    s3 = `<div class="analysis-section"><div class="analysis-title">📈 环比变化分析（vs 前${periodLabel}天）</div><div class="analysis-body">`;
+    if (pT > 0) {
+      const chgPct = ((total - pT) / pT * 100).toFixed(0);
+      s3 += `抓取量 ${Number(chgPct) >= 0 ? '<span class="comp-up">↑' : '<span class="comp-down">↓'}${Math.abs(chgPct)}%</span>（${pT} → <b>${total}</b> 条）`;
+      s3 += Math.abs(Number(chgPct)) > 20 ? '，变动幅度较大，建议核查数据管道健康度。' : '，趋势平稳。';
+    } else {
+      s3 += `前${periodLabel}天暂无抓取数据，无法计算环比。`;
+    }
+    const pP = prevSt['已处理']||0;
+    if (pP || processed) {
+      const processChg = processed - pP;
+      s3 += ` 处理量${processChg >= 0 ? '增加' : '减少'} <b>${Math.abs(processChg)}</b> 条${processChg > 0 ? '，跟进效率提升' : processChg < 0 ? '，处理节奏有所放缓' : ''}。`;
+    }
+    const pSv = prevProb?.['严重故障']||0;
+    if (pSv || severe) {
+      const svChg = severe - pSv;
+      s3 += ` 严重故障${svChg > 0 ? '<span class="comp-down">↑' + svChg + ' 条</span>，需关注是否存在版本问题或平台故障' : svChg < 0 ? '<span class="comp-up">↓' + Math.abs(svChg) + ' 条</span>，故障管控向好' : '持平'}。`;
+    }
+    const pPr = prevProb?.['正向夸奖']||0;
+    if (pPr || praise) {
+      const prChg = praise - pPr;
+      s3 += ` 正向夸奖${prChg > 0 ? '<span class="comp-up">↑' + prChg + ' 条</span>，用户口碑向好' : prChg < 0 ? '<span class="comp-down">↓' + Math.abs(prChg) + ' 条</span>，口碑有所波动' : '持平'}。`;
+    }
+    s3 += `</div></div>`;
+  }
+
+  // ④ 运营建议
+  const recs = [];
+  if (generated > 0)              recs.push(`优先跟进 <b>${generated}</b> 条 AI 已生成回复，评审后发布可快速提升品牌覆盖度。`);
+  if (Number(severeR) > 10)       recs.push(`严重故障比例 ${severeR}%，建议提取高频故障原因同步给产品团队，并在帖子中提供临时解决方案。`);
+  if (Number(processRate) < 30)   recs.push(`处理率偏低（${processRate}%），建议设置每日处理配额（如 10–15 条），形成规律处理节奏。`);
+  if (inquiry > 0)                recs.push(`${inquiry} 条咨询类帖子是转化机会，回复时结合使用场景推荐产品功能，配合下载链接效果更佳。`);
+  if (vent > 0)                   recs.push(`${vent} 条体验吐槽建议 24h 内回复，先共情后解决，有效评论可截图存档用于内容营销素材。`);
+  if (Number(praiseR) > 30)       recs.push(`正向口碑占比 ${praiseR}%，可在这些帖子中进一步引导用户留下产品评测或教程内容（UGC）。`);
+  if (d.avgQualityScore && Number(d.avgQualityScore) < 7) recs.push(`AI 回复质量均分 ${d.avgQualityScore}/10，可对低分回复进行人工优化，并将优化样本用于 Prompt 迭代。`);
+  if (!recs.length)               recs.push('当前数据表现健康，维持现有处理节奏，持续关注严重故障占比变化。');
+
+  const s4 = `<div class="analysis-section"><div class="analysis-title">💡 运营建议</div><div class="analysis-body"><ol>${recs.map(r=>`<li>${r}</li>`).join('')}</ol></div></div>`;
+
+  return s1 + s2 + s3 + s4;
 }
 
 /* ══════════════ 执行动作渲染 ══════════════ */

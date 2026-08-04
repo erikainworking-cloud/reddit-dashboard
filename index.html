@@ -183,6 +183,24 @@
       .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
       .main { padding: 14px; }
     }
+
+    /* ── Push button ─────────────── */
+    .push-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #1677ff; color: #fff; border: none;
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: opacity .2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .push-btn:hover { opacity: .85; }
+    .push-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .push-btn.sending { background: #52c41a; }
+
+    /* ── Milestone status badges ─── */
+    .ms-badge { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+    .ms-badge.good    { background: var(--green-bg); color: var(--green); }
+    .ms-badge.behind  { background: var(--red-bg);   color: var(--red); }
+    .ms-badge.pending { background: var(--bg);        color: var(--text-3); font-style: italic; font-weight: 400; }
+    .ms-badge.nosync  { background: var(--amber-bg);  color: var(--amber); }
   </style>
 </head>
 <body>
@@ -774,9 +792,15 @@ function renderAiobo() {
   const dfWordGap = (df.q3TargetWords || 82) - (df.currentWords || 0);
 
   document.getElementById('main').innerHTML = `
-    <div class="page-header">
-      <div class="page-title">北极星目标：AIO-BO</div>
-      <div class="page-desc">AI Overview Brand Occupancy Rate — 关键词在 Google AIO Reddit 引用中的品牌占位率</div>
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div>
+        <div class="page-title">北极星目标：AIO-BO</div>
+        <div class="page-desc">AI Overview Brand Occupancy Rate — 关键词在 Google AIO Reddit 引用中的品牌占位率</div>
+      </div>
+      <button class="push-btn" id="pushLarkBtn" onclick="pushToLark()" title="推送本周 AIO-BO 进展卡片到飞书群">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        推送飞书卡片
+      </button>
     </div>
 
     <div class="stat-grid">
@@ -839,52 +863,7 @@ function renderAiobo() {
 
     <div class="section-title">月度里程碑</div>
     <div class="chart-card">
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead>
-          <tr style="border-bottom:2px solid var(--border)">
-            <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:11px;text-transform:uppercase;font-weight:700">时间节点</th>
-            <th style="text-align:center;padding:8px 12px;color:var(--accent);font-size:11px;font-weight:700">SF 目标</th>
-            <th style="text-align:center;padding:8px 12px;color:var(--accent);font-size:11px;font-weight:700">SF 实际</th>
-            <th style="text-align:center;padding:8px 12px;color:var(--blue);font-size:11px;font-weight:700">DVDFab 目标</th>
-            <th style="text-align:center;padding:8px 12px;color:var(--blue);font-size:11px;font-weight:700">DVDFab 实际</th>
-            <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:11px;font-weight:700">说明</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px 12px;font-weight:600">基准（7月中）</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3)">—</td>
-            <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--accent)">17.61%（31词）</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3)">—</td>
-            <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--blue)">33.50%（68词）</td>
-            <td style="padding:10px 12px;color:var(--text-3)">数据基准确立</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px 12px;font-weight:600">2026-07-31</td>
-            <td style="text-align:center;padding:10px 12px">20%（35词）</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
-            <td style="text-align:center;padding:10px 12px">34.7%（70词）</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
-            <td style="padding:10px 12px;color:var(--text-3)">Phase 1 检查点 ①</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px 12px;font-weight:600">2026-08-31</td>
-            <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--green)">25%（44词）✓ SF Q3达成</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
-            <td style="text-align:center;padding:10px 12px">37.6%（76词）</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
-            <td style="padding:10px 12px;color:var(--text-3)">检查点 ②</td>
-          </tr>
-          <tr>
-            <td style="padding:10px 12px;font-weight:600">2026-09-30</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3)">25%（稳固）</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3)">—</td>
-            <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--green)">40.5%（82词）✓ DVDFab Q3达成</td>
-            <td style="text-align:center;padding:10px 12px;color:var(--text-3);font-style:italic">待更新</td>
-            <td style="padding:10px 12px;color:var(--text-3)">检查点 ③</td>
-          </tr>
-        </tbody>
-      </table>
+      ${buildMilestoneTable(currentData.milestones || [], sf, df)}
     </div>
   `;
 
@@ -1073,6 +1052,229 @@ function renderPaTypeChart(byType) {
       data: data.length ? data : [{ name:'暂无数据', value:1, itemStyle:{ color:'#e2e8f0' } }],
       label:{ color:'#475569', fontSize:11 }, labelLine:{ lineStyle:{ color:'#cbd5e1' } } }],
   });
+}
+
+/* ══════════════ 里程碑表格动态渲染 ══════════════ */
+
+function buildMilestoneTable(milestones, sf, df) {
+  const today = new Date().toISOString().slice(0, 10);
+
+  function sfActualCell(m) {
+    const a = m.sf.actual, aw = m.sf.actualWords, t = m.sf.target;
+    if (a !== null && a !== undefined) {
+      const badge = a >= t
+        ? `<span class="ms-badge good">✓ 达标</span>`
+        : `<span class="ms-badge behind">⬇ 落后 ${(t - a).toFixed(2)}%</span>`;
+      return `<span style="font-weight:700;color:var(--accent)">${a}%（${aw}词）</span><br>${badge}`;
+    }
+    if (m.sf.note) return `<span class="ms-badge nosync">${m.sf.note}</span>`;
+    if (today >= m.date) return `<span class="ms-badge pending">待更新</span>`;
+    return `<span style="color:var(--text-3)">—</span>`;
+  }
+
+  function dfActualCell(m) {
+    const a = m.df.actual, aw = m.df.actualWords, t = m.df.target;
+    if (a !== null && a !== undefined) {
+      const badge = a >= t
+        ? `<span class="ms-badge good">✓ 达标</span>`
+        : `<span class="ms-badge behind">⬇ 落后 ${(t - a).toFixed(2)}%</span>`;
+      return `<span style="font-weight:700;color:var(--blue)">${a}%（${aw}词）</span><br>${badge}`;
+    }
+    if (m.df.note) return `<span class="ms-badge nosync">${m.df.note}</span>`;
+    if (today >= m.date) return `<span class="ms-badge pending">待更新</span>`;
+    return `<span style="color:var(--text-3)">—</span>`;
+  }
+
+  function sfTargetCell(m) {
+    if (m.sf.stable) return `<span style="color:var(--text-3)">${m.sf.target}%（稳固）</span>`;
+    const isQ3 = m.sf.target >= 25;
+    const style = isQ3 ? 'font-weight:700;color:var(--green)' : '';
+    const label = m.sf.targetWords ? `${m.sf.target}%（${m.sf.targetWords}词）` : `${m.sf.target}%`;
+    return `<span style="${style}">${label}${isQ3 && m.label.includes('SF') ? ' ✓ Q3达成' : ''}</span>`;
+  }
+
+  function dfTargetCell(m) {
+    const isQ3 = m.df.target >= 40;
+    const style = isQ3 ? 'font-weight:700;color:var(--green)' : '';
+    const label = m.df.targetWords ? `${m.df.target}%（${m.df.targetWords}词）` : `${m.df.target}%`;
+    return `<span style="${style}">${label}${isQ3 ? ' ✓ Q3达成' : ''}</span>`;
+  }
+
+  // Baseline row (always shown)
+  const baselineRow = `
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:10px 12px;font-weight:600">基准（7月中）</td>
+      <td style="text-align:center;padding:10px 12px;color:var(--text-3)">—</td>
+      <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--accent)">${sf.actual?.[0] ? sf.actual[0]+'%（'+((sf.actual[0]/100*sf.aioTriggerWords)|0)+'词）' : '17.61%（31词）'}</td>
+      <td style="text-align:center;padding:10px 12px;color:var(--text-3)">—</td>
+      <td style="text-align:center;padding:10px 12px;font-weight:700;color:var(--blue)">${df.actual?.[0] ? df.actual[0]+'%（'+((df.actual[0]/100*df.aioTriggerWords)|0)+'词）' : '33.50%（68词）'}</td>
+      <td style="padding:10px 12px;color:var(--text-3)">数据基准确立</td>
+    </tr>`;
+
+  const milestoneRows = (milestones || []).map((m, i) => {
+    const isLast = i === milestones.length - 1;
+    return `
+    <tr style="${isLast ? '' : 'border-bottom:1px solid var(--border)'}">
+      <td style="padding:10px 12px;font-weight:600">${m.date}</td>
+      <td style="text-align:center;padding:10px 12px">${sfTargetCell(m)}</td>
+      <td style="text-align:center;padding:10px 12px">${sfActualCell(m)}</td>
+      <td style="text-align:center;padding:10px 12px">${dfTargetCell(m)}</td>
+      <td style="text-align:center;padding:10px 12px">${dfActualCell(m)}</td>
+      <td style="padding:10px 12px;color:var(--text-3)">${m.label}</td>
+    </tr>`;
+  }).join('');
+
+  return `<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border)">
+        <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:11px;text-transform:uppercase;font-weight:700">时间节点</th>
+        <th style="text-align:center;padding:8px 12px;color:var(--accent);font-size:11px;font-weight:700">SF 目标</th>
+        <th style="text-align:center;padding:8px 12px;color:var(--accent);font-size:11px;font-weight:700">SF 实际</th>
+        <th style="text-align:center;padding:8px 12px;color:var(--blue);font-size:11px;font-weight:700">DVDFab 目标</th>
+        <th style="text-align:center;padding:8px 12px;color:var(--blue);font-size:11px;font-weight:700">DVDFab 实际</th>
+        <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:11px;font-weight:700">说明</th>
+      </tr>
+    </thead>
+    <tbody>${baselineRow}${milestoneRows}</tbody>
+  </table>`;
+}
+
+/* ══════════════ 飞书卡片推送 ══════════════ */
+
+function buildLarkCard(sf, df, milestones) {
+  const today = new Date().toISOString().slice(0, 10);
+
+  // Build SF trend text (last 4 non-null actual values)
+  function trendText(weeks, actual) {
+    const pts = [];
+    for (let i = 0; i < actual.length; i++) {
+      if (actual[i] !== null && actual[i] !== undefined) {
+        pts.push({ w: (weeks[i]||'').replace('\n',' '), v: actual[i] });
+      }
+    }
+    const last4 = pts.slice(-4);
+    return last4.map((p, idx) => {
+      const prev = idx > 0 ? last4[idx-1].v : null;
+      const diff = prev !== null ? ` (${p.v >= prev ? '+':''}${(p.v - prev).toFixed(2)}%)` : '';
+      const isLatest = idx === last4.length - 1;
+      return `${p.w}: **${p.v}%**${diff}${isLatest ? ' 🆕' : ''}`;
+    }).join('\n');
+  }
+
+  function progressBar(pct, total, filled='█', empty='░', len=12) {
+    const n = Math.round(pct / total * len);
+    return filled.repeat(n) + empty.repeat(len - n);
+  }
+
+  const sfPct = sf.current || 0;
+  const dfPct = df.current || 0;
+  const sfFill = (sfPct / (sf.q3Target||25) * 100).toFixed(1);
+  const dfFill = (dfPct / (df.q3Target||40.5) * 100).toFixed(1);
+  const sfBar  = progressBar(sfPct, sf.q3Target||25);
+  const dfBar  = progressBar(dfPct, df.q3Target||40.5);
+
+  // Find the last passed milestone
+  const latestMs = (milestones||[]).filter(m => today >= m.date).pop();
+
+  const header = `🎯 AIO-BO 北极星进展 · ${today}`;
+
+  const sfSection = `🟠 **StreamFab**\n当前 **${sfPct}%** (${sf.currentWords||0}/${sf.aioTriggerWords||0}词)\n目标 ${sf.q3Target||25}% | 缺口 **${((sf.q3Target||25)-sfPct).toFixed(2)}%** | 还需 **${(sf.q3TargetWords||44)-(sf.currentWords||0)}** 词\n\`${sfBar}\` ${sfFill}%`;
+
+  const dfSection = `🔵 **DVDFab**\n当前 **${dfPct}%** (${df.currentWords||0}/${df.aioTriggerWords||0}词)\n目标 ${df.q3Target||40.5}% | 缺口 **${((df.q3Target||40.5)-dfPct).toFixed(2)}%** | 还需 **${(df.q3TargetWords||82)-(df.currentWords||0)}** 词\n\`${dfBar}\` ${dfFill}%`;
+
+  const sfTrend = trendText(sf.weeks||[], sf.actual||[]);
+  const dfTrend = trendText(df.weeks||[], df.actual||[]);
+
+  let msNote = '';
+  if (latestMs) {
+    const sfA = latestMs.sf.actual;
+    const dfA = latestMs.df.actual;
+    const sfStatus = sfA !== null ? (sfA >= latestMs.sf.target ? '✅ 达标' : `⚠️ 落后 ${(latestMs.sf.target - sfA).toFixed(2)}%`) : '⏳ 数据待更新';
+    const dfStatus = dfA !== null ? (dfA >= latestMs.df.target ? '✅ 达标' : `⚠️ 落后 ${(latestMs.df.target - dfA).toFixed(2)}%`) : '⏳ 数据待更新';
+    msNote = `\n**${latestMs.date} 检查点**：SF ${sfStatus} · DVDFab ${dfStatus}`;
+  }
+
+  return {
+    msg_type: 'interactive',
+    card: {
+      header: {
+        title: { content: header, tag: 'plain_text' },
+        template: 'green',
+      },
+      elements: [
+        {
+          tag: 'div',
+          text: { content: `**Reddit AIO-BO** 衡量我们在 Google AI Overview 引用的 Reddit 帖子中的品牌渗透率。${msNote}`, tag: 'lark_md' },
+        },
+        { tag: 'hr' },
+        {
+          tag: 'column_set',
+          flex_mode: 'bisect',
+          background_style: 'default',
+          columns: [
+            { tag: 'column', width: 'weighted', weight: 1, elements: [{ tag: 'div', text: { content: sfSection, tag: 'lark_md' } }] },
+            { tag: 'column', width: 'weighted', weight: 1, elements: [{ tag: 'div', text: { content: dfSection, tag: 'lark_md' } }] },
+          ],
+        },
+        { tag: 'hr' },
+        {
+          tag: 'column_set',
+          flex_mode: 'bisect',
+          columns: [
+            { tag: 'column', width: 'weighted', weight: 1, elements: [{ tag: 'div', text: { content: `📈 **SF 近期趋势**\n${sfTrend}`, tag: 'lark_md' } }] },
+            { tag: 'column', width: 'weighted', weight: 1, elements: [{ tag: 'div', text: { content: `📈 **DF 近期趋势**\n${dfTrend}`, tag: 'lark_md' } }] },
+          ],
+        },
+        { tag: 'hr' },
+        {
+          tag: 'action',
+          actions: [
+            {
+              tag: 'button',
+              text: { content: '查看完整看板 →', tag: 'plain_text' },
+              type: 'primary',
+              url: 'https://erikainworking-cloud.github.io/reddit-dashboard/',
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
+async function pushToLark() {
+  const webhookUrl = (typeof LARK_WEBHOOK !== 'undefined' && LARK_WEBHOOK) ? LARK_WEBHOOK : '';
+  if (!webhookUrl) {
+    alert('⚠️ 尚未配置飞书 Webhook URL。\n\n请在 config.js 中设置：\nwindow.LARK_WEBHOOK = "https://open.feishu.cn/open-apis/bot/v2/hook/..."');
+    return;
+  }
+  const btn = document.getElementById('pushLarkBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '推送中...'; }
+
+  const ab = currentData.aioBo || {};
+  const sf = ab.streamfab || {};
+  const df = ab.dvdfab    || {};
+  const card = buildLarkCard(sf, df, currentData.milestones || []);
+
+  try {
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(card),
+    });
+    const data = await res.json();
+    if (data.code === 0 || data.StatusCode === 0) {
+      if (btn) { btn.classList.add('sending'); btn.textContent = '✓ 已推送'; }
+      setTimeout(() => {
+        if (btn) { btn.classList.remove('sending'); btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> 推送飞书卡片'; }
+      }, 3000);
+    } else {
+      throw new Error(JSON.stringify(data));
+    }
+  } catch(e) {
+    alert('推送失败：' + e.message);
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> 推送飞书卡片'; }
+  }
 }
 
 function renderPaSurviveChart(s1, s7) {

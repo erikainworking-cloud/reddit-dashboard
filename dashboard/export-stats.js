@@ -304,6 +304,27 @@ async function fetchBrandMonStats(src) {
     }
   }
 
+  // 问题分类 × 处理状态（供前端计算"未处理严重故障"等精细化指标）
+  const probStatusRows = dataQuery(baseToken, {
+    datasource: { type: 'table', table: { tableId } },
+    dimensions: [
+      { field_name: '问题分类',  alias: 'problem' },
+      { field_name: '处理状态', alias: 'status' },
+    ],
+    measures: [{ field_name: '处理状态', aggregation: 'count', alias: 'count' }],
+    sort: [{ field_name: 'count', order: 'desc' }],
+    pagination: { limit: 500 },
+    shaper: { format: 'flat' },
+  });
+  const problemStatusCross = {};
+  for (const r of probStatusRows) {
+    const pb = r.problem?.value;
+    const st = r.status?.value;
+    if (pb && st) {
+      (problemStatusCross[pb] = problemStatusCross[pb] || {})[st] = Number(r.count?.value) || 0;
+    }
+  }
+
   return {
     label, total: Number(total),
     processed: statusCount['已处理'] || 0,
@@ -311,7 +332,7 @@ async function fetchBrandMonStats(src) {
     pending:   statusCount['待处理'] || 0,
     noAction:  statusCount['无需处理'] || 0,
     statusCount, problemType, avgQualityScore, scrapingTrend, processingTrend,
-    statusByDate, problemByDate,
+    statusByDate, problemByDate, problemStatusCross,
   };
 }
 

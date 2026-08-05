@@ -1643,6 +1643,15 @@ function renderOverview() {
   const dq    = currentData.dataQuality || {};
 
   // ── 计算关键指标 ─────────────────────────────────────
+  // 保留全量统计（供健康度评分等内部使用）
+  function unresolvedSevere(bmData) {
+    const cross = bmData.problemStatusCross?.['严重故障'];
+    if (cross && Object.keys(cross).length > 0) {
+      const done = (cross['已处理']||0) + (cross['无需处理']||0);
+      return Math.max(0, Object.values(cross).reduce((s,v)=>s+v,0) - done);
+    }
+    return bmData.problemType?.['严重故障'] || 0;
+  }
   // 近1天：只统计今日新增严重故障（problemByDate 当天），避免全量历史积压数字过于吓人
   function aggProbByDate1d(dateMap) {
     const today0 = new Date(); today0.setHours(0,0,0,0);

@@ -697,10 +697,10 @@ function topN(obj, n = 2) {
 
 /* ══════════════ 监控看板渲染 ══════════════ */
 
-let monState = { brand: null, range: 'all' };
+let monState = { brand: null, range: '7d' };
 
 function renderMonitor(brand) {
-  monState = { brand, range: 'all' };
+  monState = { brand, range: '7d' };
   const d     = currentData[brand];
   const label = brand === 'streamfab' ? 'StreamFab' : 'DVDFab';
 
@@ -722,9 +722,9 @@ function renderMonitor(brand) {
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
         <div class="seg-group" id="mon-range-seg">
-          <button class="seg-btn active" data-v="all"  onclick="setMonRange('all')">全部</button>
+          <button class="seg-btn"        data-v="all"  onclick="setMonRange('all')">全部</button>
           <button class="seg-btn"        data-v="30d"  onclick="setMonRange('30d')">近30天</button>
-          <button class="seg-btn"        data-v="7d"   onclick="setMonRange('7d')">近7天</button>
+          <button class="seg-btn active" data-v="7d"   onclick="setMonRange('7d')">近7天</button>
         </div>
         <button class="push-btn" id="pushKeywordBtn" onclick="openSimplePushModal('push-keyword-card.yml','pushKeywordBtn','推送精准词监控日报')" title="推送精准词监控日报到飞书群">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
@@ -1186,10 +1186,10 @@ function insightMonitorFull(d, rd, range) {
 
 /* ══════════════ 品牌舆情看板渲染 ══════════════ */
 
-let bmState = { brand: null, range: 'all', gran: 'day' };
+let bmState = { brand: null, range: '7d', gran: 'day' };
 
 function renderBrandMonitor(brand) {
-  bmState = { brand, range: 'all', gran: 'day' };
+  bmState = { brand, range: '7d', gran: 'day' };
   const d         = (currentData.brandMonitoring || {})[brand] || {};
   const label     = brand === 'streamfab' ? 'StreamFab' : 'DVDFab';
   const tagClass  = brand === 'streamfab' ? 'sf' : 'df';
@@ -1205,9 +1205,9 @@ function renderBrandMonitor(brand) {
       </div>
       <div style="display:flex;gap:10px;align-items:center">
         <div class="seg-group" id="bm-range-seg">
-          <button class="seg-btn active" data-v="all"  onclick="setBmRange('all')">全部</button>
+          <button class="seg-btn"        data-v="all"  onclick="setBmRange('all')">全部</button>
           <button class="seg-btn"        data-v="30d"  onclick="setBmRange('30d')">近30天</button>
-          <button class="seg-btn"        data-v="7d"   onclick="setBmRange('7d')">近7天</button>
+          <button class="seg-btn active" data-v="7d"   onclick="setBmRange('7d')">近7天</button>
         </div>
         <button class="push-btn" id="pushBrandBtn" onclick="openSimplePushModal('push-brand-card.yml','pushBrandBtn','推送品牌舆情监控周报')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
@@ -1643,15 +1643,20 @@ function renderOverview() {
   const dq    = currentData.dataQuality || {};
 
   // ── 计算关键指标 ─────────────────────────────────────
-  function unresolvedSevere(bmData) {
-    const cross = bmData.problemStatusCross?.['严重故障'];
-    if (cross && Object.keys(cross).length > 0) {
-      const done = (cross['已处理']||0) + (cross['无需处理']||0);
-      return Math.max(0, Object.values(cross).reduce((s,v)=>s+v,0) - done);
-    }
-    return bmData.problemType?.['严重故障'] || 0;
+  // 近1天：只统计今日新增严重故障（problemByDate 当天），避免全量历史积压数字过于吓人
+  function aggProbByDate1d(dateMap) {
+    const today0 = new Date(); today0.setHours(0,0,0,0);
+    const result = {};
+    Object.entries(dateMap || {}).forEach(([k, v]) => {
+      if (new Date(k + 'T00:00:00') >= today0) {
+        Object.entries(v).forEach(([type, cnt]) => { result[type] = (result[type]||0) + cnt; });
+      }
+    });
+    return result;
   }
-  const severeCnt      = unresolvedSevere(sfBm) + unresolvedSevere(dfBm);
+  const sfProb1d   = aggProbByDate1d(sfBm.problemByDate);
+  const dfProb1d   = aggProbByDate1d(dfBm.problemByDate);
+  const severeCnt  = (sfProb1d['严重故障']||0) + (dfProb1d['严重故障']||0);
   const reviewPending  = (sf.statusCount?.['待审核']||0) + (sf.statusCount?.['需要复核']||0)
                        + (df.statusCount?.['待审核']||0) + (df.statusCount?.['需要复核']||0);
   const generatedBrand = (sfBm.generated||0) + (dfBm.generated||0);
@@ -1778,12 +1783,12 @@ function renderOverview() {
     </div>
 
     <!-- 模块一：今日重点 Action KPI -->
-    <div class="section-title" style="margin-top:0">今日重点</div>
+    <div class="section-title" style="margin-top:0;display:flex;align-items:center;gap:10px">今日重点 <span style="font-size:12px;font-weight:500;background:var(--info-soft);color:var(--info);padding:2px 9px;border-radius:10px">近1天</span></div>
     <div class="stat-grid">
       <div class="stat-card clickable-card ${severeCnt > 5 ? 'danger' : severeCnt > 0 ? 'warning' : 'success'}" onclick="navigate('brand',document.getElementById('nav-brand'))">
         <div class="stat-label">未处理严重故障</div>
         <div class="stat-value">${severeCnt}</div>
-        <div class="stat-sub">${severeCnt > 5 ? '⚠ 数量偏高，需优先跟进' : severeCnt > 0 ? '尚有未处理的严重故障' : '✓ 暂无未处理记录'}</div>
+        <div class="stat-sub">${severeCnt > 5 ? '⚠ 今日新增偏高，需优先跟进' : severeCnt > 0 ? '今日新增严重故障' : '✓ 今日暂无新增'}</div>
       </div>
       <div class="stat-card clickable-card ${reviewPending > 20 ? 'warning' : reviewPending > 0 ? 'info' : 'success'}" onclick="navigate('keywords',document.getElementById('nav-keywords'))">
         <div class="stat-label">待审核</div>

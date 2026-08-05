@@ -143,11 +143,12 @@ async function calcStreamfabAiobo() {
 
   console.log(`  📊 查询 StreamFab SERP 排名明细表（${serpTableId}）...`);
 
-  // GROUP BY 来源类别 × 是否提及StreamFab × 关键词，JS 侧过滤
+  // GROUP BY 来源类别 × 细分来源 × 是否提及StreamFab × 关键词，JS 侧过滤
   const rows = dataQuery(cfg.baseToken, {
     datasource: { type: 'table', table: { tableId: serpTableId } },
     dimensions: [
       { field_name: cfg.fields.sourceType,   alias: 'sourceType' },
+      { field_name: cfg.fields.subSource,    alias: 'subSource' },
       { field_name: cfg.fields.mentionBrand, alias: 'mention' },
       { field_name: cfg.fields.keyword,      alias: 'keyword' },
     ],
@@ -157,14 +158,16 @@ async function calcStreamfabAiobo() {
     shaper: { format: 'flat' },
   });
 
-  // 收集满足全链路的关键词（去重）
+  // 收集满足全链路的关键词（去重），排除官方来源
   const qualifiedKws = new Set();
   for (const r of rows) {
     const sourceType = r.sourceType?.value;
     const mention    = r.mention?.value;
     const keyword    = r.keyword?.value;
     if (!keyword) continue;
-    if (sourceType === cfg.filterValues.sourceType && mention === cfg.filterValues.mentionBrand) {
+    const subSource = String(r.subSource?.value || '').toLowerCase();
+    const excluded  = cfg.excludeSources.some(s => subSource.includes(s.toLowerCase()));
+    if (sourceType === cfg.filterValues.sourceType && mention === cfg.filterValues.mentionBrand && !excluded) {
       qualifiedKws.add(keyword);
     }
   }
@@ -273,41 +276,37 @@ function updateStatsJson(sfResult, dfResult) {
   const stats = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
   const today = new Date().toISOString().slice(0, 10);
 
-  if (sfResult) {
+  // 辅助：向 snapshots 数组追加或更新当日快照
+  function upsertSnapshot(brand, result, weekLabel) {
     stats.aioBo = stats.aioBo || {};
-    stats.aioBo.streamfab = stats.aioBo.streamfab || {};
-    stats.aioBo.streamfab.current      = sfResult.aioBoPercent;
-    stats.aioBo.streamfab.currentWords = sfResult.kwCount;
-    stats.aioBo.streamfab.dataAsOf     = today;
-    stats.aioBo.streamfab.kwList       = sfResult.kwList || [];
-    // 将当前值填入 actual 数组最后一个 null 位置
-    const actual = stats.aioBo.streamfab.actual || [];
-    const nullIdx = actual.findIndex(v => v === null);
-    if (nullIdx !== -1) {
-      actual[nullIdx] = sfResult.aioBoPercent;
-      stats.aioBo.streamfab.actual = actual;
-      console.log(`  ✅ StreamFab actual[${nullIdx}] = ${sfResult.aioBoPercent}%`);
+    stats.aioBo[brand] = stats.aioBo[brand] || {};
+    const entry = stats.aioBo[brand];
+    entry.current      = result.aioBoPercent;
+    entry.currentWords = result.kwCount;
+    entry.dataAsOf     = today;
+    if (result.kwList) entry.kwList = result.kwList;
+
+    const snapshots = entry.snapshots || [];
+    const existIdx  = snapshots.findIndex(s => s.date === today);
+    const snap = {
+      date:  today,
+      week:  weekLabel || `W${snapshots.length + 1}`,
+      value: result.aioBoPercent,
+      words: result.kwCount,
+    };
+    if (existIdx !== -1) {
+      snapshots[existIdx] = snap;
+      console.log(`  ✅ ${brand} snapshot[${today}] 已更新 = ${result.aioBoPercent}%`);
     } else {
-      console.log('  ℹ️  StreamFab actual 数组无空位，请手动追加新周次');
+      snapshots.push(snap);
+      snapshots.sort((a, b) => a.date.localeCompare(b.date));
+      console.log(`  ✅ ${brand} snapshot[${today}] 已追加 = ${result.aioBoPercent}%`);
     }
+    entry.snapshots = snapshots;
   }
 
-  if (dfResult) {
-    stats.aioBo = stats.aioBo || {};
-    stats.aioBo.dvdfab = stats.aioBo.dvdfab || {};
-    stats.aioBo.dvdfab.current      = dfResult.aioBoPercent;
-    stats.aioBo.dvdfab.currentWords = dfResult.kwCount;
-    stats.aioBo.dvdfab.dataAsOf     = today;
-    const actual = stats.aioBo.dvdfab.actual || [];
-    const nullIdx = actual.findIndex(v => v === null);
-    if (nullIdx !== -1) {
-      actual[nullIdx] = dfResult.aioBoPercent;
-      stats.aioBo.dvdfab.actual = actual;
-      console.log(`  ✅ DVDFab actual[${nullIdx}] = ${dfResult.aioBoPercent}%`);
-    } else {
-      console.log('  ℹ️  DVDFab actual 数组无空位，请手动追加新周次');
-    }
-  }
+  if (sfResult) upsertSnapshot('streamfab', sfResult);
+  if (dfResult) upsertSnapshot('dvdfab', dfResult);
 
   const nextPath = statsPath + '.next';
   fs.writeFileSync(nextPath, JSON.stringify(stats, null, 2), 'utf-8');

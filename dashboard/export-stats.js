@@ -371,7 +371,7 @@ function buildDataQuality(result, prev) {
     }
 
     // 未识别的处理状态（飞书字段选项可能被改名）
-    const KNOWN_PRECISE_STATUSES = new Set(['已发布', '待处理', '已生成', '已忽略', '忽略', '处理中', '无需处理']);
+    const KNOWN_PRECISE_STATUSES = new Set(['已发布', '待处理', '已生成', '已忽略', '忽略', '处理中', '无需处理', '需要复核', '待审核', '暂不回复']);
     const unknownStatuses = Object.keys(d.statusCount || {}).filter(s => !KNOWN_PRECISE_STATUSES.has(s));
     if (unknownStatuses.length) {
       checks.push({ source: src, level: 'warning',

@@ -103,9 +103,11 @@
     .stat-card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 12px; padding: 18px 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: box-shadow .2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: box-shadow .2s, transform .15s;
     }
     .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .clickable-card { cursor: pointer; }
+    .clickable-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.12); transform: translateY(-2px); }
     .stat-label { font-size: 11px; color: var(--text-3); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
     .stat-value { font-size: 32px; font-weight: 700; color: var(--text-1); line-height: 1.1; }
     .stat-sub   { font-size: 12px; color: var(--text-3); margin-top: 4px; }
@@ -178,8 +180,28 @@
     .aiobo-progress-fill.sf { background: linear-gradient(90deg, #ff6b35, #ff4500); }
     .aiobo-progress-fill.df { background: linear-gradient(90deg, #60a5fa, #2563eb); }
 
+    /* ── Mobile hamburger nav ─────── */
+    .hamburger-btn {
+      display: none; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--surface); cursor: pointer;
+      margin-right: 8px; font-size: 18px; color: var(--text-2);
+    }
+    .mobile-nav-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      z-index: 200;
+    }
+    .mobile-nav-drawer {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+      background: var(--surface); border-right: 1px solid var(--border);
+      z-index: 201; overflow-y: auto; padding: 16px 0;
+      transform: translateX(-100%); transition: transform .25s ease;
+    }
+    .mobile-nav-drawer.open { transform: translateX(0); }
+
     @media (max-width: 900px) {
       .sidebar { display: none; }
+      .hamburger-btn { display: flex; }
       .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
       .main { padding: 14px; }
     }
@@ -238,16 +260,36 @@
 <body>
 <div class="app">
 
+  <!-- Mobile nav overlay + drawer -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
+  <div class="mobile-nav-drawer" id="mobileNavDrawer">
+    <div style="padding:0 16px 12px;font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);margin-bottom:8px">导航</div>
+    <div class="nav-section" style="padding:0 8px">
+      <div class="nav-item" onclick="navigate('overview',document.getElementById('nav-overview'));closeMobileNav()"><span class="nav-dot" style="background:var(--green)"></span> 今日概览</div>
+      <div style="height:1px;background:var(--border);margin:6px 8px"></div>
+      <div class="nav-item" onclick="navigate('streamfab',document.getElementById('nav-streamfab'));closeMobileNav()"><span class="nav-dot" style="background:var(--accent)"></span> StreamFab 精准词</div>
+      <div class="nav-item" onclick="navigate('dvdfab',document.getElementById('nav-dvdfab'));closeMobileNav()"><span class="nav-dot" style="background:var(--blue)"></span> DVDFab 精准词</div>
+      <div style="height:1px;background:var(--border);margin:6px 8px"></div>
+      <div class="nav-item" onclick="navigate('sf-brand',document.getElementById('nav-sf-brand'));closeMobileNav()"><span class="nav-dot" style="background:var(--accent)"></span> SF 品牌舆情</div>
+      <div class="nav-item" onclick="navigate('df-brand',document.getElementById('nav-df-brand'));closeMobileNav()"><span class="nav-dot" style="background:var(--blue)"></span> DF 品牌舆情</div>
+      <div style="height:1px;background:var(--border);margin:6px 8px"></div>
+      <div class="nav-item" onclick="navigate('execution',document.getElementById('nav-execution'));closeMobileNav()"><span class="nav-dot" style="background:var(--amber)"></span> 执行动作</div>
+      <div class="nav-item" onclick="navigate('aioBo',document.getElementById('nav-aioBo'));closeMobileNav()"><span class="nav-dot" style="background:var(--green)"></span> 北极星 AIO-BO</div>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="header">
     <div class="header-logo">
+      <button class="hamburger-btn" onclick="openMobileNav()" title="打开导航菜单">☰</button>
       <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#ff4500"/><path d="M16.67 10a1.46 1.46 0 0 0-2.47-1 7.12 7.12 0 0 0-3.85-1.23l.65-3.06 2.13.45a1 1 0 1 0 1.07-.97 1 1 0 0 0-.96.68l-2.38-.5a.18.18 0 0 0-.21.14l-.73 3.4a7.14 7.14 0 0 0-3.82 1.22 1.46 1.46 0 1 0-1.61 2.36 2.9 2.9 0 0 0 0 .4c0 2.03 2.36 3.67 5.27 3.67s5.27-1.64 5.27-3.67a2.9 2.9 0 0 0 0-.4 1.46 1.46 0 0 0 .55-1.19ZM7.5 11a1 1 0 1 1 1 1 1 1 0 0 1-1-1Zm5.57 2.65a3.47 3.47 0 0 1-3.07.7 3.47 3.47 0 0 1-3.07-.7.19.19 0 0 1 .26-.26 3.1 3.1 0 0 0 2.81.6 3.1 3.1 0 0 0 2.81-.6.19.19 0 0 1 .26.26Zm-.07-1.65a1 1 0 1 1 1-1 1 1 0 0 1-1 1Z" fill="#fff"/></svg>
       Ascend-Reddit 运营看板
       <span class="dot">●</span>
     </div>
     <div class="header-right">
       <span class="update-info" id="updateInfo">加载中...</span>
-      <button class="refresh-btn" id="refreshBtn" onclick="triggerFullRefresh()" title="重新加载已发布的数据；如需触发飞书拉取，请在 GitHub Actions 手动运行">刷新数据</button>
+      <span style="font-size:11px;color:var(--text-3);margin-right:4px">每日自动更新 3 次</span>
+      <button class="refresh-btn" id="refreshBtn" onclick="triggerFullRefresh()" title="重新加载已部署的 stats.json；如需触发飞书拉取，请前往 GitHub Actions 手动运行">重新加载</button>
     </div>
   </header>
 
@@ -310,6 +352,19 @@ let currentData = null;
 let currentTab  = 'overview';
 const charts    = {};
 
+function openMobileNav() {
+  const drawer  = document.getElementById('mobileNavDrawer');
+  const overlay = document.getElementById('mobileNavOverlay');
+  drawer.classList.add('open');
+  overlay.style.display = 'block';
+}
+function closeMobileNav() {
+  const drawer  = document.getElementById('mobileNavDrawer');
+  const overlay = document.getElementById('mobileNavOverlay');
+  drawer.classList.remove('open');
+  overlay.style.display = 'none';
+}
+
 loadData();
 
 async function loadData() {
@@ -329,7 +384,7 @@ async function loadData() {
   } catch(e) {
     showError(e.message);
   } finally {
-    btn.disabled = false; btn.textContent = '刷新数据';
+    btn.disabled = false; btn.textContent = '重新加载';
   }
 }
 
@@ -390,19 +445,24 @@ function renderDataQualityBanner(data) {
     banners.push({ type: 'info', msg: `ℹ️ 当前 stats.json 不含按日分布字段，近7/30天数据使用比例估算。请运行新版 <code>export-stats.js</code> 后重新推送。` });
   }
 
-  // 读取后端 dataQuality 检查结果
+  // 读取后端 dataQuality 检查结果（摘要展示）
   const dq = data.dataQuality;
   if (dq && dq.checks && dq.checks.length > 0) {
     const errors   = dq.checks.filter(c => c.level === 'error');
     const warnings = dq.checks.filter(c => c.level === 'warning');
-    if (errors.length) {
-      const msgs = errors.map(c => `[${c.source}] ${c.message}`).join('<br>');
-      banners.push({ type: 'warn', msg: `❌ 数据质量异常（${errors.length} 项错误）：<br><small style="opacity:.85">${msgs}</small>` });
-    } else if (warnings.length) {
-      const summary = warnings.length > 2
-        ? `${warnings[0].message}（另有 ${warnings.length - 1} 项警告）`
-        : warnings.map(c => c.message).join('；');
-      banners.push({ type: 'info', msg: `⚠️ 数据质量提示：${summary}` });
+    if (errors.length || warnings.length) {
+      const summaryText = [
+        errors.length   ? `<b>${errors.length} 个错误</b>` : '',
+        warnings.length ? `${warnings.length} 个警告` : '',
+      ].filter(Boolean).join('，');
+      const icon  = errors.length ? '❌' : '⚠️';
+      const allItems = [...errors, ...warnings].map(c => `<li>[${c.source}] ${c.message}</li>`).join('');
+      const detailId = 'dq-detail-' + Date.now();
+      banners.push({ type: errors.length ? 'warn' : 'info', msg:
+        `${icon} 数据质量：${summaryText}
+        <span style="cursor:pointer;text-decoration:underline;margin-left:8px;font-size:11px" onclick="const d=document.getElementById('${detailId}');d.style.display=d.style.display==='none'?'block':'none'">查看详情</span>
+        <ul id="${detailId}" style="display:none;margin:6px 0 0 16px;font-size:11px;opacity:.85;line-height:1.8">${allItems}</ul>`
+      });
     }
   }
 
@@ -580,12 +640,14 @@ function renderMonitor(brand) {
     </div>
 
     <div class="chart-card" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span class="chart-title" style="margin:0">运营分析 &amp; 建议</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;cursor:pointer" onclick="(function(){const el=document.getElementById('mon-analysis-body');const ic=document.getElementById('mon-analysis-toggle');if(el.style.display==='none'){el.style.display='';ic.textContent='▲'}else{el.style.display='none';ic.textContent='▼'}})()">
+        <span class="chart-title" style="margin:0">运营分析 &amp; 建议 <span id="mon-analysis-toggle" style="font-size:11px;color:var(--text-3);margin-left:6px">▼</span></span>
         <span class="chart-subtitle" style="margin:0" id="mon-analysis-label">全量数据综合分析</span>
       </div>
-      <div id="mon-comp-strip"></div>
-      <div id="mon-analysis"></div>
+      <div id="mon-analysis-body" style="display:none">
+        <div id="mon-comp-strip"></div>
+        <div id="mon-analysis"></div>
+      </div>
     </div>
   `;
 
@@ -643,6 +705,8 @@ function monGetRangeData(d, range) {
   // 优先使用真实按日聚合（export-stats.js >= v2），fallback 比例估算
   const hasDaily = d.statusByDate && Object.keys(d.statusByDate).length > 0;
   let statusCount, intentCount, brandMention, posts, comments, published;
+  let prevStatusCount, prevPublished, prevMentions, prevPosts, prevComments;
+  let dataLabel; // 标注数据来源
 
   if (hasDaily) {
     statusCount   = monAggByDate(d.statusByDate,  currFrom, now);
@@ -653,30 +717,43 @@ function monGetRangeData(d, range) {
     posts         = typeAgg['帖子']  || 0;
     comments      = typeAgg['评论']  || 0;
     published     = statusCount['已发布'] || 0;
+    // 上一周期真实聚合
+    prevStatusCount = monAggByDate(d.statusByDate,  prevFrom, currFrom);
+    const prevMentAgg = monAggByDate(d.mentionByDate, prevFrom, currFrom);
+    const prevTypeAgg = monAggByDate(d.typeByDate,    prevFrom, currFrom);
+    prevPublished = prevStatusCount['已发布'] || 0;
+    prevMentions  = prevMentAgg['YES'] || 0;
+    prevPosts     = prevTypeAgg['帖子'] || 0;
+    prevComments  = prevTypeAgg['评论'] || 0;
+    dataLabel = `近${days}天真实数据`;
   } else {
     // 旧数据兼容：按总量比例估算
     const ratio = d.total > 0 ? currTotal / d.total : 0;
-    function scale(obj) {
+    const prevRatio = d.total > 0 ? prevTotal / d.total : 0;
+    function scale(obj, r) {
       const res = {};
-      for (const [k, v] of Object.entries(obj || {})) res[k] = Math.round(v * ratio);
+      for (const [k, v] of Object.entries(obj || {})) res[k] = Math.round(v * r);
       return res;
     }
-    statusCount  = scale(d.statusCount);
-    intentCount  = scale(d.intentCount);
-    brandMention = { YES: Math.round(d.brandMention.YES * ratio), NO: Math.round(d.brandMention.NO * ratio) };
-    posts        = Math.round(d.posts * ratio);
-    comments     = Math.round(d.comments * ratio);
-    published    = Math.round(d.published * ratio);
+    statusCount  = scale(d.statusCount, ratio);
+    intentCount  = scale(d.intentCount, ratio);
+    brandMention = { YES: Math.round((d.brandMention?.YES||0) * ratio), NO: Math.round((d.brandMention?.NO||0) * ratio) };
+    posts        = Math.round((d.posts||0) * ratio);
+    comments     = Math.round((d.comments||0) * ratio);
+    published    = Math.round((d.published||0) * ratio);
+    prevStatusCount = scale(d.statusCount, prevRatio);
+    prevPublished = Math.round((d.published||0) * prevRatio);
+    prevMentions  = Math.round((d.brandMention?.YES||0) * prevRatio);
+    prevPosts     = Math.round((d.posts||0) * prevRatio);
+    prevComments  = Math.round((d.comments||0) * prevRatio);
+    dataLabel = `近${days}天估算数据`;
   }
 
-  // WoW：时间段内前半 vs 后半
-  const half     = Math.ceil(days / 2);
-  const halfFrom = new Date(now); halfFrom.setDate(now.getDate() - half);
-  const recentH  = currTrend.filter(([dt]) => new Date(dt+'T00:00:00') >= halfFrom);
-  const priorH   = currTrend.filter(([dt]) => new Date(dt+'T00:00:00') <  halfFrom);
-  const wow      = { thisWeek: recentH.reduce((s,[,v])=>s+v,0), lastWeek: priorH.reduce((s,[,v])=>s+v,0) };
+  // WoW：使用真实上一周期抓取量
+  const wow = { thisWeek: currTotal, lastWeek: prevTotal };
 
-  return { total: currTotal, published, posts, comments, statusCount, intentCount, brandMention, trend: currTrend, wow, prevTotal };
+  return { total: currTotal, published, posts, comments, statusCount, intentCount, brandMention, trend: currTrend, wow, prevTotal, dataLabel,
+    previous: { total: prevTotal, published: prevPublished, mentions: prevMentions, posts: prevPosts, comments: prevComments, statusCount: prevStatusCount } };
 }
 
 // ── 刷新精准词监控页面内所有动态内容 ──────────────────────────
@@ -712,8 +789,8 @@ function updateMonUI() {
   setText('ins-mention', insightMention(rd.brandMention));
   setText('ins-type',    insightType(rd.posts, rd.comments));
 
-  const rangeLabels = { all: '全量数据综合分析', '30d': '近30天数据分析（含比例估算）', '7d': '近7天数据分析（含比例估算）' };
-  setText('mon-analysis-label', rangeLabels[monState.range]);
+  const rangeLabel = monState.range === 'all' ? '全量数据综合分析' : `${rd.dataLabel || ('近'+(monState.range==='7d'?7:30)+'天')}分析`;
+  setText('mon-analysis-label', rangeLabel);
   setText('mon-comp-strip', monBuildCompStrip(rd, monState.range));
   setText('mon-analysis',   insightMonitorFull(d, rd, monState.range));
 }
@@ -723,8 +800,8 @@ function monBuildCompStrip(rd, range) {
   if (!rd.prevTotal || range === 'all') return '';
   const label = range === '7d' ? '近7天 vs 前7天' : '近30天 vs 前30天';
   const cT = rd.total, pT = rd.prevTotal;
-  const cPub = rd.published, pPub = Math.round(rd.published * (pT / (cT||1)));
-  const cMen = rd.brandMention.YES, pMen = Math.round(rd.brandMention.YES * (pT / (cT||1)));
+  const cPub = rd.published, pPub = rd.previous?.published ?? Math.round(rd.published * (pT / (cT||1)));
+  const cMen = rd.brandMention.YES, pMen = rd.previous?.mentions ?? Math.round(rd.brandMention.YES * (pT / (cT||1)));
 
   function delta(c, p, posIsGood) {
     if (!p && !c) return `<span class="comp-flat">—</span>`;
@@ -909,10 +986,15 @@ function renderBrandMonitor(brand) {
       <div class="chart-insight" id="ins-bm-trend"></div>
     </div>
 
-    <!-- 运营分析建议 -->
+    <!-- 运营分析建议（默认折叠） -->
     <div class="analysis-card">
-      <div class="chart-title" style="margin-bottom:8px">运营分析 &amp; 建议</div>
-      <div id="bm-analysis"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="(function(){const el=document.getElementById('bm-analysis-body');const ic=document.getElementById('bm-analysis-toggle');if(el.style.display==='none'){el.style.display='';ic.textContent='▲'}else{el.style.display='none';ic.textContent='▼'}})()">
+        <span class="chart-title" style="margin:0">运营分析 &amp; 建议</span>
+        <span id="bm-analysis-toggle" style="font-size:11px;color:var(--text-3)">▼ 展开</span>
+      </div>
+      <div id="bm-analysis-body" style="display:none;margin-top:12px">
+        <div id="bm-analysis"></div>
+      </div>
     </div>
   `;
 
@@ -1188,20 +1270,27 @@ function renderOverview() {
       weekPublished += monAggByDate(df.statusByDate, mon0, new Date())['已发布'] || 0;
   }
 
-  // ── AIO-BO 预测 ───────────────────────────────────────
+  // ── AIO-BO 预测（支持 snapshots 结构，兼容旧 actual 数组） ──
   function aioForecast(a) {
-    const vals    = (a.actual || []).filter(v => v !== null && v !== undefined);
-    const current = vals.length ? vals[vals.length - 1] : null;
+    // 优先使用 snapshots（日期快照），兼容旧的 actual 数组
+    let vals;
+    if (a.snapshots && a.snapshots.length > 0) {
+      vals = a.snapshots.map(s => s.value).filter(v => v !== null && v !== undefined);
+    } else {
+      vals = (a.actual || []).filter(v => v !== null && v !== undefined);
+    }
+    const current = a.current !== undefined ? a.current : (vals.length ? vals[vals.length - 1] : null);
     const q3Tgt   = a.q3Target || 0;
-    const gap     = current !== null ? q3Tgt - current : null;
+    const gap     = current !== null ? q3Tgt - current : null; // 单位：百分点 pp
     let velocity  = null;
+    const sampleN = Math.min(3, vals.length);
     if (vals.length >= 2) {
-      const last3   = vals.slice(-Math.min(3, vals.length));
-      const changes = last3.slice(1).map((v, i) => v - last3[i]);
+      const lastN   = vals.slice(-sampleN);
+      const changes = lastN.slice(1).map((v, i) => v - lastN[i]);
       velocity = changes.reduce((s, v) => s + v, 0) / changes.length;
     }
     const weeks = gap !== null && velocity !== null && velocity > 0 ? Math.ceil(gap / velocity) : null;
-    return { current, q3Target: q3Tgt, gap, velocity, weeks };
+    return { current, q3Target: q3Tgt, gap, velocity, weeks, sampleN };
   }
   const sfFc = aioForecast(aioSf);
   const dfFc = aioForecast(aioDf);
@@ -1217,22 +1306,22 @@ function renderOverview() {
 
     <div class="section-title">今日待办</div>
     <div class="stat-grid">
-      <div class="stat-card" style="${severeCnt > 5 ? 'border-color:#fca5a5;background:#fff5f5' : severeCnt > 0 ? 'border-color:#fde68a' : ''}">
-        <div class="stat-label">严重故障</div>
+      <div class="stat-card clickable-card" onclick="navigate('sf-brand',document.getElementById('nav-sf-brand'))" style="${severeCnt > 5 ? 'border-color:#fca5a5;background:#fff5f5' : severeCnt > 0 ? 'border-color:#fde68a' : ''}">
+        <div class="stat-label">累计严重故障</div>
         <div class="stat-value" style="font-size:28px;color:${severeCnt > 5 ? 'var(--red)' : severeCnt > 0 ? 'var(--amber)' : 'var(--green)'}">${severeCnt}</div>
-        <div class="stat-sub">${severeCnt > 5 ? '⚠ 请立即排查' : severeCnt > 0 ? '建议优先处理' : '一切正常'}</div>
+        <div class="stat-sub">${severeCnt > 5 ? '历史总量偏高，注意趋势' : severeCnt > 0 ? '历史累计数量' : '暂无记录'}</div>
       </div>
-      <div class="stat-card" style="${pendingPrecise > 30 ? 'border-color:#fde68a' : ''}">
+      <div class="stat-card clickable-card" onclick="navigate('streamfab',document.getElementById('nav-streamfab'))" style="${pendingPrecise > 30 ? 'border-color:#fde68a' : ''}">
         <div class="stat-label">精准词待处理</div>
         <div class="stat-value" style="font-size:28px;color:${pendingPrecise > 30 ? 'var(--amber)' : 'var(--text-1)'}">${pendingPrecise}</div>
         <div class="stat-sub">SF ${sf.statusCount?.['待处理']||0} · DF ${df.statusCount?.['待处理']||0}</div>
       </div>
-      <div class="stat-card" style="${pendingBrand > 30 ? 'border-color:#fde68a' : ''}">
+      <div class="stat-card clickable-card" onclick="navigate('sf-brand',document.getElementById('nav-sf-brand'))" style="${pendingBrand > 30 ? 'border-color:#fde68a' : ''}">
         <div class="stat-label">品牌舆情待处理</div>
         <div class="stat-value" style="font-size:28px;color:${pendingBrand > 30 ? 'var(--amber)' : 'var(--text-1)'}">${pendingBrand}</div>
         <div class="stat-sub">已生成待发布 ${generatedBrand} 条</div>
       </div>
-      <div class="stat-card" style="${dqErrors > 0 ? 'border-color:#fca5a5;background:#fff5f5' : dqWarnings > 0 ? 'border-color:#fde68a' : ''}">
+      <div class="stat-card clickable-card" onclick="navigate('aioBo',document.getElementById('nav-aioBo'))" style="${dqErrors > 0 ? 'border-color:#fca5a5;background:#fff5f5' : dqWarnings > 0 ? 'border-color:#fde68a' : ''}">
         <div class="stat-label">数据质量</div>
         <div class="stat-value" style="font-size:22px;margin-top:6px;color:${dqErrors > 0 ? 'var(--red)' : dqWarnings > 0 ? 'var(--amber)' : 'var(--green)'}">
           ${dqErrors > 0 ? dqErrors + ' 错误' : dqWarnings > 0 ? dqWarnings + ' 警告' : '正常'}
@@ -1283,7 +1372,7 @@ function renderOverview() {
 }
 
 function ovAioBoCard(brandName, cls, fc) {
-  const { current, q3Target, gap, velocity, weeks } = fc;
+  const { current, q3Target, gap, velocity, weeks, sampleN } = fc;
   const color = cls === 'sf' ? 'var(--accent)' : 'var(--blue)';
   if (current === null) {
     return `<div class="chart-card">
@@ -1293,6 +1382,12 @@ function ovAioBoCard(brandName, cls, fc) {
   }
   const pct      = Math.min(100, (current / q3Target * 100));
   const achieved = gap !== null && gap <= 0;
+  // gap 单位为百分点 pp
+  const gapStr   = achieved ? '已达标' : '-' + Math.abs(gap).toFixed(2) + 'pp';
+  const velStr   = velocity !== null ? (velocity >= 0 ? '+' : '') + velocity.toFixed(2) + 'pp/周' : '—';
+  const forecastNote = sampleN && sampleN >= 3
+    ? `基于最近 ${sampleN} 个周次的简单线性预测，仅供参考`
+    : (sampleN && sampleN >= 2 ? `数据点较少（${sampleN} 个周次），预测仅供参考` : '数据点不足，暂不预测');
   return `<div class="chart-card">
     <div class="chart-title">${brandName} AIO-BO</div>
     <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0 12px">
@@ -1312,22 +1407,21 @@ function ovAioBoCard(brandName, cls, fc) {
       <div>
         <div style="font-size:11px;color:var(--text-3);margin-bottom:2px">距目标</div>
         <div style="font-size:16px;font-weight:700;color:${achieved ? 'var(--green)' : 'var(--red)'}">
-          ${achieved ? '已达标 🎉' : Math.abs(gap).toFixed(2) + '% 待补'}
+          ${achieved ? '已达标 🎉' : gapStr}
         </div>
       </div>
       <div>
         <div style="font-size:11px;color:var(--text-3);margin-bottom:2px">近期周速度</div>
-        <div style="font-size:16px;font-weight:700;color:var(--text-1)">
-          ${velocity !== null ? (velocity >= 0 ? '+' : '') + velocity.toFixed(2) + '%/周' : '—'}
-        </div>
+        <div style="font-size:16px;font-weight:700;color:var(--text-1)">${velStr}</div>
       </div>
       <div>
         <div style="font-size:11px;color:var(--text-3);margin-bottom:2px">预计达标</div>
         <div style="font-size:16px;font-weight:700;color:${achieved ? 'var(--green)' : weeks && weeks <= 10 ? 'var(--amber)' : 'var(--red)'}">
-          ${achieved ? '已完成' : weeks ? '约 ' + weeks + ' 周' : '速度不足'}
+          ${achieved ? '已完成' : (sampleN >= 2 && weeks) ? '约 ' + weeks + ' 周' : '数据不足'}
         </div>
       </div>
     </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text-3);line-height:1.5">${forecastNote}</div>
   </div>`;
 }
 
@@ -1588,9 +1682,13 @@ function renderHealthStatus(sfPrecise, dfPrecise, sfBrand, dfBrand, pa) {
   function badge(val, thres, higherIsBetter = true) {
     const isGood = higherIsBetter ? val >= thres.good : val <= thres.warn;
     const isWarn = higherIsBetter ? val >= thres.warn : val <= thres.bad;
-    if (isGood) return `<span class="ms-badge good">● 健康 ${val}%</span>`;
-    if (isWarn) return `<span class="ms-badge nosync">● 警告 ${val}%</span>`;
-    return `<span class="ms-badge behind">● 异常 ${val}%</span>`;
+    const thresholdHint = higherIsBetter
+      ? `目标 ≥ ${thres.good}%`
+      : `警戒线 ≥ ${thres.warn}%`;
+    const statusClass = isGood ? 'good' : isWarn ? 'nosync' : 'behind';
+    const statusLabel = isGood ? '健康' : isWarn ? '警告' : '异常';
+    return `<span class="ms-badge ${statusClass}" title="${thresholdHint}">● ${statusLabel} ${val}%</span>
+      <span style="font-size:10px;color:var(--text-3);margin-left:6px">${thresholdHint}</span>`;
   }
 
   const sfPub  = sfPrecise?.total > 0 ? ((sfPrecise.published / sfPrecise.total) * 100).toFixed(1) : 0;
@@ -1611,8 +1709,9 @@ function renderHealthStatus(sfPrecise, dfPrecise, sfBrand, dfBrand, pa) {
   ];
 
   el.innerHTML = items.map(({ label, badge }) =>
-    `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:13px;color:var(--text-2)">${label}</span>${badge}
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);gap:8px">
+      <span style="font-size:13px;color:var(--text-2)">${label}</span>
+      <span style="display:flex;align-items:center;flex-shrink:0">${badge}</span>
     </div>`
   ).join('');
 }
@@ -1725,8 +1824,9 @@ function renderAiobo() {
   const dfTgt  = df.q3Target || 40.5;
   const sfFill = Math.min(100, (sfPct / sfTgt * 100).toFixed(1));
   const dfFill = Math.min(100, (dfPct / dfTgt * 100).toFixed(1));
-  const sfGap  = (sfTgt - sfPct).toFixed(2);
-  const dfGap  = (dfTgt - dfPct).toFixed(2);
+  const sfGapPp  = (sfTgt - sfPct).toFixed(2); // 单位：百分点 pp
+  const dfGapPp  = (dfTgt - dfPct).toFixed(2);
+  const sfGap = sfGapPp; const dfGap = dfGapPp; // 兼容下方文本引用
   const sfWordGap = (sf.q3TargetWords || 44) - (sf.currentWords || 0);
   const dfWordGap = (df.q3TargetWords || 82) - (df.currentWords || 0);
 
@@ -1750,7 +1850,7 @@ function renderAiobo() {
         <div class="aiobo-progress">
           <div class="aiobo-progress-labels"><span>当前 ${sfPct}%</span><span>Q3目标 ${sfTgt}%</span></div>
           <div class="aiobo-progress-track"><div class="aiobo-progress-fill sf" style="width:${sfFill}%"></div></div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px">缺口 <b style="color:var(--accent)">${sfGap}%</b>，还需增加 <b style="color:var(--accent)">${sfWordGap}</b> 个全链路关键词</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px">缺口 <b style="color:var(--accent)">-${sfGapPp}pp</b>，还需增加 <b style="color:var(--accent)">${sfWordGap}</b> 个全链路关键词</div>
         </div>
       </div>
       <div class="stat-card" style="border-top:3px solid var(--blue)">
@@ -1760,7 +1860,7 @@ function renderAiobo() {
         <div class="aiobo-progress">
           <div class="aiobo-progress-labels"><span>当前 ${dfPct}%</span><span>Q3目标 ${dfTgt}%</span></div>
           <div class="aiobo-progress-track"><div class="aiobo-progress-fill df" style="width:${dfFill}%"></div></div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px">缺口 <b style="color:var(--blue)">${dfGap}%</b>，还需增加 <b style="color:var(--blue)">${dfWordGap}</b> 个全链路关键词</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px">缺口 <b style="color:var(--blue)">-${dfGapPp}pp</b>，还需增加 <b style="color:var(--blue)">${dfWordGap}</b> 个全链路关键词</div>
         </div>
       </div>
       <div class="stat-card green">
@@ -1811,11 +1911,21 @@ function renderAiobo() {
   const dfMin = Math.floor(Math.min(...(df.target||[33])) - 1);
   const dfMax = Math.ceil(Math.max(...(df.target||[41])) + 1);
 
-  renderAioboChart('chart-sf-aiobo', sf.weeks||[], sf.actual||[], sf.target||[], '#ff4500', '#fca07a', sfMin, sfMax);
-  renderAioboChart('chart-df-aiobo', df.weeks||[], df.actual||[], df.target||[], '#2563eb', '#93c5fd', dfMin, dfMax);
+  // 支持 snapshots（日期快照），兼容旧的 weeks/actual 平行数组
+  function aioChartData(brand) {
+    if (brand.snapshots && brand.snapshots.length > 0) {
+      const weeks  = brand.snapshots.map(s => s.week || s.date);
+      const actual = brand.snapshots.map(s => s.value);
+      return { weeks, actual };
+    }
+    return { weeks: brand.weeks || [], actual: brand.actual || [] };
+  }
+  const sfCD = aioChartData(sf), dfCD = aioChartData(df);
+  renderAioboChart('chart-sf-aiobo', sfCD.weeks, sfCD.actual, sf.target||[], '#ff4500', '#fca07a', sfMin, sfMax);
+  renderAioboChart('chart-df-aiobo', dfCD.weeks, dfCD.actual, df.target||[], '#2563eb', '#93c5fd', dfMin, dfMax);
 
-  setText('ins-sf-aiobo', `基准 <b>${sfPct}%</b>（${sf.currentWords||0}/${sf.aioTriggerWords||0}词），Q3目标 <b>${sfTgt}%</b>，缺口 <b>${sfGap}%</b>，需在 Q3 内新增 <b>${sfWordGap}</b> 个全链路关键词。前 3 周缓坡（+1词/周），W4 起规模化阶段加速（+2词/周），预计 8/31 达标。`);
-  setText('ins-df-aiobo', `基准 <b>${dfPct}%</b>（${df.currentWords||0}/${df.aioTriggerWords||0}词），Q3目标 <b>${dfTgt}%</b>，缺口 <b>${dfGap}%</b>，需在 Q3 内新增 <b>${dfWordGap}</b> 个全链路关键词。线性递增，周均 +1.2词，预计 9/30 达标。`);
+  setText('ins-sf-aiobo', `基准 <b>${sfPct}%</b>（${sf.currentWords||0}/${sf.aioTriggerWords||0}词），Q3目标 <b>${sfTgt}%</b>，缺口 <b>-${sfGapPp}pp</b>，需在 Q3 内新增 <b>${sfWordGap}</b> 个全链路关键词。前 3 周缓坡（+1词/周），W4 起规模化阶段加速（+2词/周），预计 8/31 达标。`);
+  setText('ins-df-aiobo', `基准 <b>${dfPct}%</b>（${df.currentWords||0}/${df.aioTriggerWords||0}词），Q3目标 <b>${dfTgt}%</b>，缺口 <b>-${dfGapPp}pp</b>，需在 Q3 内新增 <b>${dfWordGap}</b> 个全链路关键词。线性递增，周均 +1.2词，预计 9/30 达标。`);
 }
 
 function renderAioboChart(id, weeks, actual, target, colorActual, colorTarget, yMin, yMax) {

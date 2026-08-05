@@ -37,8 +37,28 @@ cp .env.example .env
 |------|------|------|
 | `GITHUB_TOKEN` | 推送 stats.json 到 GitHub（仅本地手动同步时需要） | 本地推送必需 |
 | `LARK_CLI` | 覆盖 lark-cli 路径（默认自动探测） | 可选 |
+| `SF_SERP_TABLE_ID` | StreamFab SERP 排名明细表 table_id（首次配置时使用） | export-aiobo.js 必需 |
 
 > **注意**：`.env` 已在 `.gitignore` 中，不会提交到仓库。
+
+> ⚠️ **Node.js 不会自动读取 `.env` 文件。** 运行脚本时需要用以下任一方式加载环境变量：
+>
+> **方式一（推荐，Node ≥ 20.6.0）**：
+> ```bash
+> node --env-file=.env export-aiobo.js --update
+> node --env-file=.env export-stats.js
+> ```
+>
+> **方式二（Shell 加载，兼容所有 Node 版本）**：
+> ```bash
+> set -a; source .env; set +a
+> node export-aiobo.js --update
+> ```
+>
+> **方式三（单次临时注入）**：
+> ```bash
+> GITHUB_TOKEN=ghp_xxx SF_SERP_TABLE_ID=tblYYY node export-aiobo.js --update
+> ```
 
 ### 3. 抓取飞书数据
 
@@ -95,9 +115,13 @@ node export-aiobo.js --update
 node export-aiobo.js --list-tables-sf
 ```
 
-发现表 ID 后，将 `SF_SERP_TABLE_ID` 写入 `.env` 或在运行时通过环境变量传入：
+发现表 ID 后，将 `SF_SERP_TABLE_ID` 写入 `.env`，然后通过以下方式运行：
 
 ```bash
+# 推荐（Node >= 20.6.0）
+node --env-file=.env export-aiobo.js --update
+
+# 或临时注入
 SF_SERP_TABLE_ID=tblXXX node export-aiobo.js --update
 ```
 

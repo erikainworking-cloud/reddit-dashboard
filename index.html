@@ -563,39 +563,23 @@ function renderMonitor(brand) {
         <div class="stat-value" id="mon-published">—</div>
         <div class="stat-sub"   id="mon-published-sub">—</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-label">有效候选 → 发布转化</div>
+        <div class="stat-value" style="font-size:22px;margin-top:4px">${pubConvPct}%</div>
+        <div class="stat-sub">有效 ${valid.toLocaleString()} · AI生成 ${aiGen} · 发布 ${d.published}</div>
+        <div style="margin-top:8px;display:flex;gap:6px;font-size:11px;color:var(--text-3);flex-wrap:wrap">
+          <span>有效率 <b style="color:var(--text-2)">${validRatePct}%</b></span>
+          <span>·</span>
+          <span>AI覆盖 <b style="color:var(--text-2)">${aiCoverPct}%</b></span>
+          <span>·</span>
+          <span>审核率 <b style="color:var(--text-2)">${reviewPct}%</b></span>
+        </div>
+      </div>
       <div class="stat-card green">
-        <div class="stat-label">产品提及（含品牌）</div>
+        <div class="stat-label">品牌提及 · 关键词覆盖</div>
         <div class="stat-value" id="mon-mention">—</div>
         <div class="stat-sub"   id="mon-mention-sub">—</div>
-      </div>
-      <div class="stat-card blue">
-        <div class="stat-label">覆盖关键词数</div>
-        <div class="stat-value">${d.topKeywords.length}</div>
-        <div class="stat-sub">Top 关键词维度</div>
-      </div>
-    </div>
-
-    <div class="section-title" style="margin-top:14px">全量漏斗转化指标</div>
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-label">有效率</div>
-        <div class="stat-value" style="font-size:24px">${validRatePct}%</div>
-        <div class="stat-sub">有效候选 ${valid.toLocaleString()} / 总 ${d.total.toLocaleString()}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">AI生成覆盖率</div>
-        <div class="stat-value" style="font-size:24px">${aiCoverPct}%</div>
-        <div class="stat-sub">已生成 ${aiGen} / 有效候选 ${valid}</div>
-      </div>
-      <div class="stat-card accent">
-        <div class="stat-label">审核完成率</div>
-        <div class="stat-value" style="font-size:24px">${reviewPct}%</div>
-        <div class="stat-sub">已发布 ${d.published} / AI已生成 ${aiGen}</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">发布转化率</div>
-        <div class="stat-value" style="font-size:24px">${pubConvPct}%</div>
-        <div class="stat-sub">已发布 ${d.published} / 有效候选 ${valid}</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text-3)">覆盖关键词 <b style="color:var(--text-2)">${d.topKeywords.length}</b> 个</div>
       </div>
     </div>
 
@@ -1249,7 +1233,16 @@ function renderOverview() {
   const pendingPrecise = (sf.statusCount?.['待处理']||0) + (df.statusCount?.['待处理']||0);
   const pendingBrand   = (sfBm.pending||0) + (dfBm.pending||0);
   const generatedBrand = (sfBm.generated||0) + (dfBm.generated||0);
-  const severeCnt      = (sfBm.problemType?.['严重故障']||0) + (dfBm.problemType?.['严重故障']||0);
+  // 未处理严重故障：从 problemStatusCross 中排除已处理和无需处理，兼容无此字段的旧数据
+  function unresolvedSevere(bm) {
+    const cross = bm.problemStatusCross?.['严重故障'];
+    if (cross && Object.keys(cross).length > 0) {
+      const done = (cross['已处理']||0) + (cross['无需处理']||0);
+      return Math.max(0, Object.values(cross).reduce((s,v)=>s+v,0) - done);
+    }
+    return bm.problemType?.['严重故障'] || 0;
+  }
+  const severeCnt = unresolvedSevere(sfBm) + unresolvedSevere(dfBm);
   const dqErrors       = dq.checks?.filter(c => c.level === 'error').length || 0;
   const dqWarnings     = dq.checks?.filter(c => c.level === 'warning').length || 0;
 
@@ -1307,9 +1300,9 @@ function renderOverview() {
     <div class="section-title">今日待办</div>
     <div class="stat-grid">
       <div class="stat-card clickable-card" onclick="navigate('sf-brand',document.getElementById('nav-sf-brand'))" style="${severeCnt > 5 ? 'border-color:#fca5a5;background:#fff5f5' : severeCnt > 0 ? 'border-color:#fde68a' : ''}">
-        <div class="stat-label">累计严重故障</div>
+        <div class="stat-label">未处理严重故障</div>
         <div class="stat-value" style="font-size:28px;color:${severeCnt > 5 ? 'var(--red)' : severeCnt > 0 ? 'var(--amber)' : 'var(--green)'}">${severeCnt}</div>
-        <div class="stat-sub">${severeCnt > 5 ? '历史总量偏高，注意趋势' : severeCnt > 0 ? '历史累计数量' : '暂无记录'}</div>
+        <div class="stat-sub">${severeCnt > 5 ? '未处理数量偏高，需优先跟进' : severeCnt > 0 ? '尚未处理的严重故障' : '暂无未处理记录'}</div>
       </div>
       <div class="stat-card clickable-card" onclick="navigate('streamfab',document.getElementById('nav-streamfab'))" style="${pendingPrecise > 30 ? 'border-color:#fde68a' : ''}">
         <div class="stat-label">精准词待处理</div>
@@ -1634,22 +1627,31 @@ function renderExecFunnelChart(sfData, dfData) {
   const chart = echarts.init(el);
   charts['exec-funnel'] = chart;
 
+  // 漏斗核心链路：抓取 → 有效候选 → AI已生成 → 已发布
+  // 品牌提及不是必经步骤，作为旁注指标单独展示
   function funnelVals(d) {
     const ignored = (d.statusCount?.['已忽略']||0) + (d.statusCount?.['忽略']||0);
     const valid   = Math.max(0, (d.total||0) - ignored);
     const aiGen   = (d.statusCount?.['已生成']||0) + (d.published||0);
     return [
-      d.total || 0,                 // 抓取总量
-      valid,                        // 有效候选量
-      aiGen,                        // AI已生成
-      d.published || 0,             // 已发布
-      d.brandMention?.YES || 0,     // 品牌提及
+      d.total || 0,     // 抓取总量
+      valid,            // 有效候选量
+      aiGen,            // AI已生成
+      d.published || 0, // 已发布
     ];
   }
+  function sideMetrics(d) {
+    const tot = (d.brandMention?.YES||0) + (d.brandMention?.NO||0);
+    const mentRate = tot > 0 ? ((d.brandMention.YES / tot) * 100).toFixed(0) : '—';
+    const topIntents = Object.entries(d.intentCount||{}).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>k).join('、');
+    return { mentRate, topIntents };
+  }
 
-  const steps  = ['抓取总量', '有效候选量', 'AI已生成', '已发布', '品牌提及'];
+  const steps  = ['抓取总量', '有效候选量', 'AI已生成', '已发布'];
   const sfVals = funnelVals(sfData);
   const dfVals = funnelVals(dfData);
+  const sfSide = sideMetrics(sfData);
+  const dfSide = sideMetrics(dfData);
 
   chart.setOption({
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -1668,9 +1670,11 @@ function renderExecFunnelChart(sfData, dfData) {
   const sfPubRate   = sfVals[1] > 0 ? ((sfVals[3] / sfVals[1]) * 100).toFixed(1) : 0;
   const dfPubRate   = dfVals[1] > 0 ? ((dfVals[3] / dfVals[1]) * 100).toFixed(1) : 0;
   setText('ins-exec-funnel',
-    `StreamFab：有效率 <b>${sfValidRate}%</b>，有效候选发布转化 <b>${sfPubRate}%</b>；` +
-    `DVDFab：有效率 <b>${dfValidRate}%</b>，有效候选发布转化 <b>${dfPubRate}%</b>。` +
-    `每一层缩窄代表该阶段流失率；有效候选量排除了已忽略条目。`);
+    `StreamFab：有效率 <b>${sfValidRate}%</b>，有效候选→发布转化 <b>${sfPubRate}%</b>；` +
+    `DVDFab：有效率 <b>${dfValidRate}%</b>，有效候选→发布转化 <b>${dfPubRate}%</b>。` +
+    `漏斗不含品牌提及（非必经步骤）。旁注指标 → ` +
+    `SF 品牌提及率 <b>${sfSide.mentRate}%</b>（主意图：${sfSide.topIntents||'—'}）；` +
+    `DF 品牌提及率 <b>${dfSide.mentRate}%</b>（主意图：${dfSide.topIntents||'—'}）。`);
 }
 
 /* ══════════════ 健康度状态 ══════════════ */

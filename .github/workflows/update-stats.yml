@@ -1,12 +1,48 @@
-name: Update Stats (Manual)
+name: Update Stats
 
+# 每日 UTC 02/10/18 触发（对应北京时间 10/18/02），可手动运行
 on:
+  schedule:
+    - cron: '0 2,10,18 * * *'
   workflow_dispatch:
 
 jobs:
   update:
-    runs-on: self-hosted
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 允许 git push
+
     steps:
-      - name: Run export and push to GitHub
-        run: bash "/Users/erikaleen/Desktop/进行项目/reddit/dashboard/push-stats.sh"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install lark-cli
+        run: npm install -g @larksuite/cli
+
+      - name: Auth lark-cli
+        # LARK_TOKEN 是飞书用户 token，在 repo Settings → Secrets → Actions 中配置
+        run: lark-cli auth login --token "$LARK_TOKEN"
+        env:
+          LARK_TOKEN: ${{ secrets.LARK_TOKEN }}
+
+      - name: Export stats from Feishu
+        run: node export-stats.js
+        working-directory: dashboard
+        env:
+          LARK_CLI: lark-cli   # 让 export-stats.js 直接用 PATH 中的 lark-cli
+
+      - name: Commit & push stats.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add stats.json
+          git diff --staged --quiet && echo "stats.json unchanged, skip commit" && exit 0
+          git commit -m "chore: update stats $(date -u +%Y-%m-%d)"
+          git push
+        working-directory: dashboard

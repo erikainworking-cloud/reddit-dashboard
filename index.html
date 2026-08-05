@@ -8,25 +8,55 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     :root {
-      --bg:        #f0f4f8;
-      --surface:   #ffffff;
-      --border:    #dde3ec;
-      --text-1:    #1a2332;
-      --text-2:    #4a5568;
-      --text-3:    #8896a7;
-      --accent:    #ff4500;
-      --accent-bg: #fff2ee;
-      --green:     #0ea371;
-      --green-bg:  #edfcf4;
-      --blue:      #2563eb;
-      --blue-bg:   #eff6ff;
-      --purple:    #7c3aed;
-      --purple-bg: #f5f3ff;
-      --amber:     #d97706;
-      --amber-bg:  #fffbeb;
-      --red:       #dc2626;
-      --red-bg:    #fef2f2;
-      --sidebar-w: 220px;
+      /* ── Core palette ── */
+      --bg:           #F5F7FA;
+      --surface:      #FFFFFF;
+      --surface-muted:#F8FAFC;
+      --border:       #E5E7EB;
+      --sidebar-bg:   #111827;
+      --sidebar-w:    224px;
+
+      /* ── Text ── */
+      --text-1:  #111827;
+      --text-2:  #4B5563;
+      --text-3:  #94A3B8;
+
+      /* ── Semantic colors ── */
+      --accent:      #FF5A1F;
+      --accent-bg:   #FFF0EB;
+
+      --green:       #16A36A;
+      --green-bg:    #E8F7F0;
+
+      --blue:        #2F6BEE;
+      --blue-bg:     #EAF1FF;
+
+      --purple:      #7C3AED;
+      --purple-bg:   #F5F3FF;
+
+      --amber:       #D97706;
+      --amber-bg:    #FFF4DD;
+
+      --red:         #D64545;
+      --red-bg:      #FDEBEC;
+
+      /* ── Semantic aliases ── */
+      --danger:      #D64545;
+      --danger-soft: #FDEBEC;
+      --warning:     #D97706;
+      --warning-soft:#FFF4DD;
+      --success:     #16A36A;
+      --success-soft:#E8F7F0;
+      --info:        #2F6BEE;
+      --info-soft:   #EAF1FF;
+
+      /* ── Brand ── */
+      --brand-sf:    #FF5A1F;
+      --brand-df:    #2F6BEE;
+
+      /* ── Spacing tokens ── */
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system,'Segoe UI','PingFang SC',sans-serif; background: var(--bg); color: var(--text-1); }
@@ -37,14 +67,20 @@
 
     /* ── Header ───────────────────── */
     .header {
-      height: 60px; background: var(--surface);
+      height: 64px; background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 0 24px; display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(15,23,42,0.06);
     }
-    .header-logo { font-size: 17px; font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
+    .header-logo { font-size: 16px; font-weight: 700; color: var(--text-1); display: flex; align-items: center; gap: 10px; }
     .header-logo .dot { color: var(--accent); font-size: 10px; }
+    .env-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; color: var(--success);
+      background: var(--success-soft); padding: 3px 9px; border-radius: 20px;
+    }
+    .env-tag::before { content: '●'; font-size: 7px; }
     .header-right { display: flex; align-items: center; gap: 12px; }
     .update-info { font-size: 12px; color: var(--text-3); }
     .refresh-btn {
@@ -58,31 +94,57 @@
     /* ── Sidebar ──────────────────── */
     .sidebar {
       width: var(--sidebar-w); flex-shrink: 0;
-      background: var(--surface); border-right: 1px solid var(--border);
-      overflow-y: auto; padding: 20px 0;
+      background: var(--sidebar-bg); border-right: none;
+      overflow-y: auto; padding: 16px 0;
+      display: flex; flex-direction: column;
     }
-    .nav-section { padding: 0 12px; margin-bottom: 6px; }
+    .sidebar-nav { flex: 1; }
+    .nav-section { padding: 0 10px; margin-bottom: 4px; }
     .nav-section-title {
-      font-size: 10.5px; font-weight: 700; color: var(--text-3);
-      text-transform: uppercase; letter-spacing: 0.8px;
-      padding: 4px 8px 8px; display: block;
+      font-size: 10px; font-weight: 700; color: #6B7280;
+      text-transform: uppercase; letter-spacing: 0.9px;
+      padding: 4px 10px 6px; display: block;
     }
     .nav-item {
       display: flex; align-items: center; gap: 9px;
       padding: 9px 10px; border-radius: 8px;
-      font-size: 13.5px; font-weight: 500; color: var(--text-2);
-      cursor: pointer; transition: all .15s; user-select: none; margin-bottom: 1px;
+      font-size: 13px; font-weight: 500; color: #9CA3AF;
+      cursor: pointer; transition: all .15s; user-select: none;
+      margin-bottom: 1px; position: relative;
     }
-    .nav-item:hover { background: var(--bg); color: var(--text-1); }
-    .nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+    .nav-item:hover { background: #1F2937; color: #F9FAFB; }
+    .nav-item.active { background: #1F2937; color: #FFFFFF; font-weight: 600; }
+    .nav-item.active .nav-dot { box-shadow: 0 0 0 3px rgba(255,90,31,.25); }
+    .nav-badge {
+      margin-left: auto; min-width: 20px; height: 20px;
+      background: var(--danger); color: #fff;
+      font-size: 10px; font-weight: 700; border-radius: 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0 5px; flex-shrink: 0;
+    }
+    .nav-badge.warn { background: var(--warning); }
+    .nav-badge.info { background: var(--info); }
     .nav-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .nav-dot.sf { background: var(--accent); }
-    .nav-dot.df { background: var(--blue); }
+    .nav-dot.sf { background: var(--brand-sf); }
+    .nav-dot.df { background: var(--brand-df); }
     .nav-dot.ex { background: var(--purple); }
-    .nav-divider { height: 1px; background: var(--border); margin: 10px 12px; }
+    .nav-dot.green { background: var(--success); }
+    .nav-divider { height: 1px; background: #1F2937; margin: 8px 10px; }
+
+    /* ── Sidebar footer ── */
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid #1F2937;
+    }
+    .sidebar-status { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #6B7280; margin-bottom: 3px; }
+    .sidebar-status .dot-status { width: 7px; height: 7px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+    .sidebar-status .dot-status.error { background: var(--danger); }
+    .sidebar-status .dot-status.warn  { background: var(--warning); }
+    .sidebar-status-text { font-size: 11px; color: #4B5563; line-height: 1.5; }
 
     /* ── Main ─────────────────────── */
-    .main { flex: 1; overflow-y: auto; padding: 24px 28px; background: var(--bg); }
+    .main { flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--bg); }
+    .main-inner { max-width: 1480px; margin: 0 auto; }
 
     /* ── Loading / Error ─────────── */
     .status-overlay {
@@ -99,18 +161,29 @@
     .page-desc  { font-size: 12px; color: var(--text-3); margin-top: 3px; }
 
     /* ── Stat cards ──────────────── */
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 14px; margin-bottom: 20px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 16px; margin-bottom: 24px; }
     .stat-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 18px 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04); transition: box-shadow .2s, transform .15s;
+      border-radius: 14px; padding: 20px;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04); transition: box-shadow .2s, transform .15s;
     }
-    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(15,23,42,.06); }
     .clickable-card { cursor: pointer; }
-    .clickable-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.12); transform: translateY(-2px); }
-    .stat-label { font-size: 11px; color: var(--text-3); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
-    .stat-value { font-size: 32px; font-weight: 700; color: var(--text-1); line-height: 1.1; }
-    .stat-sub   { font-size: 12px; color: var(--text-3); margin-top: 4px; }
+    .clickable-card:hover { box-shadow: 0 8px 24px rgba(15,23,42,.08); transform: translateY(-1px); }
+    .stat-label { font-size: 13px; color: var(--text-2); margin-bottom: 8px; font-weight: 600; }
+    .stat-value { font-size: 36px; font-weight: 700; color: var(--text-1); line-height: 1.1; }
+    .stat-sub   { font-size: 12px; color: var(--text-3); margin-top: 5px; }
+    /* Semantic card variants */
+    .stat-card.danger  { background: var(--danger-soft);  border-color: #FECACA; }
+    .stat-card.danger  .stat-value { color: var(--danger); }
+    .stat-card.danger  .stat-label { color: var(--danger); }
+    .stat-card.warning { background: var(--warning-soft); border-color: #FDE68A; }
+    .stat-card.warning .stat-value { color: var(--warning); }
+    .stat-card.info    { background: var(--info-soft);    border-color: #BFDBFE; }
+    .stat-card.info    .stat-value { color: var(--info); }
+    .stat-card.success { background: var(--success-soft); border-color: #A7F3D0; }
+    .stat-card.success .stat-value { color: var(--success); }
+    /* Legacy aliases */
     .stat-card.accent  .stat-value { color: var(--accent); }
     .stat-card.green   .stat-value { color: var(--green); }
     .stat-card.blue    .stat-value { color: var(--blue); }
@@ -123,16 +196,17 @@
     .wow.flat { background: var(--bg);        color: var(--text-3); border: 1px solid var(--border); }
 
     /* ── Chart cards ─────────────── */
-    .chart-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-    .chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .chart-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .chart-grid-84{ display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
     .chart-full   { grid-column: 1 / -1; }
     .chart-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 18px 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      border-radius: 14px; padding: 20px;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04);
     }
-    .chart-title    { font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
-    .chart-subtitle { font-size: 11px; color: var(--text-3); margin-bottom: 12px; line-height: 1.5; }
+    .chart-title    { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+    .chart-subtitle { font-size: 12px; color: var(--text-3); margin-bottom: 14px; line-height: 1.5; }
     .chart-box      { width: 100%; height: 240px; }
     .chart-box.tall  { height: 300px; }
     .chart-box.short { height: 180px; }
@@ -148,11 +222,10 @@
 
     /* ── Section title ───────────── */
     .section-title {
-      font-size: 11.5px; font-weight: 700; color: var(--text-3);
-      text-transform: uppercase; letter-spacing: .9px;
-      margin: 24px 0 12px; padding-left: 10px;
-      border-left: 3px solid var(--accent);
+      font-size: 18px; font-weight: 700; color: var(--text-1);
+      margin: 28px 0 14px;
     }
+    .section-subtitle { font-size: 13px; color: var(--text-3); margin-top: -10px; margin-bottom: 14px; }
 
     /* Brand tag */
     .brand-tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
@@ -188,22 +261,27 @@
       margin-right: 8px; font-size: 18px; color: var(--text-2);
     }
     .mobile-nav-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
       z-index: 200;
     }
     .mobile-nav-drawer {
       position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
-      background: var(--surface); border-right: 1px solid var(--border);
+      background: var(--sidebar-bg); border-right: none;
       z-index: 201; overflow-y: auto; padding: 16px 0;
       transform: translateX(-100%); transition: transform .25s ease;
     }
     .mobile-nav-drawer.open { transform: translateX(0); }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
       .sidebar { display: none; }
       .hamburger-btn { display: flex; }
-      .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
-      .main { padding: 14px; }
+      .chart-grid, .chart-grid-84, .chart-grid-3 { grid-template-columns: 1fr; }
+      .main { padding: 16px; }
+    }
+    @media (max-width: 768px) {
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .chart-box { height: 240px !important; }
+      .header-right .update-extra { display: none; }
     }
 
     /* ── Data Quality Banner ─────── */
@@ -255,6 +333,31 @@
     .analysis-body { font-size:13px; color:var(--text-2); line-height:1.75; }
     .analysis-body ol { padding-left:18px; }
     .analysis-body li { margin-bottom:4px; }
+
+    /* ── Page-level brand tabs ─── */
+    .brand-tabs { display:flex; gap:0; background:#f1f5f9; border-radius:10px; padding:3px; margin-bottom:20px; width:fit-content; }
+    .brand-tab { padding:6px 20px; border:none; background:transparent; border-radius:8px; font-size:13px; font-weight:500; color:var(--text-2); cursor:pointer; transition:all .15s; }
+    .brand-tab.active { background:var(--surface); color:var(--text-1); box-shadow:0 1px 3px rgba(0,0,0,.1); font-weight:700; }
+    .brand-tab.active.sf { color:var(--brand-sf); }
+    .brand-tab.active.df { color:var(--brand-df); }
+    .brand-tab:hover:not(.active) { background:rgba(255,255,255,.6); }
+
+    /* ── AIO-BO keyword delta card ─── */
+    .kw-delta-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .kw-delta-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px 24px; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+    .kw-delta-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #f1f5f9; font-size:13px; }
+    .kw-delta-row:last-child { border-bottom:none; padding-bottom:0; }
+    .kw-delta-label { color:var(--text-2); font-weight:500; }
+    .kw-delta-val { font-weight:700; font-size:15px; }
+    .kw-delta-val.added { color:var(--success); }
+    .kw-delta-val.lost  { color:var(--danger); }
+    .kw-delta-val.net-pos { color:var(--success); }
+    .kw-delta-val.net-neg { color:var(--danger); }
+    .kw-delta-val.net-zero { color:var(--text-3); }
+    .kw-list { margin-top:8px; display:flex; flex-wrap:wrap; gap:5px; }
+    .kw-chip { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:500; }
+    .kw-chip.added { background:var(--success-soft); color:var(--success); }
+    .kw-chip.lost  { background:var(--danger-soft);  color:var(--danger); }
   </style>
 </head>
 <body>
@@ -263,18 +366,16 @@
   <!-- Mobile nav overlay + drawer -->
   <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="closeMobileNav()"></div>
   <div class="mobile-nav-drawer" id="mobileNavDrawer">
-    <div style="padding:0 16px 12px;font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);margin-bottom:8px">导航</div>
+    <div style="padding:0 16px 12px;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #1F2937;margin-bottom:8px">导航</div>
     <div class="nav-section" style="padding:0 8px">
-      <div class="nav-item" onclick="navigate('overview',document.getElementById('nav-overview'));closeMobileNav()"><span class="nav-dot" style="background:var(--green)"></span> 今日概览</div>
-      <div style="height:1px;background:var(--border);margin:6px 8px"></div>
-      <div class="nav-item" onclick="navigate('streamfab',document.getElementById('nav-streamfab'));closeMobileNav()"><span class="nav-dot" style="background:var(--accent)"></span> StreamFab 精准词</div>
-      <div class="nav-item" onclick="navigate('dvdfab',document.getElementById('nav-dvdfab'));closeMobileNav()"><span class="nav-dot" style="background:var(--blue)"></span> DVDFab 精准词</div>
-      <div style="height:1px;background:var(--border);margin:6px 8px"></div>
-      <div class="nav-item" onclick="navigate('sf-brand',document.getElementById('nav-sf-brand'));closeMobileNav()"><span class="nav-dot" style="background:var(--accent)"></span> SF 品牌舆情</div>
-      <div class="nav-item" onclick="navigate('df-brand',document.getElementById('nav-df-brand'));closeMobileNav()"><span class="nav-dot" style="background:var(--blue)"></span> DF 品牌舆情</div>
-      <div style="height:1px;background:var(--border);margin:6px 8px"></div>
-      <div class="nav-item" onclick="navigate('execution',document.getElementById('nav-execution'));closeMobileNav()"><span class="nav-dot" style="background:var(--amber)"></span> 执行动作</div>
-      <div class="nav-item" onclick="navigate('aioBo',document.getElementById('nav-aioBo'));closeMobileNav()"><span class="nav-dot" style="background:var(--green)"></span> 北极星 AIO-BO</div>
+      <div class="nav-item" onclick="navigate('overview',document.getElementById('nav-overview'));closeMobileNav()"><span class="nav-dot green"></span> 今日总览</div>
+      <div style="height:1px;background:#1F2937;margin:6px 8px"></div>
+      <div class="nav-item" onclick="navigate('keywords',document.getElementById('nav-keywords'));closeMobileNav()"><span class="nav-dot sf"></span> 精准词运营</div>
+      <div style="height:1px;background:#1F2937;margin:6px 8px"></div>
+      <div class="nav-item" onclick="navigate('brand',document.getElementById('nav-brand'));closeMobileNav()"><span class="nav-dot sf"></span> 品牌监控</div>
+      <div style="height:1px;background:#1F2937;margin:6px 8px"></div>
+      <div class="nav-item" onclick="navigate('execution',document.getElementById('nav-execution'));closeMobileNav()"><span class="nav-dot ex"></span> 执行漏斗</div>
+      <div class="nav-item" onclick="navigate('aioBo',document.getElementById('nav-aioBo'));closeMobileNav()"><span class="nav-dot green"></span> AIO-BO 追踪</div>
     </div>
   </div>
 
@@ -282,14 +383,18 @@
   <header class="header">
     <div class="header-logo">
       <button class="hamburger-btn" onclick="openMobileNav()" title="打开导航菜单">☰</button>
-      <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#ff4500"/><path d="M16.67 10a1.46 1.46 0 0 0-2.47-1 7.12 7.12 0 0 0-3.85-1.23l.65-3.06 2.13.45a1 1 0 1 0 1.07-.97 1 1 0 0 0-.96.68l-2.38-.5a.18.18 0 0 0-.21.14l-.73 3.4a7.14 7.14 0 0 0-3.82 1.22 1.46 1.46 0 1 0-1.61 2.36 2.9 2.9 0 0 0 0 .4c0 2.03 2.36 3.67 5.27 3.67s5.27-1.64 5.27-3.67a2.9 2.9 0 0 0 0-.4 1.46 1.46 0 0 0 .55-1.19ZM7.5 11a1 1 0 1 1 1 1 1 1 0 0 1-1-1Zm5.57 2.65a3.47 3.47 0 0 1-3.07.7 3.47 3.47 0 0 1-3.07-.7.19.19 0 0 1 .26-.26 3.1 3.1 0 0 0 2.81.6 3.1 3.1 0 0 0 2.81-.6.19.19 0 0 1 .26.26Zm-.07-1.65a1 1 0 1 1 1-1 1 1 0 0 1-1 1Z" fill="#fff"/></svg>
-      Ascend-Reddit 运营看板
-      <span class="dot">●</span>
+      <svg width="22" height="22" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="10" fill="#FF5A1F"/><path d="M16.67 10a1.46 1.46 0 0 0-2.47-1 7.12 7.12 0 0 0-3.85-1.23l.65-3.06 2.13.45a1 1 0 1 0 1.07-.97 1 1 0 0 0-.96.68l-2.38-.5a.18.18 0 0 0-.21.14l-.73 3.4a7.14 7.14 0 0 0-3.82 1.22 1.46 1.46 0 1 0-1.61 2.36 2.9 2.9 0 0 0 0 .4c0 2.03 2.36 3.67 5.27 3.67s5.27-1.64 5.27-3.67a2.9 2.9 0 0 0 0-.4 1.46 1.46 0 0 0 .55-1.19ZM7.5 11a1 1 0 1 1 1 1 1 1 0 0 1-1-1Zm5.57 2.65a3.47 3.47 0 0 1-3.07.7 3.47 3.47 0 0 1-3.07-.7.19.19 0 0 1 .26-.26 3.1 3.1 0 0 0 2.81.6 3.1 3.1 0 0 0 2.81-.6.19.19 0 0 1 .26.26Zm-.07-1.65a1 1 0 1 1 1-1 1 1 0 0 1-1 1Z" fill="#fff"/></svg>
+      Ascend Reddit
+      <span class="env-tag">生产环境</span>
     </div>
     <div class="header-right">
       <span class="update-info" id="updateInfo">加载中...</span>
-      <span style="font-size:11px;color:var(--text-3);margin-right:4px">每日自动更新 3 次</span>
-      <button class="refresh-btn" id="refreshBtn" onclick="triggerFullRefresh()" title="重新加载已部署的 stats.json；如需触发飞书拉取，请前往 GitHub Actions 手动运行">重新加载</button>
+      <span class="update-extra" style="font-size:11px;color:var(--text-3)">每日自动更新 3 次</span>
+      <button class="refresh-btn" id="refreshBtn" onclick="triggerFullRefresh()"
+        title="重新读取已部署数据；完整更新由 GitHub Actions 自动完成">重新加载</button>
+      <a href="https://github.com" target="_blank" rel="noopener" style="display:flex;align-items:center;color:var(--text-3);transition:color .15s" onmouseover="this.style.color='var(--text-1)'" onmouseout="this.style.color='var(--text-3)'" title="查看 GitHub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      </a>
     </div>
   </header>
 
@@ -299,43 +404,48 @@
 
     <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="nav-section">
-        <div class="nav-item active" id="nav-overview" onclick="navigate('overview', this)">
-          <span class="nav-dot" style="background:var(--green)"></span> 今日概览
+      <div class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-item active" id="nav-overview" onclick="navigate('overview', this)">
+            <span class="nav-dot green"></span> 今日总览
+          </div>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-item" id="nav-keywords" onclick="navigate('keywords', this)">
+            <span class="nav-dot sf"></span> 精准词运营
+            <span class="nav-badge info" id="badge-keywords" style="display:none">0</span>
+          </div>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-item" id="nav-brand" onclick="navigate('brand', this)">
+            <span class="nav-dot sf"></span> 品牌监控
+            <span class="nav-badge" id="badge-brand" style="display:none">0</span>
+          </div>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-item" id="nav-execution" onclick="navigate('execution', this)">
+            <span class="nav-dot ex"></span> 执行漏斗
+            <span class="nav-badge warn" id="badge-execution" style="display:none">0</span>
+          </div>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-item" id="nav-aioBo" onclick="navigate('aioBo', this)">
+            <span class="nav-dot green"></span> AIO-BO 追踪
+          </div>
         </div>
       </div>
-      <div class="nav-divider"></div>
-      <div class="nav-section">
-        <span class="nav-section-title">精准词监控</span>
-        <div class="nav-item" id="nav-streamfab" onclick="navigate('streamfab', this)">
-          <span class="nav-dot sf"></span> StreamFab
+
+      <!-- Sidebar footer: data status -->
+      <div class="sidebar-footer" id="sidebarFooter">
+        <div class="sidebar-status">
+          <span class="dot-status" id="sidebarStatusDot"></span>
+          <span id="sidebarStatusText" style="color:#9CA3AF;font-size:12px">加载中…</span>
         </div>
-        <div class="nav-item" id="nav-dvdfab" onclick="navigate('dvdfab', this)">
-          <span class="nav-dot df"></span> DVDFab
-        </div>
-      </div>
-      <div class="nav-divider"></div>
-      <div class="nav-section">
-        <span class="nav-section-title">品牌舆情</span>
-        <div class="nav-item" id="nav-sf-brand" onclick="navigate('sf-brand', this)">
-          <span class="nav-dot sf"></span> StreamFab
-        </div>
-        <div class="nav-item" id="nav-df-brand" onclick="navigate('df-brand', this)">
-          <span class="nav-dot df"></span> DVDFab
-        </div>
-      </div>
-      <div class="nav-divider"></div>
-      <div class="nav-section">
-        <div class="nav-item" id="nav-execution" onclick="navigate('execution', this)">
-          <span class="nav-dot ex"></span> 执行动作
-        </div>
-      </div>
-      <div class="nav-divider"></div>
-      <div class="nav-section">
-        <span class="nav-section-title">北极星目标</span>
-        <div class="nav-item" id="nav-aioBo" onclick="navigate('aioBo', this)">
-          <span class="nav-dot" style="background:var(--green)"></span> AIO-BO
-        </div>
+        <div class="sidebar-status-text" id="sidebarUpdateTime" style="color:#6B7280;font-size:11px"></div>
       </div>
     </aside>
 
@@ -351,6 +461,14 @@
 let currentData = null;
 let currentTab  = 'overview';
 const charts    = {};
+// Tracks which brand tab is active within each merged page
+const pageTabState = { keywords: 'streamfab', brand: 'streamfab' };
+
+function switchPageTab(page, brand) {
+  pageTabState[page] = brand;
+  if (page === 'keywords') renderMonitor(brand);
+  else if (page === 'brand') renderBrandMonitor(brand);
+}
 
 function openMobileNav() {
   const drawer  = document.getElementById('mobileNavDrawer');
@@ -377,9 +495,11 @@ async function loadData() {
     currentData = await res.json();
     if (currentData.error) throw new Error(currentData.error);
     const d = new Date(currentData.updatedAt);
-    document.getElementById('updateInfo').textContent =
-      `更新于 ${d.toLocaleDateString('zh-CN')} ${d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}`;
+    const timeStr = `${d.toLocaleDateString('zh-CN')} ${d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}`;
+    document.getElementById('updateInfo').textContent = `更新于 ${timeStr}`;
     renderDataQualityBanner(currentData);
+    updateSidebarStatus(currentData, timeStr);
+    updateNavBadges(currentData);
     renderTab(currentTab);
   } catch(e) {
     showError(e.message);
@@ -391,6 +511,58 @@ async function loadData() {
 // 数据更新由 GitHub Actions 定时自动完成（每日 3 次），前端无需持有任何密钥。
 // 如需手动触发更新，请登录 GitHub → Actions → Update Stats → Run workflow。
 
+function updateSidebarStatus(data, timeStr) {
+  const dot  = document.getElementById('sidebarStatusDot');
+  const text = document.getElementById('sidebarStatusText');
+  const time = document.getElementById('sidebarUpdateTime');
+  if (!dot || !text) return;
+  const dq       = data.dataQuality || {};
+  const errors   = dq.checks?.filter(c => c.level === 'error').length   || 0;
+  const warnings = dq.checks?.filter(c => c.level === 'warning').length || 0;
+  if (errors > 0) {
+    dot.className  = 'dot-status error';
+    text.textContent = `${errors} 个数据错误`;
+    text.style.color = 'var(--danger)';
+  } else if (warnings > 0) {
+    dot.className  = 'dot-status warn';
+    text.textContent = `${warnings} 个提醒`;
+    text.style.color = 'var(--warning)';
+  } else {
+    dot.className  = 'dot-status';
+    text.textContent = '数据正常';
+    text.style.color = '#9CA3AF';
+  }
+  if (time) time.textContent = '最后更新：' + timeStr;
+}
+
+function updateNavBadges(data) {
+  const sf   = data.streamfab || {};
+  const df   = data.dvdfab    || {};
+  const bm   = data.brandMonitoring || {};
+  const sfBm = bm.streamfab || {};
+  const dfBm = bm.dvdfab    || {};
+  const dq   = data.dataQuality || {};
+
+  function setBadge(id, count, cls) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (count > 0) { el.textContent = count > 99 ? '99+' : count; el.style.display = ''; if (cls) el.className = 'nav-badge ' + cls; }
+    else el.style.display = 'none';
+  }
+
+  const sfPending = (sf.statusCount?.['待处理'] || 0) + (sf.statusCount?.['需要复核'] || 0);
+  const dfPending = (df.statusCount?.['待处理'] || 0) + (df.statusCount?.['需要复核'] || 0);
+  const sfBrandPending = (sfBm.pending || 0) + (sfBm.generated || 0);
+  const dfBrandPending = (dfBm.pending || 0) + (dfBm.generated || 0);
+  const dqErrors = dq.checks?.filter(c => c.level === 'error').length || 0;
+
+  const kwTotal    = sfPending + dfPending;
+  const brandTotal = sfBrandPending + dfBrandPending;
+  setBadge('badge-keywords', kwTotal, 'info');
+  setBadge('badge-brand', brandTotal, brandTotal > 5 ? '' : 'warn');
+  setBadge('badge-execution', dqErrors, '');
+}
+
 async function triggerFullRefresh() {
   // 仅重新拉取当前已部署的 stats.json，不触发远程 Actions
   await loadData();
@@ -399,16 +571,25 @@ async function triggerFullRefresh() {
 function navigate(tab, el) {
   currentTab = tab;
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  (el || document.getElementById('nav-' + tab))?.classList.add('active');
+  // Map old route names to new consolidated nav IDs
+  const navIdMap = { streamfab: 'keywords', dvdfab: 'keywords', 'sf-brand': 'brand', 'df-brand': 'brand' };
+  const navId = navIdMap[tab] || tab;
+  (el || document.getElementById('nav-' + navId))?.classList.add('active');
   if (currentData) renderTab(tab);
 }
 
 function renderTab(tab) {
-  if (tab === 'overview') renderOverview();
+  if (tab === 'overview')   renderOverview();
   else if (tab === 'execution') renderExecution();
   else if (tab === 'aioBo') renderAiobo();
-  else if (tab === 'sf-brand') renderBrandMonitor('streamfab');
-  else if (tab === 'df-brand') renderBrandMonitor('dvdfab');
+  // New consolidated routes
+  else if (tab === 'keywords') renderMonitor(pageTabState.keywords);
+  else if (tab === 'brand')    renderBrandMonitor(pageTabState.brand);
+  // Legacy compat (overview action cards still use these)
+  else if (tab === 'sf-brand') { pageTabState.brand = 'streamfab'; renderBrandMonitor('streamfab'); }
+  else if (tab === 'df-brand') { pageTabState.brand = 'dvdfab';    renderBrandMonitor('dvdfab'); }
+  else if (tab === 'streamfab'){ pageTabState.keywords = 'streamfab'; renderMonitor('streamfab'); }
+  else if (tab === 'dvdfab')   { pageTabState.keywords = 'dvdfab';    renderMonitor('dvdfab'); }
   else renderMonitor(tab);
 }
 
@@ -533,10 +714,11 @@ function renderMonitor(brand) {
   const pubConvPct   = valid > 0 ? ((d.published / valid) * 100).toFixed(1) : '—';
 
   document.getElementById('main').innerHTML = `
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+  <div class="main-inner">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:24px">
       <div>
-        <div class="page-title">${label} 精准词监控</div>
-        <div class="page-desc">基于精准关键词抓取的 Reddit 内容监控与回复数据</div>
+        <div class="page-title" style="font-size:26px">精准词运营</div>
+        <div class="page-desc">回答抓取是否有效、AI 是否生成、审核是否积压、最终发布多少</div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
         <div class="seg-group" id="mon-range-seg">
@@ -551,6 +733,13 @@ function renderMonitor(brand) {
       </div>
     </div>
 
+    <!-- Brand tab switcher -->
+    <div class="brand-tabs">
+      <button class="brand-tab ${brand === 'streamfab' ? 'active sf' : ''}" onclick="switchPageTab('keywords','streamfab')">StreamFab</button>
+      <button class="brand-tab ${brand === 'dvdfab'    ? 'active df' : ''}" onclick="switchPageTab('keywords','dvdfab')">DVDFab</button>
+    </div>
+
+    <!-- 核心 KPI：抓取总量/有效候选/AI已生成/已发布 -->
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">抓取总量</div>
@@ -558,81 +747,94 @@ function renderMonitor(brand) {
         <div class="stat-sub"   id="mon-total-sub">—</div>
         <div id="mon-total-wow"></div>
       </div>
-      <div class="stat-card accent">
-        <div class="stat-label">已发布回复</div>
+      <div class="stat-card info">
+        <div class="stat-label">有效候选</div>
+        <div class="stat-value" id="mon-valid">—</div>
+        <div class="stat-sub"   id="mon-valid-sub">—</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-label">AI 已生成</div>
+        <div class="stat-value" id="mon-aigen">—</div>
+        <div class="stat-sub"   id="mon-aigen-sub">—</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">已发布</div>
         <div class="stat-value" id="mon-published">—</div>
         <div class="stat-sub"   id="mon-published-sub">—</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">有效候选 → 发布转化</div>
-        <div class="stat-value" style="font-size:22px;margin-top:4px">${pubConvPct}%</div>
-        <div class="stat-sub">有效 ${valid.toLocaleString()} · AI生成 ${aiGen} · 发布 ${d.published}</div>
-        <div style="margin-top:8px;display:flex;gap:6px;font-size:11px;color:var(--text-3);flex-wrap:wrap">
-          <span>有效率 <b style="color:var(--text-2)">${validRatePct}%</b></span>
-          <span>·</span>
-          <span>AI覆盖 <b style="color:var(--text-2)">${aiCoverPct}%</b></span>
-          <span>·</span>
-          <span>审核率 <b style="color:var(--text-2)">${reviewPct}%</b></span>
-        </div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">品牌提及 · 关键词覆盖</div>
-        <div class="stat-value" id="mon-mention">—</div>
-        <div class="stat-sub"   id="mon-mention-sub">—</div>
-        <div style="margin-top:6px;font-size:11px;color:var(--text-3)">覆盖关键词 <b style="color:var(--text-2)">${d.topKeywords.length}</b> 个</div>
-      </div>
     </div>
 
-    <div class="chart-grid">
+    <!-- 8+4 布局：趋势图 + 待办状态 -->
+    <div class="chart-grid-84">
       <div class="chart-card">
-        <div class="chart-title">每日抓取趋势</div>
-        <div class="chart-subtitle" id="mon-trend-sub">近 60 天每日新增抓取量</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div>
+            <div class="chart-title">每日抓取趋势</div>
+            <div class="chart-subtitle" id="mon-trend-sub">近 60 天每日新增抓取量</div>
+          </div>
+          <div class="seg-group" id="mon-brand-seg">
+            <button class="seg-btn active" data-v="${brand}" onclick="">全部</button>
+          </div>
+        </div>
         <div class="chart-box tall" id="chart-daily"></div>
         <div class="chart-insight" id="ins-daily"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">处理状态分布</div>
-        <div class="chart-subtitle">已过滤「已忽略」条目</div>
-        <div class="chart-box tall" id="chart-status"></div>
-        <div class="chart-insight" id="ins-status"></div>
+        <div class="chart-title">待办状态</div>
+        <div class="chart-subtitle">点击可跳转处理</div>
+        <div id="mon-todo-list" style="margin-top:4px"></div>
       </div>
     </div>
 
+    <!-- 运营漏斗：完整 5 步 -->
+    <div class="section-title">运营漏斗</div>
+    <div class="chart-card" style="margin-bottom:16px">
+      <div class="chart-subtitle">抓取总量 → 有效候选 → AI已生成 → 人工已审核 → 已发布，每步显示转化率</div>
+      <div id="mon-funnel-steps" style="display:flex;gap:0;align-items:stretch;padding:16px 0 8px;overflow-x:auto"></div>
+    </div>
+
+    <!-- 内容质量指标（原品牌提及等，移至此处） -->
+    <div class="section-title">内容质量</div>
     <div class="chart-grid-3">
       <div class="chart-card">
-        <div class="chart-title">意图分类</div>
-        <div class="chart-box" id="chart-intent"></div>
-        <div class="chart-insight" id="ins-intent"></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">产品提及率</div>
-        <div class="chart-box" id="chart-mention"></div>
+        <div class="chart-title">品牌提及率</div>
+        <div id="mon-mention-bar" style="margin-top:8px"></div>
         <div class="chart-insight" id="ins-mention"></div>
       </div>
       <div class="chart-card">
+        <div class="chart-title">主要用户意图</div>
+        <div class="chart-box short" id="chart-intent"></div>
+        <div class="chart-insight" id="ins-intent"></div>
+      </div>
+      <div class="chart-card">
         <div class="chart-title">帖子 vs 评论</div>
-        <div class="chart-box" id="chart-type"></div>
+        <div id="mon-type-bar" style="margin-top:8px"></div>
         <div class="chart-insight" id="ins-type"></div>
       </div>
     </div>
 
+    <!-- Top 关键词表格 -->
+    <div class="section-title">Top 关键词</div>
     <div class="chart-card">
-      <div class="chart-title">关键词覆盖量 Top 15</div>
-      <div class="chart-subtitle">${label} 精准词频次排行</div>
-      <div class="chart-box tall" id="chart-keywords"></div>
-      <div class="chart-insight" id="ins-keywords"></div>
+      <div class="chart-subtitle">${label} 精准词频次排行 · 点击列头可排序</div>
+      <div id="mon-keyword-table" style="overflow-x:auto"></div>
     </div>
 
-    <div class="chart-card" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;cursor:pointer" onclick="(function(){const el=document.getElementById('mon-analysis-body');const ic=document.getElementById('mon-analysis-toggle');if(el.style.display==='none'){el.style.display='';ic.textContent='▲'}else{el.style.display='none';ic.textContent='▼'}})()">
-        <span class="chart-title" style="margin:0">运营分析 &amp; 建议 <span id="mon-analysis-toggle" style="font-size:11px;color:var(--text-3);margin-left:6px">▼</span></span>
-        <span class="chart-subtitle" style="margin:0" id="mon-analysis-label">全量数据综合分析</span>
+    <!-- AI 分析：默认折叠，标题显示一句话 -->
+    <div class="chart-card" style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleMonAnalysis()">
+        <div>
+          <div class="chart-title" style="margin-bottom:2px">运营分析 &amp; 建议</div>
+          <div id="mon-analysis-label" style="font-size:12px;color:var(--text-3)">全量数据综合分析</div>
+        </div>
+        <span id="mon-analysis-toggle" style="font-size:12px;color:var(--text-3);white-space:nowrap">展开 ▼</span>
       </div>
-      <div id="mon-analysis-body" style="display:none">
+      <div id="mon-analysis-body" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
         <div id="mon-comp-strip"></div>
         <div id="mon-analysis"></div>
       </div>
     </div>
+  </div>
   `;
 
   // 关键词图表不随时间范围变化，只渲染一次
@@ -746,37 +948,144 @@ function updateMonUI() {
   const rd = monGetRangeData(d, monState.range);
   const sc = filterIgnored(rd.statusCount);
 
-  const pubRate  = rd.total > 0 ? ((rd.published / rd.total) * 100).toFixed(1) : 0;
-  const mentTot  = (rd.brandMention.YES||0) + (rd.brandMention.NO||0);
-  const mentRate = mentTot > 0 ? ((rd.brandMention.YES / mentTot) * 100).toFixed(1) : 0;
+  const ignored    = (d.statusCount?.['已忽略']||0) + (d.statusCount?.['忽略']||0);
+  const validTotal = Math.max(0, (rd.total||0) - (sc['已忽略']||0) - (sc['忽略']||0));
+  const aiGen      = (sc['已生成']||0) + (rd.published||0);
+  const reviewed   = rd.published || 0;
+  const pubRate    = rd.total > 0 ? ((rd.published / rd.total) * 100).toFixed(1) : 0;
+  const validRate  = rd.total > 0 ? ((validTotal / rd.total) * 100).toFixed(0) : 0;
+  const mentTot    = (rd.brandMention.YES||0) + (rd.brandMention.NO||0);
+  const mentRate   = mentTot > 0 ? ((rd.brandMention.YES / mentTot) * 100).toFixed(1) : 0;
 
+  // 核心 KPI
   setText('mon-total',         rd.total.toLocaleString());
   setText('mon-total-sub',     `帖子 ${rd.posts} · 评论 ${rd.comments}`);
   setText('mon-total-wow',     wowHTML(rd.wow.thisWeek, rd.wow.lastWeek));
+  setText('mon-valid',         validTotal.toLocaleString());
+  setText('mon-valid-sub',     `有效率 ${validRate}%`);
+  setText('mon-aigen',         aiGen.toLocaleString());
+  setText('mon-aigen-sub',     aiGen > 0 ? `AI 覆盖率 ${rd.total>0?((aiGen/rd.total)*100).toFixed(0):0}%` : '—');
   setText('mon-published',     rd.published.toLocaleString());
   setText('mon-published-sub', `发布率 ${pubRate}%`);
-  setText('mon-mention',       rd.brandMention.YES.toLocaleString());
-  setText('mon-mention-sub',   `提及率 ${mentRate}%`);
 
   const trendLabels = { all: '近 60 天每日新增抓取量', '30d': '近 30 天每日新增抓取量', '7d': '近 7 天每日新增抓取量' };
   setText('mon-trend-sub', trendLabels[monState.range]);
 
-  renderDailyChart(rd.trend, rd.wow);
-  renderStatusChart(sc);
-  renderIntentChart(rd.intentCount);
-  renderMentionChart(rd.brandMention);
-  renderTypeChart(rd.posts, rd.comments);
+  // 待办状态列表
+  const todoEl = document.getElementById('mon-todo-list');
+  if (todoEl) {
+    const todos = [
+      { label: '待处理',  val: sc['待处理']||0,   color: 'var(--warning)' },
+      { label: '待审核',  val: sc['待审核']||0,   color: 'var(--info)' },
+      { label: '需要复核',val: sc['需要复核']||0, color: 'var(--purple)' },
+      { label: 'AI已生成',val: sc['已生成']||0,   color: 'var(--success)' },
+    ];
+    todoEl.innerHTML = todos.map(t =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;color:var(--text-2)">${t.label}</span>
+        <span style="font-size:20px;font-weight:700;color:${t.val>0?t.color:'var(--text-3)'}">${t.val}</span>
+      </div>`
+    ).join('');
+  }
 
-  setText('ins-daily',   insightDaily(rd.trend, rd.wow));
-  setText('ins-status',  insightStatus(sc, rd.total));
-  setText('ins-intent',  insightIntent(rd.intentCount));
-  setText('ins-mention', insightMention(rd.brandMention));
-  setText('ins-type',    insightType(rd.posts, rd.comments));
+  // 运营漏斗（5步）
+  const funnelEl = document.getElementById('mon-funnel-steps');
+  if (funnelEl) {
+    const reviewed2 = sc['已审核'] || sc['已发布'] || rd.published;
+    const steps = [
+      { label: '抓取总量',   val: rd.total,  color: '#6B7280' },
+      { label: '有效候选',   val: validTotal, color: 'var(--info)' },
+      { label: 'AI 已生成',  val: aiGen,      color: 'var(--warning)' },
+      { label: '人工已审核', val: reviewed,   color: 'var(--purple)' },
+      { label: '已发布',     val: rd.published,color:'var(--success)' },
+    ];
+    funnelEl.innerHTML = steps.map((s, i) => {
+      const rate = i > 0 && steps[i-1].val > 0 ? ((s.val / steps[i-1].val)*100).toFixed(1) : null;
+      return `<div style="flex:1;min-width:100px;display:flex;flex-direction:column;align-items:center;position:relative">
+        ${i > 0 ? '<div style="position:absolute;left:-1px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--border)">›</div>' : ''}
+        <div style="font-size:11px;color:var(--text-3);font-weight:600;margin-bottom:6px;text-align:center">${s.label}</div>
+        <div style="font-size:28px;font-weight:800;color:${s.color}">${s.val.toLocaleString()}</div>
+        ${rate !== null ? `<div style="font-size:11px;color:var(--text-3);margin-top:4px">转化 ${rate}%</div>` : '<div style="font-size:11px;color:var(--text-3);margin-top:4px">100%</div>'}
+      </div>`;
+    }).join('');
+  }
+
+  // 内容质量：品牌提及进度条
+  const mentEl = document.getElementById('mon-mention-bar');
+  if (mentEl) {
+    const pct = Math.round(Number(mentRate));
+    mentEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);margin-bottom:6px">
+        <span>品牌提及</span><span><b style="color:var(--text-1);font-size:18px">${mentRate}%</b></span>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:var(--brand-sf);border-radius:4px;transition:width .6s"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:6px">${rd.brandMention.YES} / ${mentTot} 条含品牌提及</div>`;
+    setText('ins-mention', insightMention(rd.brandMention));
+  }
+
+  // 帖子/评论进度条
+  const typeEl = document.getElementById('mon-type-bar');
+  if (typeEl) {
+    const tot = rd.posts + rd.comments;
+    const pPct = tot > 0 ? Math.round(rd.posts/tot*100) : 0;
+    typeEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);margin-bottom:6px">
+        <span>帖子 ${pPct}%</span><span>评论 ${100-pPct}%</span>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;display:flex">
+        <div style="height:100%;width:${pPct}%;background:var(--brand-sf);border-radius:4px 0 0 4px"></div>
+        <div style="height:100%;flex:1;background:var(--brand-df)"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:6px">帖子 ${rd.posts} · 评论 ${rd.comments}</div>`;
+    setText('ins-type', insightType(rd.posts, rd.comments));
+  }
+
+  // 关键词表格
+  const kwTableEl = document.getElementById('mon-keyword-table');
+  if (kwTableEl && d.topKeywords.length) {
+    const top15 = d.topKeywords.slice(0, 15);
+    const maxVal = top15[0]?.[1] || 1;
+    kwTableEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:2px solid var(--border)">
+        <th style="text-align:left;padding:8px 6px;color:var(--text-3);font-weight:600;font-size:11px">关键词</th>
+        <th style="text-align:right;padding:8px 6px;color:var(--text-3);font-weight:600;font-size:11px">抓取量</th>
+        <th style="text-align:right;padding:8px 6px;color:var(--text-3);font-weight:600;font-size:11px">占比</th>
+        <th style="padding:8px 6px;min-width:80px"></th>
+      </tr></thead>
+      <tbody>${top15.map(([kw, cnt], i) => {
+        const pct = ((cnt/maxVal)*100).toFixed(0);
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 6px;color:var(--text-1);font-weight:500">${i+1}. ${kw}</td>
+          <td style="padding:9px 6px;text-align:right;font-weight:700;color:var(--text-1)">${cnt}</td>
+          <td style="padding:9px 6px;text-align:right;color:var(--text-3)">${((cnt/(rd.total||1))*100).toFixed(1)}%</td>
+          <td style="padding:9px 6px"><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--brand-sf);border-radius:3px"></div></div></td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+  } else if (kwTableEl) {
+    kwTableEl.innerHTML = '<div style="padding:20px;color:var(--text-3);text-align:center">暂无关键词数据</div>';
+  }
+
+  renderDailyChart(rd.trend, rd.wow);
+  renderIntentChart(rd.intentCount);
+
+  setText('ins-daily',  insightDaily(rd.trend, rd.wow));
+  setText('ins-intent', insightIntent(rd.intentCount));
 
   const rangeLabel = monState.range === 'all' ? '全量数据综合分析' : `${rd.dataLabel || ('近'+(monState.range==='7d'?7:30)+'天')}分析`;
   setText('mon-analysis-label', rangeLabel);
   setText('mon-comp-strip', monBuildCompStrip(rd, monState.range));
   setText('mon-analysis',   insightMonitorFull(d, rd, monState.range));
+}
+
+function toggleMonAnalysis() {
+  const body = document.getElementById('mon-analysis-body');
+  const icon = document.getElementById('mon-analysis-toggle');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  if (icon) icon.textContent = open ? '展开 ▼' : '收起 ▲';
 }
 
 // ── 精准词环比对比条 ──────────────────────────────────────────
@@ -888,98 +1197,128 @@ function renderBrandMonitor(brand) {
   const processRate = d.total > 0 ? (((d.processed||0) / d.total) * 100).toFixed(1) : 0;
 
   document.getElementById('main').innerHTML = `
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+  <div class="main-inner">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:24px">
       <div>
-        <div class="page-title">${label} 品牌舆情监控</div>
-        <div class="page-desc">Reddit 品牌相关帖文抓取、问题分类与回复处理数据</div>
+        <div class="page-title" style="font-size:26px">品牌监控</div>
+        <div class="page-desc">回答品牌讨论是否异常、主要问题是什么、处理是否及时</div>
       </div>
-      <button class="push-btn" id="pushBrandBtn" onclick="openSimplePushModal('push-brand-card.yml','pushBrandBtn','推送品牌舆情监控周报')" title="推送品牌舆情监控周报到飞书群">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-        推送飞书卡片
-      </button>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="seg-group" id="bm-range-seg">
+          <button class="seg-btn active" data-v="all"  onclick="setBmRange('all')">全部</button>
+          <button class="seg-btn"        data-v="30d"  onclick="setBmRange('30d')">近30天</button>
+          <button class="seg-btn"        data-v="7d"   onclick="setBmRange('7d')">近7天</button>
+        </div>
+        <button class="push-btn" id="pushBrandBtn" onclick="openSimplePushModal('push-brand-card.yml','pushBrandBtn','推送品牌舆情监控周报')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          推送飞书卡片
+        </button>
+      </div>
     </div>
 
+    <!-- Brand tab switcher -->
+    <div class="brand-tabs">
+      <button class="brand-tab ${brand === 'streamfab' ? 'active sf' : ''}" onclick="switchPageTab('brand','streamfab')">StreamFab</button>
+      <button class="brand-tab ${brand === 'dvdfab'    ? 'active df' : ''}" onclick="switchPageTab('brand','dvdfab')">DVDFab</button>
+    </div>
+
+    <!-- 顶部 4 个核心 KPI -->
     <div class="stat-grid">
       <div class="stat-card">
-        <div class="stat-label">抓取总量</div>
+        <div class="stat-label">新增品牌提及</div>
         <div class="stat-value">${(d.total||0).toLocaleString()}</div>
         <div class="stat-sub">品牌相关 Reddit 内容</div>
         ${wowHTML(wow.thisWeek, wow.lastWeek)}
       </div>
-      <div class="stat-card accent">
-        <div class="stat-label">已处理</div>
-        <div class="stat-value">${(d.processed||0).toLocaleString()}</div>
-        <div class="stat-sub">处理率 ${processRate}%</div>
+      <div class="stat-card ${(d.pending||0) > 20 ? 'warning' : 'info'}">
+        <div class="stat-label">未处理舆情</div>
+        <div class="stat-value">${(d.pending||0).toLocaleString()}</div>
+        <div class="stat-sub">待处理舆情内容</div>
       </div>
-      <div class="stat-card blue">
-        <div class="stat-label">AI 已生成待发布</div>
-        <div class="stat-value">${(d.generated||0).toLocaleString()}</div>
-        <div class="stat-sub">可直接跟进发布</div>
+      <div class="stat-card ${unresolvedSevereBrand(d) > 5 ? 'danger' : unresolvedSevereBrand(d) > 0 ? 'warning' : 'success'}">
+        <div class="stat-label">未处理严重故障</div>
+        <div class="stat-value">${unresolvedSevereBrand(d)}</div>
+        <div class="stat-sub">${unresolvedSevereBrand(d) > 0 ? '需优先处理' : '暂无未处理记录'}</div>
       </div>
-      <div class="stat-card green">
+      <div class="stat-card ${d.avgQualityScore && d.avgQualityScore >= 7 ? 'success' : 'info'}">
         <div class="stat-label">平均回复质量</div>
         <div class="stat-value">${d.avgQualityScore || '—'}<span style="font-size:16px;font-weight:400">${d.avgQualityScore ? '/10' : ''}</span></div>
         <div class="stat-sub">AI 生成回复综合评分</div>
       </div>
     </div>
 
-    <!-- 状态 & 问题分类，带时间范围切换 -->
-    <div class="section-header-row">
-      <span class="section-title" style="margin:0">处理状态 &amp; 问题分类</span>
-      <div class="seg-group" id="bm-range-seg">
-        <button class="seg-btn active" data-v="all"  onclick="setBmRange('all')">全部</button>
-        <button class="seg-btn"        data-v="30d"  onclick="setBmRange('30d')">近30天</button>
-        <button class="seg-btn"        data-v="7d"   onclick="setBmRange('7d')">近7天</button>
-      </div>
-    </div>
+    <!-- 环比对比条 -->
     <div id="bm-comp-strip"></div>
-    <div class="chart-grid">
+
+    <!-- 8+4 布局：趋势图 + Top 问题横向排行 -->
+    <div class="chart-grid-84">
       <div class="chart-card">
-        <div class="chart-title">处理状态分布 <span class="brand-tag ${tagClass}">${label}</span></div>
-        <div class="chart-subtitle" id="bm-status-sub"></div>
-        <div class="chart-box" id="chart-bm-status"></div>
-        <div class="chart-insight" id="ins-bm-status"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div>
+            <div class="chart-title">品牌提及趋势</div>
+            <div class="chart-subtitle" id="bm-scraping-sub">近期品牌舆情抓取量</div>
+          </div>
+          <div class="seg-group" id="bm-gran-seg">
+            <button class="seg-btn active" data-v="day"   onclick="setBmGran('day')">日</button>
+            <button class="seg-btn"        data-v="week"  onclick="setBmGran('week')">周</button>
+            <button class="seg-btn"        data-v="month" onclick="setBmGran('month')">月</button>
+          </div>
+        </div>
+        <div class="chart-box tall" id="chart-bm-scraping"></div>
+        <div class="chart-insight" id="ins-bm-scraping"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">用户问题分类 <span class="brand-tag ${tagClass}">${label}</span></div>
-        <div class="chart-subtitle" id="bm-prob-sub"></div>
-        <div class="chart-box" id="chart-bm-prob"></div>
+        <div class="chart-title">Top 问题分类</div>
+        <div class="chart-subtitle" id="bm-prob-sub">横向排行</div>
+        <div id="bm-prob-bar-list" style="margin-top:8px"></div>
         <div class="chart-insight" id="ins-bm-prob"></div>
       </div>
     </div>
 
-    <!-- 趋势，带时间粒度切换 -->
-    <div class="section-header-row">
-      <span class="section-title" style="margin:0">抓取 &amp; 处理趋势</span>
-      <div class="seg-group" id="bm-gran-seg">
-        <button class="seg-btn active" data-v="day"   onclick="setBmGran('day')">日</button>
-        <button class="seg-btn"        data-v="week"  onclick="setBmGran('week')">周</button>
-        <button class="seg-btn"        data-v="month" onclick="setBmGran('month')">月</button>
+    <!-- 处理管道：待处理 → 已生成 → 已处理 -->
+    <div class="section-title">处理管道</div>
+    <div class="chart-card" style="margin-bottom:16px">
+      <div class="chart-subtitle" id="bm-status-sub">待处理 → 已生成 → 已处理 转化，不含无需处理分流</div>
+      <div id="bm-pipeline" style="display:flex;align-items:stretch;gap:0;padding:16px 0 8px;overflow-x:auto"></div>
+    </div>
+
+    <!-- 问题详情（默认折叠） -->
+    <div class="chart-card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleBmDetail()">
+        <div class="chart-title">查看全部问题分类</div>
+        <span id="bm-detail-toggle" style="font-size:12px;color:var(--text-3)">展开 ▼</span>
       </div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">抓取趋势 <span class="brand-tag ${tagClass}">${label}</span></div>
-      <div class="chart-subtitle" id="bm-scraping-sub">近期品牌舆情抓取量</div>
-      <div class="chart-box tall" id="chart-bm-scraping"></div>
-      <div class="chart-insight" id="ins-bm-scraping"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">处理趋势 <span class="brand-tag ${tagClass}">${label}</span></div>
-      <div class="chart-subtitle" id="bm-trend-sub">按实际处理时间统计</div>
-      <div class="chart-box tall" id="chart-bm-trend"></div>
-      <div class="chart-insight" id="ins-bm-trend"></div>
+      <div id="bm-detail-body" style="display:none;margin-top:14px">
+        <div class="chart-grid">
+          <div class="chart-card" style="box-shadow:none">
+            <div class="chart-title">处理状态分布</div>
+            <div class="chart-box" id="chart-bm-status"></div>
+            <div class="chart-insight" id="ins-bm-status"></div>
+          </div>
+          <div class="chart-card" style="box-shadow:none">
+            <div class="chart-title">处理趋势</div>
+            <div class="chart-subtitle" id="bm-trend-sub">按实际处理时间统计</div>
+            <div class="chart-box" id="chart-bm-trend"></div>
+            <div class="chart-insight" id="ins-bm-trend"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 运营分析建议（默认折叠） -->
-    <div class="analysis-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="(function(){const el=document.getElementById('bm-analysis-body');const ic=document.getElementById('bm-analysis-toggle');if(el.style.display==='none'){el.style.display='';ic.textContent='▲'}else{el.style.display='none';ic.textContent='▼'}})()">
-        <span class="chart-title" style="margin:0">运营分析 &amp; 建议</span>
-        <span id="bm-analysis-toggle" style="font-size:11px;color:var(--text-3)">▼ 展开</span>
+    <div class="chart-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleBmAnalysis()">
+        <div>
+          <div class="chart-title">运营分析 &amp; 建议</div>
+          <div id="bm-analysis-hint" style="font-size:12px;color:var(--text-3);margin-top:2px">点击展开完整建议</div>
+        </div>
+        <span id="bm-analysis-toggle" style="font-size:12px;color:var(--text-3);white-space:nowrap">展开 ▼</span>
       </div>
-      <div id="bm-analysis-body" style="display:none;margin-top:12px">
+      <div id="bm-analysis-body" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
         <div id="bm-analysis"></div>
       </div>
     </div>
+  </div>
   `;
 
   updateBmDistCharts();
@@ -998,24 +1337,98 @@ function setBmGran(gran) {
   updateBmTrendCharts();
 }
 
+function unresolvedSevereBrand(bmData) {
+  const cross = bmData.problemStatusCross?.['严重故障'];
+  if (cross && Object.keys(cross).length > 0) {
+    const done = (cross['已处理']||0) + (cross['无需处理']||0);
+    return Math.max(0, Object.values(cross).reduce((s,v)=>s+v,0) - done);
+  }
+  return bmData.problemType?.['严重故障'] || 0;
+}
+
+function toggleBmDetail() {
+  const body = document.getElementById('bm-detail-body');
+  const icon = document.getElementById('bm-detail-toggle');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  if (icon) icon.textContent = open ? '展开 ▼' : '收起 ▲';
+  if (!open) { updateBmTrendCharts(); renderBMStatusChart('chart-bm-status', filterIgnored((bmGetRangeData((currentData.brandMonitoring||{})[bmState.brand]||{}, bmState.range)).curr)); }
+}
+
+function toggleBmAnalysis() {
+  const body = document.getElementById('bm-analysis-body');
+  const icon = document.getElementById('bm-analysis-toggle');
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  if (icon) icon.textContent = open ? '展开 ▼' : '收起 ▲';
+}
+
 // ── 分布图（状态 + 问题分类）更新 ────────────────────────────
 function updateBmDistCharts() {
   const d = (currentData.brandMonitoring || {})[bmState.brand] || {};
   const { curr: currStatus, prev: prevStatus, currProb, prevProb } = bmGetRangeData(d, bmState.range);
+  const filteredStatus = filterIgnored(currStatus);
 
-  renderBMStatusChart('chart-bm-status', filterIgnored(currStatus));
-  renderProblemChart('chart-bm-prob', currProb);
+  // 处理管道
+  const pipelineEl = document.getElementById('bm-pipeline');
+  if (pipelineEl) {
+    const pending   = currStatus['待处理'] || 0;
+    const generated = currStatus['已生成'] || 0;
+    const processed = currStatus['已处理'] || 0;
+    const total     = pending + generated + processed;
+    const pipeSteps = [
+      { label: '待处理',   val: pending,   color: 'var(--warning)' },
+      { label: 'AI 已生成',val: generated, color: 'var(--info)' },
+      { label: '已处理',   val: processed, color: 'var(--success)' },
+    ];
+    pipelineEl.innerHTML = pipeSteps.map((s, i) => {
+      const rate = i > 0 && total > 0 ? ((s.val/total)*100).toFixed(0) : null;
+      return `<div style="flex:1;min-width:90px;display:flex;flex-direction:column;align-items:center;position:relative">
+        ${i > 0 ? '<div style="position:absolute;left:-1px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--border)">›</div>' : ''}
+        <div style="font-size:11px;color:var(--text-3);font-weight:600;margin-bottom:6px">${s.label}</div>
+        <div style="font-size:30px;font-weight:800;color:${s.color}">${s.val.toLocaleString()}</div>
+        ${rate !== null ? `<div style="font-size:11px;color:var(--text-3);margin-top:4px">占比 ${rate}%</div>` : ''}
+      </div>`;
+    }).join('');
+  }
 
-  const currTotal = Object.values(currStatus).reduce((s,v)=>s+v, 0);
-  const praise  = currProb['正向夸奖']||0;
-  const severe  = currProb['严重故障']||0;
-  setText('bm-status-sub', `待处理 ${currStatus['待处理']||0} · 无需处理 ${currStatus['无需处理']||0} · AI已生成 ${currStatus['已生成']||0}`);
+  // Top 问题分类横向排行
+  const probBarEl = document.getElementById('bm-prob-bar-list');
+  if (probBarEl) {
+    const probEntries = Object.entries(currProb).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const maxProb = probEntries[0]?.[1] || 1;
+    const probColors = { '咨询请求':'var(--info)', '严重故障':'var(--danger)', '体验吐槽':'var(--warning)', '正向夸奖':'var(--success)', '其他':'var(--text-3)' };
+    probBarEl.innerHTML = probEntries.length
+      ? probEntries.map(([k, v]) => `
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+              <span style="color:var(--text-2);font-weight:500">${k}</span>
+              <span style="font-weight:700;color:var(--text-1)">${v}</span>
+            </div>
+            <div style="height:7px;background:var(--border);border-radius:4px;overflow:hidden">
+              <div style="height:100%;width:${((v/maxProb)*100).toFixed(0)}%;background:${probColors[k]||'var(--text-3)'};border-radius:4px"></div>
+            </div>
+          </div>`).join('')
+      : '<div style="color:var(--text-3);font-size:13px">暂无问题分类数据</div>';
+  }
+
+  const praise = currProb['正向夸奖']||0;
+  const severe = currProb['严重故障']||0;
+  setText('bm-status-sub', `待处理 ${currStatus['待处理']||0} · AI已生成 ${currStatus['已生成']||0} · 无需处理分流 ${currStatus['无需处理']||0}`);
   setText('bm-prob-sub',   `正向夸奖 ${praise} · 严重故障 ${severe}${d.avgQualityScore ? ' · 均分 <b>'+d.avgQualityScore+'</b>/10' : ''}`);
 
   setText('ins-bm-status', insightBMStatus({ ...d, statusCount: currStatus }));
   setText('ins-bm-prob',   insightProblem(currProb, d.avgQualityScore));
   setText('bm-comp-strip', bmBuildCompStrip(currStatus, prevStatus, currProb, prevProb, bmState.range));
   setText('bm-analysis',   insightBrandMonitorFull(d, currStatus, currProb, prevStatus, prevProb, bmState.range));
+
+  // 更新折叠 hint
+  const processRate = (currStatus['待处理']||0) > 10
+    ? `积压 ${currStatus['待处理']} 条待处理内容，建议优先清化`
+    : severe > 0 ? `严重故障 ${severe} 条，需重点跟进` : '整体处理状态正常';
+  setText('bm-analysis-hint', processRate);
 }
 
 // ── 趋势图更新 ────────────────────────────────────────────────
@@ -1216,7 +1629,7 @@ function insightBrandMonitorFull(d, currSt, currProb, prevSt, prevProb, range) {
   return s1 + s2 + s3 + s4;
 }
 
-/* ══════════════ 今日概览 ══════════════ */
+/* ══════════════ 今日总览 ══════════════ */
 
 function renderOverview() {
   const sf    = currentData.streamfab || {};
@@ -1229,29 +1642,25 @@ function renderOverview() {
   const aioDf = currentData.aioBo?.dvdfab    || {};
   const dq    = currentData.dataQuality || {};
 
-  // ── 今日待办 ─────────────────────────────────────────
-  const pendingPrecise = (sf.statusCount?.['待处理']||0) + (df.statusCount?.['待处理']||0);
-  const pendingBrand   = (sfBm.pending||0) + (dfBm.pending||0);
-  const generatedBrand = (sfBm.generated||0) + (dfBm.generated||0);
-  // 未处理严重故障：从 problemStatusCross 中排除已处理和无需处理，兼容无此字段的旧数据
-  function unresolvedSevere(bm) {
-    const cross = bm.problemStatusCross?.['严重故障'];
+  // ── 计算关键指标 ─────────────────────────────────────
+  function unresolvedSevere(bmData) {
+    const cross = bmData.problemStatusCross?.['严重故障'];
     if (cross && Object.keys(cross).length > 0) {
       const done = (cross['已处理']||0) + (cross['无需处理']||0);
       return Math.max(0, Object.values(cross).reduce((s,v)=>s+v,0) - done);
     }
-    return bm.problemType?.['严重故障'] || 0;
+    return bmData.problemType?.['严重故障'] || 0;
   }
-  const severeCnt = unresolvedSevere(sfBm) + unresolvedSevere(dfBm);
-  const dqErrors       = dq.checks?.filter(c => c.level === 'error').length || 0;
+  const severeCnt      = unresolvedSevere(sfBm) + unresolvedSevere(dfBm);
+  const reviewPending  = (sf.statusCount?.['待审核']||0) + (sf.statusCount?.['需要复核']||0)
+                       + (df.statusCount?.['待审核']||0) + (df.statusCount?.['需要复核']||0);
+  const generatedBrand = (sfBm.generated||0) + (dfBm.generated||0);
+  const generatedPrecise = (sf.statusCount?.['已生成']||0) + (df.statusCount?.['已生成']||0);
+  const publishPending = generatedBrand + generatedPrecise;
+  const dqErrors       = dq.checks?.filter(c => c.level === 'error').length   || 0;
   const dqWarnings     = dq.checks?.filter(c => c.level === 'warning').length || 0;
 
-  // ── 本周成果 ─────────────────────────────────────────
-  const sfWow   = calcWoW(sf.dailyTrend || []);
-  const dfWow   = calcWoW(df.dailyTrend || []);
-  const sfBmWow = calcWoW(sfBm.processingTrend || []);
-  const dfBmWow = calcWoW(dfBm.processingTrend || []);
-
+  // ── 本周发布量 ───────────────────────────────────────
   let weekPublished = 0;
   {
     const today = new Date(); today.setHours(0,0,0,0);
@@ -1263,9 +1672,8 @@ function renderOverview() {
       weekPublished += monAggByDate(df.statusByDate, mon0, new Date())['已发布'] || 0;
   }
 
-  // ── AIO-BO 预测（支持 snapshots 结构，兼容旧 actual 数组） ──
+  // ── AIO-BO 预测 ──────────────────────────────────────
   function aioForecast(a) {
-    // 优先使用 snapshots（日期快照），兼容旧的 actual 数组
     let vals;
     if (a.snapshots && a.snapshots.length > 0) {
       vals = a.snapshots.map(s => s.value).filter(v => v !== null && v !== undefined);
@@ -1274,7 +1682,7 @@ function renderOverview() {
     }
     const current = a.current !== undefined ? a.current : (vals.length ? vals[vals.length - 1] : null);
     const q3Tgt   = a.q3Target || 0;
-    const gap     = current !== null ? q3Tgt - current : null; // 单位：百分点 pp
+    const gap     = current !== null ? q3Tgt - current : null;
     let velocity  = null;
     const sampleN = Math.min(3, vals.length);
     if (vals.length >= 2) {
@@ -1288,80 +1696,245 @@ function renderOverview() {
   const sfFc = aioForecast(aioSf);
   const dfFc = aioForecast(aioDf);
 
+  // ── 系统健康度评分 ────────────────────────────────────
+  function calcHealthScore(sfD, dfD, sfBmD, dfBmD, dqD, sfFcD, dfFcD) {
+    let score = 100;
+    const dqErr  = dqD.checks?.filter(c => c.level === 'error').length || 0;
+    const dqWarn = dqD.checks?.filter(c => c.level === 'warning').length || 0;
+    score -= dqErr * 12 + dqWarn * 3;    // 数据质量 25%
+    const sev = unresolvedSevere(sfBmD) + unresolvedSevere(dfBmD);
+    score -= Math.min(25, sev * 5);      // 严重故障 25%
+    const rev = (sfD.statusCount?.['待审核']||0)+(dfD.statusCount?.['待审核']||0)
+              + (sfD.statusCount?.['需要复核']||0)+(dfD.statusCount?.['需要复核']||0);
+    score -= Math.min(20, rev > 20 ? 20 : rev > 10 ? 10 : 0); // 审核积压 20%
+    const sfPub = sfD.total > 0 ? sfD.published/sfD.total : 0.5;
+    const dfPub = dfD.total > 0 ? dfD.published/dfD.total : 0.5;
+    const avgPub = (sfPub + dfPub) / 2;
+    score -= avgPub < 0.15 ? 15 : avgPub < 0.30 ? 8 : 0;     // 发布转化 15%
+    const sfGap = sfFcD.gap || 0, dfGap = dfFcD.gap || 0;
+    score -= sfGap > 5 ? 10 : sfGap > 2 ? 5 : 0;              // AIO进度 15%
+    score -= dfGap > 5 ? 5 : 0;
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+  const healthScore = calcHealthScore(sf, df, sfBm, dfBm, dq, sfFc, dfFc);
+  const healthColor = healthScore >= 80 ? 'var(--success)' : healthScore >= 60 ? 'var(--warning)' : 'var(--danger)';
+
+  // ── AI 今日总结（基于规则生成） ──────────────────────
+  function buildAiSummary() {
+    const issues = [];
+    const tags   = [];
+    if (severeCnt > 5)          { issues.push(`有 <b>${severeCnt}</b> 条未处理严重故障`); tags.push({t:'严重故障偏多',c:'danger'}); }
+    else if (severeCnt > 0)     { issues.push(`有 <b>${severeCnt}</b> 条严重故障待处理`); tags.push({t:'有未处理故障',c:'warning'}); }
+    else                        { tags.push({t:'无严重故障',c:'success'}); }
+    if (reviewPending > 20)     { issues.push(`审核积压较多（<b>${reviewPending}</b> 条）`); tags.push({t:'审核积压较多',c:'warning'}); }
+    else if (reviewPending > 0) { tags.push({t:'处理效率正常',c:'info'}); }
+    if (publishPending > 0)     { issues.push(`<b>${publishPending}</b> 条内容已生成待发布`); }
+    if (sfFc.gap > 0 && sfFc.gap < 3) tags.push({t:'AIO 进度良好',c:'success'});
+    else if (sfFc.gap >= 3)           tags.push({t:'AIO 进度需关注',c:'warning'});
+    if (dqErrors > 0)                 { issues.push(`<b>${dqErrors}</b> 个数据异常`); tags.push({t:`${dqErrors}个数据错误`,c:'danger'}); }
+    else if (dqWarnings > 0)          { tags.push({t:`${dqWarnings}个提醒`,c:'warning'}); }
+    else                              { tags.push({t:'数据质量正常',c:'success'}); }
+    const summary = issues.length > 0
+      ? `今天${issues.join('，')}，建议优先处理。`
+      : '当前运营状态健康，维持现有节奏即可。';
+    return { summary, tags };
+  }
+  const ai = buildAiSummary();
+
+  const tagColorMap = { danger:'var(--danger-soft);color:var(--danger)', warning:'var(--warning-soft);color:var(--warning)', success:'var(--success-soft);color:var(--success)', info:'var(--info-soft);color:var(--info)' };
+
+  // ── 健康度子项 ───────────────────────────────────────
+  const sfPubRate = sf.total > 0 ? ((sf.published/sf.total)*100).toFixed(1) : '—';
+  const dfPubRate = df.total > 0 ? ((df.published/df.total)*100).toFixed(1) : '—';
+  const avgPubRate = (sf.total > 0 && df.total > 0)
+    ? (((sf.published + df.published) / (sf.total + df.total)) * 100).toFixed(1) : '—';
   const s7y = pa.survive7day?.['是']||0, s7n = pa.survive7day?.['否']||0;
-  const s7rate = (s7y + s7n) > 0 ? ((s7y / (s7y + s7n)) * 100).toFixed(0) + '%' : '—';
+  const s7Rate = (s7y+s7n) > 0 ? ((s7y/(s7y+s7n))*100).toFixed(0) : '—';
+
+  function healthItem(label, value, unit, statusTxt, statusColor, hint) {
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-1)">${label}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:2px">${hint}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:18px;font-weight:700;color:var(--text-1)">${value}<span style="font-size:12px;font-weight:400;margin-left:2px">${unit}</span></div>
+        <div style="font-size:11px;font-weight:600;color:${statusColor}">${statusTxt}</div>
+      </div>
+    </div>`;
+  }
 
   document.getElementById('main').innerHTML = `
-    <div class="page-header">
-      <div class="page-title">今日概览</div>
-      <div class="page-desc">当前状态 · 本周成果 · 目标进度 — 打开即知道今天该做什么</div>
+  <div class="main-inner">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
+      <div>
+        <div class="page-title" style="font-size:26px">今日总览</div>
+        <div class="page-desc">一眼掌握运营全局，聚焦今日重点</div>
+      </div>
+      <div style="text-align:right;font-size:12px;color:var(--text-3);line-height:1.8">
+        <div>${new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'})}</div>
+        <div id="ov-update-hint"></div>
+      </div>
     </div>
 
-    <div class="section-title">今日待办</div>
+    <!-- 模块一：今日重点 Action KPI -->
+    <div class="section-title" style="margin-top:0">今日重点</div>
     <div class="stat-grid">
-      <div class="stat-card clickable-card" onclick="navigate('sf-brand',document.getElementById('nav-sf-brand'))" style="${severeCnt > 5 ? 'border-color:#fca5a5;background:#fff5f5' : severeCnt > 0 ? 'border-color:#fde68a' : ''}">
+      <div class="stat-card clickable-card ${severeCnt > 5 ? 'danger' : severeCnt > 0 ? 'warning' : 'success'}" onclick="navigate('brand',document.getElementById('nav-brand'))">
         <div class="stat-label">未处理严重故障</div>
-        <div class="stat-value" style="font-size:28px;color:${severeCnt > 5 ? 'var(--red)' : severeCnt > 0 ? 'var(--amber)' : 'var(--green)'}">${severeCnt}</div>
-        <div class="stat-sub">${severeCnt > 5 ? '未处理数量偏高，需优先跟进' : severeCnt > 0 ? '尚未处理的严重故障' : '暂无未处理记录'}</div>
+        <div class="stat-value">${severeCnt}</div>
+        <div class="stat-sub">${severeCnt > 5 ? '⚠ 数量偏高，需优先跟进' : severeCnt > 0 ? '尚有未处理的严重故障' : '✓ 暂无未处理记录'}</div>
       </div>
-      <div class="stat-card clickable-card" onclick="navigate('streamfab',document.getElementById('nav-streamfab'))" style="${pendingPrecise > 30 ? 'border-color:#fde68a' : ''}">
-        <div class="stat-label">精准词待处理</div>
-        <div class="stat-value" style="font-size:28px;color:${pendingPrecise > 30 ? 'var(--amber)' : 'var(--text-1)'}">${pendingPrecise}</div>
-        <div class="stat-sub">SF ${sf.statusCount?.['待处理']||0} · DF ${df.statusCount?.['待处理']||0}</div>
+      <div class="stat-card clickable-card ${reviewPending > 20 ? 'warning' : reviewPending > 0 ? 'info' : 'success'}" onclick="navigate('keywords',document.getElementById('nav-keywords'))">
+        <div class="stat-label">待审核</div>
+        <div class="stat-value">${reviewPending}</div>
+        <div class="stat-sub">精准词待审核 · 需要复核合计</div>
       </div>
-      <div class="stat-card clickable-card" onclick="navigate('sf-brand',document.getElementById('nav-sf-brand'))" style="${pendingBrand > 30 ? 'border-color:#fde68a' : ''}">
-        <div class="stat-label">品牌舆情待处理</div>
-        <div class="stat-value" style="font-size:28px;color:${pendingBrand > 30 ? 'var(--amber)' : 'var(--text-1)'}">${pendingBrand}</div>
-        <div class="stat-sub">已生成待发布 ${generatedBrand} 条</div>
+      <div class="stat-card clickable-card ${publishPending > 10 ? 'info' : 'success'}" onclick="navigate('execution',document.getElementById('nav-execution'))">
+        <div class="stat-label">待发布</div>
+        <div class="stat-value">${publishPending}</div>
+        <div class="stat-sub">已审核待发布（精准词 ${generatedPrecise} · 品牌 ${generatedBrand}）</div>
       </div>
-      <div class="stat-card clickable-card" onclick="navigate('aioBo',document.getElementById('nav-aioBo'))" style="${dqErrors > 0 ? 'border-color:#fca5a5;background:#fff5f5' : dqWarnings > 0 ? 'border-color:#fde68a' : ''}">
-        <div class="stat-label">数据质量</div>
-        <div class="stat-value" style="font-size:22px;margin-top:6px;color:${dqErrors > 0 ? 'var(--red)' : dqWarnings > 0 ? 'var(--amber)' : 'var(--green)'}">
-          ${dqErrors > 0 ? dqErrors + ' 错误' : dqWarnings > 0 ? dqWarnings + ' 警告' : '正常'}
+      <div class="stat-card clickable-card ${dqErrors > 0 ? 'danger' : dqWarnings > 0 ? 'warning' : 'success'}" onclick="navigate('execution',document.getElementById('nav-execution'))">
+        <div class="stat-label">数据异常</div>
+        <div class="stat-value" style="font-size:28px">${dqErrors > 0 ? dqErrors : dqWarnings > 0 ? dqWarnings : 0}</div>
+        <div class="stat-sub">${dqErrors > 0 ? dqErrors + ' 个错误，需立即处理' : dqWarnings > 0 ? dqWarnings + ' 个提醒，建议检查' : '✓ 所有检查通过'}</div>
+      </div>
+    </div>
+
+    <!-- 模块二：AI 今日总结 -->
+    <div class="chart-card" style="margin-bottom:24px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:16px;font-weight:700;color:var(--text-1)">AI 今日总结</span>
+            <span style="font-size:11px;background:var(--purple-bg);color:var(--purple);padding:2px 8px;border-radius:10px;font-weight:600">自动生成</span>
+          </div>
+          <div style="font-size:14px;color:var(--text-2);line-height:1.7;margin-bottom:12px">${ai.summary}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${ai.tags.map(tag => `<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;background:${tagColorMap[tag.c]}">${tag.t}</span>`).join('')}
+          </div>
         </div>
-        <div class="stat-sub">${dqErrors > 0 ? '需立即处理' : dqWarnings > 0 ? '建议检查' : '所有检查通过'}</div>
+        <div>
+          <button onclick="toggleAiDetail()" id="ai-detail-btn"
+            style="white-space:nowrap;padding:7px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-2);font-size:12px;font-weight:600;cursor:pointer">
+            展开详细分析 ▼
+          </button>
+        </div>
+      </div>
+      <div id="ai-detail-body" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        ${buildAiDetailHTML(sf, df, sfBm, dfBm, dq, sfFc, dfFc, severeCnt, reviewPending, publishPending)}
       </div>
     </div>
 
-    <div class="section-title">本周成果</div>
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-label">本周新增抓取</div>
-        <div class="stat-value" style="font-size:28px">${sfWow.thisWeek + dfWow.thisWeek}</div>
-        <div>${wowHTML(sfWow.thisWeek + dfWow.thisWeek, sfWow.lastWeek + dfWow.lastWeek)}</div>
-        <div class="stat-sub">SF ${sfWow.thisWeek} · DF ${dfWow.thisWeek}</div>
+    <!-- 模块三：系统健康度 -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">系统健康度</div>
+        <div class="chart-subtitle">基于数据质量、故障、审核积压、发布转化、AIO进度加权评分</div>
+        <div style="display:flex;align-items:center;gap:20px;padding:12px 0 16px">
+          <div style="position:relative;width:90px;height:90px;flex-shrink:0">
+            <svg viewBox="0 0 36 36" style="width:90px;height:90px;transform:rotate(-90deg)">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="${healthColor}" stroke-width="3"
+                stroke-dasharray="${healthScore} ${100-healthScore}" stroke-dashoffset="0" stroke-linecap="round"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <span style="font-size:20px;font-weight:800;color:${healthColor}">${healthScore}</span>
+              <span style="font-size:10px;color:var(--text-3)">分</span>
+            </div>
+          </div>
+          <div style="flex:1">
+            ${healthItem('发布转化率', avgPubRate, '%', avgPubRate >= 15 ? '正常' : '偏低', avgPubRate >= 15 ? 'var(--success)' : 'var(--warning)', '目标 ≥ 15%  内部运营目标')}
+            ${healthItem('审核积压', reviewPending, '条', reviewPending > 20 ? '注意' : reviewPending > 0 ? '待处理' : '正常', reviewPending > 20 ? 'var(--warning)' : reviewPending > 0 ? 'var(--info)' : 'var(--success)', '建议及时清化')}
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:12px">
+          ${healthItem('严重故障', severeCnt, '条', severeCnt > 5 ? '风险' : severeCnt > 0 ? '注意' : '正常', severeCnt > 5 ? 'var(--danger)' : severeCnt > 0 ? 'var(--warning)' : 'var(--success)', '未处理严重故障数')}
+          ${healthItem('SF AIO 进度', sfFc.current !== null ? sfFc.current + '%' : '—', '', sfFc.gap !== null && sfFc.gap <= 0 ? '已达标' : sfFc.gap < 3 ? '正常' : '待追赶', sfFc.gap !== null && sfFc.gap <= 0 ? 'var(--success)' : sfFc.gap < 3 ? 'var(--success)' : 'var(--warning)', 'Q3目标 ' + (aioSf.q3Target||25) + '%')}
+        </div>
       </div>
-      <div class="stat-card accent">
-        <div class="stat-label">本周已发布回复</div>
-        <div class="stat-value" style="font-size:28px">${weekPublished}</div>
-        <div class="stat-sub">${(sf.statusByDate && Object.keys(sf.statusByDate||{}).length) ? '精准词本周发布量' : '（需新版 stats.json）'}</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">品牌舆情本周处理</div>
-        <div class="stat-value" style="font-size:28px">${sfBmWow.thisWeek + dfBmWow.thisWeek}</div>
-        <div>${wowHTML(sfBmWow.thisWeek + dfBmWow.thisWeek, sfBmWow.lastWeek + dfBmWow.lastWeek)}</div>
-        <div class="stat-sub">SF ${sfBmWow.thisWeek} · DF ${dfBmWow.thisWeek}</div>
-      </div>
-      <div class="stat-card blue">
-        <div class="stat-label">第三方账号总量</div>
-        <div class="stat-value" style="font-size:28px">${(pa.total||0).toLocaleString()}</div>
-        <div class="stat-sub">7天存活率 ${s7rate}</div>
+
+      <!-- 模块四：快捷行动中心 -->
+      <div class="chart-card">
+        <div class="chart-title">快捷行动中心</div>
+        <div class="chart-subtitle">今日优先处理任务</div>
+        ${actionCard('处理故障', severeCnt + ' 条待处理', '立即处理', "navigate('brand',document.getElementById('nav-brand'))", severeCnt > 0)}
+        ${actionCard('审核内容', reviewPending + ' 条待审核', '去审核', "navigate('keywords',document.getElementById('nav-keywords'))", reviewPending > 0)}
+        ${actionCard('发布内容', publishPending + ' 条待发布', '查看详情', "navigate('execution',document.getElementById('nav-execution'))", publishPending > 0)}
+        ${actionCard('AIO-BO 追踪', sfFc.gap !== null ? '缺口 -' + Math.abs(sfFc.gap||0).toFixed(1) + 'pp' : '查看进展', '去更新', "navigate('aioBo',document.getElementById('nav-aioBo'))", true)}
       </div>
     </div>
 
-    <div class="section-title">北极星目标预测（AIO-BO）</div>
+    <!-- AIO-BO 简要进度 -->
+    <div class="section-title">AIO-BO 目标进度</div>
     <div class="chart-grid">
       ${ovAioBoCard('StreamFab', 'sf', sfFc)}
       ${ovAioBoCard('DVDFab', 'df', dfFc)}
     </div>
-
-    <div class="section-title">快速跳转</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
-      ${[['streamfab','SF精准词'],['dvdfab','DF精准词'],['sf-brand','SF品牌舆情'],['df-brand','DF品牌舆情'],['execution','执行动作'],['aioBo','AIO-BO']].map(([t,l])=>
-        `<button onclick="navigate('${t}',document.getElementById('nav-${t}'))" style="padding:7px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-2);font-size:13px;cursor:pointer;font-weight:500;transition:all .15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='var(--surface)'">${l}</button>`
-      ).join('')}
-    </div>
+  </div>
   `;
+
+  // 更新提示
+  const upd = document.getElementById('ov-update-hint');
+  if (upd) {
+    const d = new Date(currentData.updatedAt);
+    upd.textContent = '数据更新：' + d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+  }
+}
+
+function actionCard(title, count, btnLabel, onclick, active) {
+  return `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)">
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--text-1)">${title}</div>
+      <div style="font-size:12px;color:${active ? 'var(--text-2)' : 'var(--text-3)'};margin-top:2px">${count}</div>
+    </div>
+    <button onclick="${onclick}" style="padding:5px 12px;border:1px solid ${active ? 'var(--accent)' : 'var(--border)'};border-radius:7px;background:${active ? 'var(--accent-bg)' : 'var(--bg)'};color:${active ? 'var(--accent)' : 'var(--text-3)'};font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">${btnLabel}</button>
+  </div>`;
+}
+
+function toggleAiDetail() {
+  const body = document.getElementById('ai-detail-body');
+  const btn  = document.getElementById('ai-detail-btn');
+  if (!body || !btn) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : '';
+  btn.textContent = open ? '展开详细分析 ▼' : '收起详细分析 ▲';
+}
+
+function buildAiDetailHTML(sf, df, sfBm, dfBm, dq, sfFc, dfFc, severeCnt, reviewPending, publishPending) {
+  const sfPub = sf.total > 0 ? ((sf.published/sf.total)*100).toFixed(0) : '—';
+  const dfPub = df.total > 0 ? ((df.published/df.total)*100).toFixed(0) : '—';
+  const sections = [];
+
+  sections.push(`<div class="analysis-section"><div class="analysis-title">⚠ 当前风险</div><div class="analysis-body">`
+    + (severeCnt > 0 ? `严重故障 <b>${severeCnt}</b> 条未处理；` : '')
+    + (reviewPending > 20 ? `审核积压 <b>${reviewPending}</b> 条；` : '')
+    + (dq.checks?.filter(c=>c.level==='error').length > 0 ? `数据错误 <b>${dq.checks.filter(c=>c.level==='error').length}</b> 个；` : '')
+    + (severeCnt === 0 && reviewPending <= 20 && !dq.checks?.some(c=>c.level==='error') ? '暂无高优先级风险。' : '')
+    + `</div></div>`);
+
+  sections.push(`<div class="analysis-section"><div class="analysis-title">🔍 主要原因</div><div class="analysis-body">`
+    + (severeCnt > 0 ? `严重故障积压通常源于处理速度不及抓取速度，建议每日固定清化配额。` : '')
+    + (reviewPending > 10 ? ` 审核积压说明 AI 生成速度快于人工审核，建议调整每日审核目标。` : '')
+    + (severeCnt === 0 && reviewPending <= 10 ? '当前运营状态良好，各环节运转正常。' : '')
+    + `</div></div>`);
+
+  const recs = [];
+  if (severeCnt > 0)       recs.push(`优先处理 <b>${severeCnt}</b> 条未处理严重故障`);
+  if (reviewPending > 0)   recs.push(`今日审核 <b>${Math.min(reviewPending,20)}</b> 条待审核内容`);
+  if (publishPending > 0)  recs.push(`跟进 <b>${publishPending}</b> 条已生成内容的发布`);
+  if (sfFc.gap > 0)        recs.push(`AIO-BO 缺口 <b>${sfFc.gap?.toFixed(2)}pp</b>，持续推进关键词全链路建设`);
+  if (!recs.length)        recs.push('维持现有运营节奏');
+  sections.push(`<div class="analysis-section"><div class="analysis-title">💡 推荐动作</div><div class="analysis-body"><ol style="padding-left:18px">${recs.map(r=>`<li style="margin-bottom:4px">${r}</li>`).join('')}</ol></div></div>`);
+
+  sections.push(`<div class="analysis-section"><div class="analysis-title">📊 数据依据</div><div class="analysis-body">`
+    + `SF 精准词发布率 <b>${sfPub}%</b> · DF <b>${dfPub}%</b>；`
+    + `SF AIO-BO <b>${sfFc.current ?? '—'}%</b> / 目标 <b>${sfFc.q3Target}%</b>；`
+    + `DF AIO-BO <b>${dfFc.current ?? '—'}%</b> / 目标 <b>${dfFc.q3Target}%</b>。`
+    + `</div></div>`);
+
+  return `<div class="analysis-card" style="box-shadow:none;border:none;padding:0">${sections.join('')}</div>`;
 }
 
 function ovAioBoCard(brandName, cls, fc) {
@@ -1444,53 +2017,55 @@ function renderExecution() {
   const dfPraiseRate = df.total > 0 ? ((dfPraise/df.total)*100).toFixed(0) : '—';
 
   document.getElementById('main').innerHTML = `
-    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+  <div class="main-inner">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:24px">
       <div>
-        <div class="page-title">执行动作</div>
-        <div class="page-desc">品牌舆情回复执行情况 · 第三方付费账号 · 工具进展</div>
+        <div class="page-title" style="font-size:26px">执行漏斗</div>
+        <div class="page-desc">跨品牌运营执行链路 · 定位瓶颈 · 渠道健康度</div>
       </div>
-      <button class="push-btn" id="pushBrandBtn" onclick="openSimplePushModal('push-brand-card.yml','pushBrandBtn','推送品牌舆情监控周报')" title="推送品牌舆情监控周报到飞书群">
+      <button class="push-btn" id="pushBrandBtn" onclick="openSimplePushModal('push-brand-card.yml','pushBrandBtn','推送品牌舆情监控周报')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
         推送飞书卡片
       </button>
     </div>
 
     <div class="stat-grid">
-      <div class="stat-card accent">
+      <div class="stat-card">
         <div class="stat-label">内部回复执行总量</div>
         <div class="stat-value">${totalInternal.toLocaleString()}</div>
         <div class="stat-sub">品牌舆情 + 精准词已处理合计</div>
       </div>
-      <div class="stat-card green">
+      <div class="stat-card ${Number(bmRate) >= 50 ? 'success' : Number(bmRate) >= 20 ? 'info' : 'warning'}">
         <div class="stat-label">品牌舆情处理率</div>
         <div class="stat-value">${bmRate}%</div>
         <div class="stat-sub">已处理 ${bmProcessed} / 总量 ${bmTotal}</div>
       </div>
-      <div class="stat-card blue">
+      <div class="stat-card info">
         <div class="stat-label">第三方投放总数</div>
         <div class="stat-value">${(pa.total||0).toLocaleString()}</div>
         <div class="stat-sub">付费账号累计回帖</div>
       </div>
-      <div class="stat-card purple">
+      <div class="stat-card ${Number(s7Rate) >= 60 ? 'success' : Number(s7Rate) >= 40 ? 'warning' : s7Rate === '—' ? '' : 'danger'}">
         <div class="stat-label">7天存活率</div>
         <div class="stat-value">${s7Rate}</div>
         <div class="stat-sub">存活 ${s7y} / 已知 ${s7y+s7n} 条</div>
       </div>
     </div>
 
-    <!-- 精准词运营漏斗 -->
+    <!-- 主漏斗 + 当前瓶颈 -->
     <div class="section-title">精准词运营漏斗</div>
-    <div class="chart-grid">
+    <div class="chart-grid-84">
       <div class="chart-card">
-        <div class="chart-title">抓取 → 提及 → 生成 → 发布 转化率</div>
+        <div class="chart-title">抓取 → 有效候选 → AI生成 → 已发布</div>
         <div class="chart-subtitle">精准词全流程各阶段实际数量（StreamFab vs DVDFab）</div>
         <div class="chart-box tall" id="chart-exec-funnel"></div>
         <div class="chart-insight" id="ins-exec-funnel"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">渠道健康度</div>
-        <div class="chart-subtitle">各核心指标是否达标</div>
-        <div id="health-status-list" style="padding:8px 0;display:flex;flex-direction:column;gap:10px;"></div>
+        <div class="chart-title">当前瓶颈</div>
+        <div id="exec-bottleneck" style="margin-top:8px"></div>
+        <div class="chart-title" style="margin-top:20px">渠道健康度</div>
+        <div id="health-status-list" style="padding:4px 0"></div>
       </div>
     </div>
 
@@ -1498,18 +2073,18 @@ function renderExecution() {
     <div class="section-title">品牌舆情处理状态</div>
     <div class="chart-grid">
       <div class="chart-card">
-        <div class="chart-title">StreamFab 处理状态 <span class="brand-tag sf">StreamFab</span></div>
+        <div class="chart-title">StreamFab <span class="brand-tag sf">StreamFab</span></div>
         <div class="chart-subtitle">
-          已处理 ${sf.processed||0} · 已生成待发布 ${sf.generated||0} · 待处理 ${sf.pending||0} · 无需处理 ${sf.noAction||0}
+          已处理 ${sf.processed||0} · AI已生成待发布 ${sf.generated||0} · 待处理 ${sf.pending||0}
           &nbsp;${wowHTML(sfWow.thisWeek, sfWow.lastWeek)}
         </div>
         <div class="chart-box" id="chart-sf-status"></div>
         <div class="chart-insight" id="ins-sf-status"></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">DVDFab 处理状态 <span class="brand-tag df">DVDFab</span></div>
+        <div class="chart-title">DVDFab <span class="brand-tag df">DVDFab</span></div>
         <div class="chart-subtitle">
-          已处理 ${df.processed||0} · 已生成待发布 ${df.generated||0} · 待处理 ${df.pending||0} · 无需处理 ${df.noAction||0}
+          已处理 ${df.processed||0} · AI已生成待发布 ${df.generated||0} · 待处理 ${df.pending||0}
           &nbsp;${wowHTML(dfWow.thisWeek, dfWow.lastWeek)}
         </div>
         <div class="chart-box" id="chart-df-status"></div>
@@ -1517,45 +2092,22 @@ function renderExecution() {
       </div>
     </div>
 
-    <!-- 用户问题分类 -->
-    <div class="section-title">用户问题分类</div>
-    <div class="chart-grid">
-      <div class="chart-card">
-        <div class="chart-title">StreamFab 问题分类 <span class="brand-tag sf">StreamFab</span></div>
-        <div class="chart-subtitle">
-          正向夸奖占比 <b>${sfPraiseRate}%</b>
-          ${sf.avgQualityScore ? `&nbsp;·&nbsp;平均回复质量 <b>${sf.avgQualityScore}</b>/10` : ''}
-        </div>
-        <div class="chart-box" id="chart-sf-prob"></div>
-        <div class="chart-insight" id="ins-sf-prob"></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">DVDFab 问题分类 <span class="brand-tag df">DVDFab</span></div>
-        <div class="chart-subtitle">
-          正向夸奖占比 <b>${dfPraiseRate}%</b>
-          ${df.avgQualityScore ? `&nbsp;·&nbsp;平均回复质量 <b>${df.avgQualityScore}</b>/10` : ''}
-        </div>
-        <div class="chart-box" id="chart-df-prob"></div>
-        <div class="chart-insight" id="ins-df-prob"></div>
-      </div>
-    </div>
-
-    <!-- 第三方付费账号 -->
+    <!-- 第三方付费账号（次要区域） -->
     <div class="section-title">第三方付费账号</div>
     <div class="chart-grid-3">
       <div class="chart-card">
         <div class="chart-title">产线分布</div>
-        <div class="chart-box" id="chart-pa-brand"></div>
+        <div class="chart-box short" id="chart-pa-brand"></div>
         <div class="chart-insight" id="ins-pa-brand"></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">新帖 vs 旧帖</div>
-        <div class="chart-box" id="chart-pa-type"></div>
+        <div class="chart-box short" id="chart-pa-type"></div>
         <div class="chart-insight" id="ins-pa-type"></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">存活率对比</div>
-        <div class="chart-box" id="chart-pa-survive"></div>
+        <div class="chart-box short" id="chart-pa-survive"></div>
         <div class="chart-insight" id="ins-pa-survive"></div>
       </div>
     </div>
@@ -1588,22 +2140,20 @@ function renderExecution() {
         </div>
       </div>
     </div>
+  </div>
   `;
 
   renderBMStatusChart('chart-sf-status', filterIgnored(sf.statusCount));
   renderBMStatusChart('chart-df-status', filterIgnored(df.statusCount));
-  renderProblemChart('chart-sf-prob', sf.problemType||{});
-  renderProblemChart('chart-df-prob', df.problemType||{});
   renderPaBrandChart(pa.byBrand||{});
   renderPaTypeChart(pa.byType||{});
   renderPaSurviveChart(pa.survive1day||{}, pa.survive7day||{});
   renderExecFunnelChart(currentData.streamfab, currentData.dvdfab);
   renderHealthStatus(currentData.streamfab, currentData.dvdfab, sf, df, pa);
+  renderBottleneckCard(currentData.streamfab, currentData.dvdfab);
 
   setText('ins-sf-status', insightBMStatus(sf));
   setText('ins-df-status', insightBMStatus(df));
-  setText('ins-sf-prob', insightProblem(sf.problemType||{}, sf.avgQualityScore));
-  setText('ins-df-prob', insightProblem(df.problemType||{}, df.avgQualityScore));
   setText('ins-pa-brand', insightPaBrand(pa.byBrand||{}));
   setText('ins-pa-type',  insightPaType(pa.byType||{}));
   setText('ins-pa-survive', insightPaSurvive(pa.survive1day||{}, pa.survive7day||{}));
@@ -1675,6 +2225,44 @@ function renderExecFunnelChart(sfData, dfData) {
     `漏斗不含品牌提及（非必经步骤）。旁注指标 → ` +
     `SF 品牌提及率 <b>${sfSide.mentRate}%</b>（主意图：${sfSide.topIntents||'—'}）；` +
     `DF 品牌提及率 <b>${dfSide.mentRate}%</b>（主意图：${dfSide.topIntents||'—'}）。`);
+}
+
+/* ══════════════ 当前瓶颈卡片 ══════════════ */
+
+function renderBottleneckCard(sfData, dfData) {
+  const el = document.getElementById('exec-bottleneck');
+  if (!el || !sfData || !dfData) return;
+
+  function funnelVals(d) {
+    const ignored = (d.statusCount?.['已忽略']||0) + (d.statusCount?.['忽略']||0);
+    const valid   = Math.max(0, (d.total||0) - ignored);
+    const aiGen   = (d.statusCount?.['已生成']||0) + (d.published||0);
+    return [d.total||0, valid, aiGen, d.published||0];
+  }
+  const sfV = funnelVals(sfData), dfV = funnelVals(dfData);
+  const combined = sfV.map((v, i) => v + dfV[i]);
+  const labels = ['抓取总量', '有效候选', 'AI已生成', '已发布'];
+
+  // 找出转化率最低的阶段（瓶颈）
+  let minRate = 1, minIdx = 1;
+  for (let i = 1; i < combined.length; i++) {
+    const rate = combined[i-1] > 0 ? combined[i] / combined[i-1] : 1;
+    if (rate < minRate) { minRate = rate; minIdx = i; }
+  }
+
+  const pending = combined[minIdx-1] - combined[minIdx];
+  el.innerHTML = `
+    <div style="background:var(--warning-soft);border:1px solid #FDE68A;border-radius:12px;padding:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--warning);margin-bottom:8px">当前瓶颈：${labels[minIdx]}</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.6">
+        ${labels[minIdx-1]} <b>${combined[minIdx-1].toLocaleString()}</b> →<br>
+        ${labels[minIdx]} <b>${combined[minIdx].toLocaleString()}</b><br>
+        仍有 <b style="color:var(--warning)">${pending.toLocaleString()}</b> 条未完成
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text-3)">
+        建议动作：今日优先处理 ${labels[minIdx]} 环节积压
+      </div>
+    </div>`;
 }
 
 /* ══════════════ 健康度状态 ══════════════ */
@@ -1835,9 +2423,10 @@ function renderAiobo() {
   const dfWordGap = (df.q3TargetWords || 82) - (df.currentWords || 0);
 
   document.getElementById('main').innerHTML = `
+  <div class="main-inner">
     <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
       <div>
-        <div class="page-title">北极星目标：AIO-BO</div>
+        <div class="page-title" style="font-size:26px">北极星目标：AIO-BO</div>
         <div class="page-desc">AI Overview Brand Occupancy Rate — 关键词在 Google AIO Reddit 引用中的品牌占位率</div>
       </div>
       <button class="push-btn" id="pushLarkBtn" onclick="pushToLark()" title="推送本周 AIO-BO 进展卡片到飞书群">
@@ -1846,39 +2435,118 @@ function renderAiobo() {
       </button>
     </div>
 
-    <div class="stat-grid">
-      <div class="stat-card" style="border-top:3px solid var(--accent)">
-        <div class="stat-label">StreamFab AIO-BO</div>
-        <div class="stat-value" style="color:var(--accent)">${sfPct}<span style="font-size:18px;font-weight:500">%</span></div>
-        <div class="stat-sub">${sf.currentWords||0}/${sf.aioTriggerWords||0}词 · 截至 ${sf.dataAsOf||'—'}</div>
+    <!-- Hero：两张品牌卡片 -->
+    <div class="chart-grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <!-- StreamFab Hero Card -->
+      <div class="chart-card" style="border-top:3px solid var(--brand-sf);padding:20px 24px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <span class="brand-tag sf">StreamFab</span>
+          <span style="font-size:13px;color:var(--text-3)">截至 ${sf.dataAsOf||'—'}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;text-align:center;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">当前 AIO-BO</div>
+            <div style="font-size:22px;font-weight:700;color:var(--brand-sf)">${sfPct}<span style="font-size:13px">%</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Q3 目标</div>
+            <div style="font-size:22px;font-weight:700;color:var(--text-1)">${sfTgt}<span style="font-size:13px">%</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">目标完成度</div>
+            <div style="font-size:22px;font-weight:700;color:${sfFill>=100?'var(--success)':'var(--text-1)'}">${sfFill}<span style="font-size:13px">%</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">距目标</div>
+            <div style="font-size:22px;font-weight:700;color:var(--danger)">-${sfGapPp}<span style="font-size:13px">pp</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">预计达标</div>
+            <div style="font-size:16px;font-weight:700;color:var(--success)">${sf.etaDate||'8/31'}</div>
+          </div>
+        </div>
         <div class="aiobo-progress">
-          <div class="aiobo-progress-labels"><span>当前 ${sfPct}%</span><span>Q3目标 ${sfTgt}%</span></div>
+          <div class="aiobo-progress-labels"><span>${sf.currentWords||0}/${sf.aioTriggerWords||0} 词</span><span>缺 ${sfWordGap} 词</span></div>
           <div class="aiobo-progress-track"><div class="aiobo-progress-fill sf" style="width:${sfFill}%"></div></div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px">缺口 <b style="color:var(--accent)">-${sfGapPp}pp</b>，还需增加 <b style="color:var(--accent)">${sfWordGap}</b> 个全链路关键词</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:6px">保守 ${sf.q3Conservative||20}% · 激进 ${sf.q3Aggressive||28}% · 周均 +1.1pp/周</div>
         </div>
       </div>
-      <div class="stat-card" style="border-top:3px solid var(--blue)">
-        <div class="stat-label">DVDFab AIO-BO</div>
-        <div class="stat-value" style="color:var(--blue)">${dfPct}<span style="font-size:18px;font-weight:500">%</span></div>
-        <div class="stat-sub">${df.currentWords||0}/${df.aioTriggerWords||0}词 · 截至 ${df.dataAsOf||'—'}</div>
+      <!-- DVDFab Hero Card -->
+      <div class="chart-card" style="border-top:3px solid var(--brand-df);padding:20px 24px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <span class="brand-tag df">DVDFab</span>
+          <span style="font-size:13px;color:var(--text-3)">截至 ${df.dataAsOf||'—'}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;text-align:center;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">当前 AIO-BO</div>
+            <div style="font-size:22px;font-weight:700;color:var(--brand-df)">${dfPct}<span style="font-size:13px">%</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Q3 目标</div>
+            <div style="font-size:22px;font-weight:700;color:var(--text-1)">${dfTgt}<span style="font-size:13px">%</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">目标完成度</div>
+            <div style="font-size:22px;font-weight:700;color:${dfFill>=100?'var(--success)':'var(--text-1)'}">${dfFill}<span style="font-size:13px">%</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">距目标</div>
+            <div style="font-size:22px;font-weight:700;color:var(--danger)">-${dfGapPp}<span style="font-size:13px">pp</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">预计达标</div>
+            <div style="font-size:16px;font-weight:700;color:var(--success)">${df.etaDate||'9/30'}</div>
+          </div>
+        </div>
         <div class="aiobo-progress">
-          <div class="aiobo-progress-labels"><span>当前 ${dfPct}%</span><span>Q3目标 ${dfTgt}%</span></div>
+          <div class="aiobo-progress-labels"><span>${df.currentWords||0}/${df.aioTriggerWords||0} 词</span><span>缺 ${dfWordGap} 词</span></div>
           <div class="aiobo-progress-track"><div class="aiobo-progress-fill df" style="width:${dfFill}%"></div></div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px">缺口 <b style="color:var(--blue)">-${dfGapPp}pp</b>，还需增加 <b style="color:var(--blue)">${dfWordGap}</b> 个全链路关键词</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:6px">保守 ${df.q3Conservative||35.5}% · 激进 ${df.q3Aggressive||43.5}% · 周均 +1.2pp/周</div>
         </div>
       </div>
-      <div class="stat-card green">
-        <div class="stat-label">SF Q3 目标</div>
-        <div class="stat-value">${sfTgt}%</div>
-        <div class="stat-sub">保守 ${sf.q3Conservative||20}% / 激进 ${sf.q3Aggressive||28}%</div>
-        <div class="stat-sub" style="margin-top:4px">周均 +1.1词，截止 8/31</div>
-      </div>
-      <div class="stat-card blue">
-        <div class="stat-label">DVDFab Q3 目标</div>
-        <div class="stat-value">${dfTgt}%</div>
-        <div class="stat-sub">保守 ${df.q3Conservative||35.5}% / 激进 ${df.q3Aggressive||43.5}%</div>
-        <div class="stat-sub" style="margin-top:4px">周均 +1.2词，截止 9/30</div>
-      </div>
+    </div>
+
+    <!-- §8.4 本周新增/流失关键词 -->
+    <div class="section-title">本周关键词变动</div>
+    <div class="kw-delta-grid">
+      ${['streamfab','dvdfab'].map(bk => {
+        const bdata   = ab[bk] || {};
+        const added   = bdata.weeklyAdded || [];
+        const lost    = bdata.weeklyLost  || [];
+        const addedN  = Array.isArray(added) ? added.length : (added || 0);
+        const lostN   = Array.isArray(lost)  ? lost.length  : (lost  || 0);
+        const net     = (typeof addedN === 'number' ? addedN : 0) - (typeof lostN === 'number' ? lostN : 0);
+        const netCls  = net > 0 ? 'net-pos' : net < 0 ? 'net-neg' : 'net-zero';
+        const netStr  = net > 0 ? '+' + net : String(net);
+        const tag     = bk === 'streamfab' ? 'sf' : 'df';
+        const addedList = Array.isArray(added) ? added.slice(0,5) : [];
+        const lostList  = Array.isArray(lost)  ? lost.slice(0,5)  : [];
+        const noData    = addedN === 0 && lostN === 0;
+        return `
+        <div class="kw-delta-card" style="border-top:3px solid var(--brand-${tag})">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <span class="brand-tag ${tag}">${bk === 'streamfab' ? 'StreamFab' : 'DVDFab'}</span>
+            <span style="font-size:12px;color:var(--text-3)">关键词周变动</span>
+          </div>
+          ${noData ? `<div style="color:var(--text-3);font-size:13px;padding:12px 0">暂无本周变动数据</div>` : `
+          <div class="kw-delta-row">
+            <span class="kw-delta-label">本周新增</span>
+            <span class="kw-delta-val added">+${addedN}</span>
+          </div>
+          <div class="kw-delta-row">
+            <span class="kw-delta-label">本周流失</span>
+            <span class="kw-delta-val lost">-${lostN}</span>
+          </div>
+          <div class="kw-delta-row">
+            <span class="kw-delta-label">净增长</span>
+            <span class="kw-delta-val ${netCls}">${netStr}</span>
+          </div>
+          ${addedList.length > 0 ? `<div class="kw-list">${addedList.map(k=>`<span class="kw-chip added">+${k}</span>`).join('')}${addedN > 5 ? `<span class="kw-chip added">+${addedN-5}更多</span>`:''}</div>` : ''}
+          ${lostList.length  > 0 ? `<div class="kw-list">${lostList.map(k=>`<span class="kw-chip lost">-${k}</span>`).join('')}${lostN > 5 ? `<span class="kw-chip lost">-${lostN-5}更多</span>`:''}</div>` : ''}
+          `}
+        </div>`;
+      }).join('')}
     </div>
 
     <div class="section-title">计算口径</div>
@@ -1908,6 +2576,7 @@ function renderAiobo() {
     <div class="chart-card">
       ${buildMilestoneTable(currentData.milestones || [], sf, df)}
     </div>
+  </div>
   `;
 
   const sfMin = Math.floor(Math.min(...(sf.target||[17])) - 1);

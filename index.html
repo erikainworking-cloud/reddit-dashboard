@@ -90,6 +90,16 @@
     }
     .refresh-btn:hover { opacity: .85; }
     .refresh-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      background: var(--success); color: #fff;
+      padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      opacity: 0; transform: translateY(8px);
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
 
     /* ── Sidebar ──────────────────── */
     .sidebar {
@@ -501,11 +511,21 @@ async function loadData() {
     updateSidebarStatus(currentData, timeStr);
     updateNavBadges(currentData);
     renderTab(currentTab);
+    showToast(`数据已刷新：${timeStr}`);
   } catch(e) {
     showError(e.message);
   } finally {
     btn.disabled = false; btn.textContent = '重新加载';
   }
+}
+
+function showToast(msg) {
+  let t = document.getElementById('globalToast');
+  if (!t) { t = document.createElement('div'); t.id = 'globalToast'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 // 数据更新由 GitHub Actions 定时自动完成（每日 3 次），前端无需持有任何密钥。

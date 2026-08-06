@@ -86,10 +86,11 @@
     .refresh-btn {
       background: var(--accent); color: #fff; border: none;
       padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
-      cursor: pointer; transition: opacity .2s;
+      cursor: pointer; transition: background .25s, opacity .2s;
     }
     .refresh-btn:hover { opacity: .85; }
     .refresh-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .refresh-btn.success { background: var(--success); }
     .toast {
       position: fixed; bottom: 24px; right: 24px; z-index: 9999;
       background: var(--success); color: #fff;
@@ -512,10 +513,15 @@ async function loadData() {
     updateNavBadges(currentData);
     renderTab(currentTab);
     showToast(`数据已刷新：${timeStr}`);
+    btn.textContent = '✓ 已刷新';
+    btn.classList.add('success');
+    await new Promise(r => setTimeout(r, 1200));
   } catch(e) {
     showError(e.message);
   } finally {
-    btn.disabled = false; btn.textContent = '重新加载';
+    btn.disabled = false;
+    btn.classList.remove('success');
+    btn.textContent = '重新加载';
   }
 }
 

@@ -1260,19 +1260,19 @@ function renderBrandMonitor(brand) {
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">新增品牌提及</div>
-        <div class="stat-value">${(d.total||0).toLocaleString()}</div>
+        <div class="stat-value" id="bm-kpi-total">${(d.total||0).toLocaleString()}</div>
         <div class="stat-sub">品牌相关 Reddit 内容</div>
         ${wowHTML(wow.thisWeek, wow.lastWeek)}
       </div>
-      <div class="stat-card ${(d.pending||0) > 20 ? 'warning' : 'info'}">
+      <div class="stat-card ${(d.pending||0) > 20 ? 'warning' : 'info'}" id="bm-kpi-pending-card">
         <div class="stat-label">未处理舆情</div>
-        <div class="stat-value">${(d.pending||0).toLocaleString()}</div>
+        <div class="stat-value" id="bm-kpi-pending">${(d.pending||0).toLocaleString()}</div>
         <div class="stat-sub">待处理舆情内容</div>
       </div>
-      <div class="stat-card ${unresolvedSevereBrand(d) > 5 ? 'danger' : unresolvedSevereBrand(d) > 0 ? 'warning' : 'success'}">
+      <div class="stat-card ${unresolvedSevereBrand(d) > 5 ? 'danger' : unresolvedSevereBrand(d) > 0 ? 'warning' : 'success'}" id="bm-kpi-severe-card">
         <div class="stat-label">未处理严重故障</div>
-        <div class="stat-value">${unresolvedSevereBrand(d)}</div>
-        <div class="stat-sub">${unresolvedSevereBrand(d) > 0 ? '需优先处理' : '暂无未处理记录'}</div>
+        <div class="stat-value" id="bm-kpi-severe">${unresolvedSevereBrand(d)}</div>
+        <div class="stat-sub" id="bm-kpi-severe-sub">${unresolvedSevereBrand(d) > 0 ? '需优先处理' : '暂无未处理记录'}</div>
       </div>
       <div class="stat-card ${d.avgQualityScore && d.avgQualityScore >= 7 ? 'success' : 'info'}">
         <div class="stat-label">平均回复质量</div>
@@ -1399,6 +1399,31 @@ function toggleBmAnalysis() {
   if (icon) icon.textContent = open ? '展开 ▼' : '收起 ▲';
 }
 
+// ── Banner KPI 随时间范围更新 ──────────────────────────────────
+function updateBmBanners(d, range) {
+  const { curr: currStatus, currProb } = bmGetRangeData(d, range);
+
+  const periodTotal   = range === 'all'
+    ? (d.total || 0)
+    : Object.values(currStatus).reduce((s, v) => s + v, 0);
+  const periodPending = range === 'all'
+    ? (d.pending || 0)
+    : (currStatus['待处理'] || 0);
+  const periodSevere  = range === 'all'
+    ? unresolvedSevereBrand(d)
+    : (currProb['严重故障'] || 0);
+
+  setText('bm-kpi-total',   periodTotal.toLocaleString());
+  setText('bm-kpi-pending', periodPending.toLocaleString());
+  setText('bm-kpi-severe',  String(periodSevere));
+  setText('bm-kpi-severe-sub', periodSevere > 0 ? '需优先处理' : '暂无未处理记录');
+
+  const pendingCard = document.getElementById('bm-kpi-pending-card');
+  if (pendingCard) pendingCard.className = `stat-card ${periodPending > 20 ? 'warning' : 'info'}`;
+  const severeCard  = document.getElementById('bm-kpi-severe-card');
+  if (severeCard)  severeCard.className  = `stat-card ${periodSevere > 5 ? 'danger' : periodSevere > 0 ? 'warning' : 'success'}`;
+}
+
 // ── 分布图（状态 + 问题分类）更新 ────────────────────────────
 function updateBmDistCharts() {
   const d = (currentData.brandMonitoring || {})[bmState.brand] || {};
@@ -1457,6 +1482,7 @@ function updateBmDistCharts() {
   setText('ins-bm-prob',   insightProblem(currProb, d.avgQualityScore));
   setText('bm-comp-strip', bmBuildCompStrip(currStatus, prevStatus, currProb, prevProb, bmState.range));
   setText('bm-analysis',   insightBrandMonitorFull(d, currStatus, currProb, prevStatus, prevProb, bmState.range));
+  updateBmBanners(d, bmState.range);
 
   // 更新折叠 hint
   const processRate = (currStatus['待处理']||0) > 10

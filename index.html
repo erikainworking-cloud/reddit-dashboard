@@ -1362,6 +1362,8 @@ function renderBrandMonitor(brand) {
 function setBmRange(range) {
   bmState.range = range;
   document.querySelectorAll('#bm-range-seg .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.v === range));
+  const d = (currentData.brandMonitoring || {})[bmState.brand] || {};
+  updateBmBanners(d, range);
   updateBmDistCharts();
 }
 
@@ -1427,6 +1429,7 @@ function updateBmBanners(d, range) {
 // ── 分布图（状态 + 问题分类）更新 ────────────────────────────
 function updateBmDistCharts() {
   const d = (currentData.brandMonitoring || {})[bmState.brand] || {};
+  updateBmBanners(d, bmState.range);
   const { curr: currStatus, prev: prevStatus, currProb, prevProb } = bmGetRangeData(d, bmState.range);
   const filteredStatus = filterIgnored(currStatus);
 
@@ -1482,7 +1485,6 @@ function updateBmDistCharts() {
   setText('ins-bm-prob',   insightProblem(currProb, d.avgQualityScore));
   setText('bm-comp-strip', bmBuildCompStrip(currStatus, prevStatus, currProb, prevProb, bmState.range));
   setText('bm-analysis',   insightBrandMonitorFull(d, currStatus, currProb, prevStatus, prevProb, bmState.range));
-  updateBmBanners(d, bmState.range);
 
   // 更新折叠 hint
   const processRate = (currStatus['待处理']||0) > 10

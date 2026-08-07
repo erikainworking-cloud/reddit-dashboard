@@ -385,6 +385,8 @@
       <div style="height:1px;background:#1F2937;margin:6px 8px"></div>
       <div class="nav-item" onclick="navigate('brand',document.getElementById('nav-brand'));closeMobileNav()"><span class="nav-dot sf"></span> 品牌监控</div>
       <div style="height:1px;background:#1F2937;margin:6px 8px"></div>
+      <div class="nav-item" onclick="navigate('competitor',document.getElementById('nav-competitor'));closeMobileNav()"><span class="nav-dot ex"></span> 竞品监控</div>
+      <div style="height:1px;background:#1F2937;margin:6px 8px"></div>
       <div class="nav-item" onclick="navigate('execution',document.getElementById('nav-execution'));closeMobileNav()"><span class="nav-dot ex"></span> 执行漏斗</div>
       <div class="nav-item" onclick="navigate('aioBo',document.getElementById('nav-aioBo'));closeMobileNav()"><span class="nav-dot green"></span> AIO-BO 追踪</div>
     </div>
@@ -433,6 +435,12 @@
           <div class="nav-item" id="nav-brand" onclick="navigate('brand', this)">
             <span class="nav-dot sf"></span> 品牌监控
             <span class="nav-badge" id="badge-brand" style="display:none">0</span>
+          </div>
+        </div>
+        <div class="nav-divider"></div>
+        <div class="nav-section">
+          <div class="nav-item" id="nav-competitor" onclick="navigate('competitor', this)">
+            <span class="nav-dot ex"></span> 竞品监控
           </div>
         </div>
         <div class="nav-divider"></div>
@@ -607,6 +615,7 @@ function navigate(tab, el) {
 function renderTab(tab) {
   if (tab === 'overview')   renderOverview();
   else if (tab === 'execution') renderExecution();
+  else if (tab === 'competitor') renderCompetitorMonitoring();
   else if (tab === 'aioBo') renderAiobo();
   // New consolidated routes
   else if (tab === 'keywords') renderMonitor(pageTabState.keywords);
@@ -1700,6 +1709,7 @@ function renderOverview() {
   const sfBm  = bm.streamfab || {};
   const dfBm  = bm.dvdfab    || {};
   const pa    = currentData.paidAccounts || {};
+  const cm    = currentData.competitorMonitoring || {};
   const aioSf = currentData.aioBo?.streamfab || {};
   const aioDf = currentData.aioBo?.dvdfab    || {};
   const dq    = currentData.dataQuality || {};
@@ -1938,6 +1948,7 @@ function renderOverview() {
         ${actionCard('处理故障', severeCnt + ' 条待处理', '立即处理', "navigate('brand',document.getElementById('nav-brand'))", severeCnt > 0)}
         ${actionCard('审核内容', reviewPending + ' 条待审核', '去审核', "navigate('keywords',document.getElementById('nav-keywords'))", reviewPending > 0)}
         ${actionCard('发布内容', publishPending + ' 条待发布', '查看详情', "navigate('execution',document.getElementById('nav-execution'))", publishPending > 0)}
+        ${actionCard('竞品提及', cm.currentTotal != null ? `${cm.currentTotal} 条 · 环比 ${cm.totalChange >= 0 ? '+' : ''}${cm.totalChange || 0}` : '等待导出数据', '查看周报', "navigate('competitor',document.getElementById('nav-competitor'))", cm.currentTotal != null)}
         ${actionCard('AIO-BO 追踪', sfFc.gap !== null ? '缺口 -' + Math.abs(sfFc.gap||0).toFixed(1) + 'pp' : '查看进展', '去更新', "navigate('aioBo',document.getElementById('nav-aioBo'))", true)}
       </div>
     </div>
@@ -1956,6 +1967,147 @@ function renderOverview() {
   if (upd) {
     const d = new Date(currentData.updatedAt);
     upd.textContent = '数据更新：' + d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+  }
+}
+
+function renderCompetitorMonitoring() {
+  const d = currentData.competitorMonitoring;
+  if (!d) {
+    document.getElementById('main').innerHTML = `<div class="main-inner"><div class="page-title">竞品监控</div><div class="chart-card" style="margin-top:20px;color:var(--text-2)">当前 stats.json 尚未包含竞品监控数据。请运行新版 export-stats.js 后重新加载。</div></div>`;
+    return;
+  }
+
+  const currentRange = `${d.currentWeek?.start || '—'} 至 ${d.currentWeek?.end || '—'}`;
+  const previousRange = `${d.previousWeek?.start || '—'} 至 ${d.previousWeek?.end || '—'}`;
+  const totalChange = d.totalChange || 0;
+  const changeColor = totalChange > 0 ? 'var(--danger)' : totalChange < 0 ? 'var(--success)' : 'var(--text-2)';
+  const changeText = `${totalChange > 0 ? '+' : ''}${totalChange}${d.totalChangePct != null ? ` (${totalChange > 0 ? '+' : ''}${d.totalChangePct}%)` : ''}`;
+  const brands = [...(d.brands || [])].sort((a, b) => Math.abs(b.change || 0) - Math.abs(a.change || 0) || (b.currentWeek || 0) - (a.currentWeek || 0));
+  const tableRows = brands.map((brand, i) => {
+    const change = brand.change || 0;
+    const direction = change > 0 ? '增长' : change < 0 ? '下降' : '持平';
+    const color = change > 0 ? 'var(--danger)' : change < 0 ? 'var(--success)' : 'var(--text-3)';
+    const bg = change > 0 ? 'var(--danger-soft)' : change < 0 ? 'var(--success-soft)' : 'var(--bg)';
+    const changeValue = `${change > 0 ? '+' : ''}${change}`;
+    const pct = brand.changePct == null ? (brand.previousWeek === 0 && brand.currentWeek > 0 ? '新增' : '—') : `${brand.changePct > 0 ? '+' : ''}${brand.changePct}%`;
+    return `<tr>
+      <td style="color:var(--text-3);width:38px">${i + 1}</td>
+      <td style="font-weight:700">${brand.label}</td>
+      <td>${brand.currentWeek || 0}</td>
+      <td style="color:var(--text-2)">${brand.previousWeek || 0}</td>
+      <td style="font-weight:700;color:${color}">${changeValue}</td>
+      <td><span style="display:inline-block;padding:3px 9px;border-radius:12px;background:${bg};color:${color};font-size:11px;font-weight:700">${direction}</span></td>
+      <td style="color:${color};font-weight:600">${pct}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('main').innerHTML = `
+    <div class="main-inner">
+      <div class="page-header" style="display:flex;justify-content:space-between;gap:20px;align-items:flex-start">
+        <div>
+          <div class="page-title">竞品监控</div>
+          <div class="page-desc">按最近两个完整自然周（周一至周日）对比竞品提及变化</div>
+        </div>
+        <a href="${d.sourceUrl}" target="_blank" rel="noopener" class="refresh-btn" style="text-decoration:none;white-space:nowrap">打开竞品监控多维表格 ↗</a>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:24px;background:linear-gradient(120deg,var(--info-soft),var(--surface))">
+        <div style="font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:8px">本期对比</div>
+        <div style="display:flex;flex-wrap:wrap;gap:20px;font-size:13px;color:var(--text-2)">
+          <span><b style="color:var(--text-1)">本周：</b>${currentRange}</span>
+          <span><b style="color:var(--text-1)">上周：</b>${previousRange}</span>
+          <span><b style="color:var(--text-1)">数据口径：</b>日报表每日提及数汇总</span>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card info">
+          <div class="stat-label">本周竞品提及</div>
+          <div class="stat-value">${d.currentTotal || 0}</div>
+          <div class="stat-sub">${currentRange}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">上周竞品提及</div>
+          <div class="stat-value">${d.previousTotal || 0}</div>
+          <div class="stat-sub">${previousRange}</div>
+        </div>
+        <div class="stat-card ${totalChange > 0 ? 'danger' : totalChange < 0 ? 'success' : 'info'}">
+          <div class="stat-label">周环比变化</div>
+          <div class="stat-value" style="color:${changeColor}">${changeText}</div>
+          <div class="stat-sub">${totalChange > 0 ? '竞品提及增加，建议关注曝光来源' : totalChange < 0 ? '竞品提及减少' : '与上周持平'}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">变动品牌</div>
+          <div class="stat-value">${brands.filter(b => (b.change || 0) !== 0).length}</div>
+          <div class="stat-sub">${brands.filter(b => (b.change || 0) > 0).length} 个增长 · ${brands.filter(b => (b.change || 0) < 0).length} 个下降</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">每日竞品提及趋势</div>
+          <div class="chart-subtitle">覆盖上周与本周两个完整自然周</div>
+          <div class="chart-box tall" id="chart-competitor-trend"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">变化幅度排名</div>
+          <div class="chart-subtitle">按本周相对上周的绝对变化排序</div>
+          <div class="chart-box tall" id="chart-competitor-change"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">竞品周环比明细</div>
+        <div class="chart-subtitle">增长代表本周提及高于上周；新增表示上周基线为 0，无法计算百分比。</div>
+        <div style="overflow:auto;margin-top:16px">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;text-align:left">
+            <thead><tr style="color:var(--text-3);border-bottom:1px solid var(--border)">
+              <th style="padding:10px 8px;font-weight:600">#</th><th style="padding:10px 8px;font-weight:600">竞品</th><th style="padding:10px 8px;font-weight:600">本周</th><th style="padding:10px 8px;font-weight:600">上周</th><th style="padding:10px 8px;font-weight:600">变化</th><th style="padding:10px 8px;font-weight:600">趋势</th><th style="padding:10px 8px;font-weight:600">环比</th>
+            </tr></thead>
+            <tbody>${tableRows || '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--text-3)">暂无竞品日报数据</td></tr>'}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+
+  renderCompetitorCharts(d, brands);
+}
+
+function renderCompetitorCharts(data, brands) {
+  const trendEl = document.getElementById('chart-competitor-trend');
+  if (trendEl) {
+    const trend = data.dailyTrend || [];
+    const chart = echarts.init(trendEl);
+    charts['competitor-trend'] = chart;
+    chart.setOption({
+      tooltip: { trigger: 'axis' },
+      legend: { top: 0, textStyle: { fontSize: 11 } },
+      grid: { left: 40, right: 18, top: 38, bottom: 35 },
+      xAxis: { type: 'category', data: trend.map(day => day.date.slice(5)), axisLabel: { fontSize: 11 } },
+      yAxis: { type: 'value', minInterval: 1, axisLabel: { fontSize: 11 } },
+      series: [
+        { name: '总提及', type: 'line', smooth: true, data: trend.map(day => day.total || 0), itemStyle: { color: '#2563EB' }, areaStyle: { color: 'rgba(37,99,235,.10)' } },
+        { name: 'Playon', type: 'line', smooth: true, data: trend.map(day => day.brands?.playon || 0), itemStyle: { color: '#FF5A1F' } },
+        { name: 'Keeprix', type: 'line', smooth: true, data: trend.map(day => day.brands?.keeprix || 0), itemStyle: { color: '#8B5CF6' } },
+      ],
+    });
+  }
+
+  const changeEl = document.getElementById('chart-competitor-change');
+  if (changeEl) {
+    const chart = echarts.init(changeEl);
+    charts['competitor-change'] = chart;
+    const ranked = [...brands].reverse();
+    chart.setOption({
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      grid: { left: 82, right: 24, top: 20, bottom: 20 },
+      xAxis: { type: 'value', axisLabel: { fontSize: 11 } },
+      yAxis: { type: 'category', data: ranked.map(b => b.label), axisLabel: { fontSize: 11 } },
+      series: [{
+        type: 'bar', data: ranked.map(b => ({ value: b.change || 0, itemStyle: { color: (b.change || 0) > 0 ? '#D64545' : (b.change || 0) < 0 ? '#16A36A' : '#98A2B3' } })),
+        barMaxWidth: 22, label: { show: true, position: 'right', formatter: p => `${p.value > 0 ? '+' : ''}${p.value}`, fontSize: 11 },
+      }],
+    });
   }
 }
 

@@ -5,25 +5,92 @@
  * 运行方式：node export-stats.js
  */
 
-const { spawnSync, execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs   = require('fs');
 const path = require('path');
 
-function resolveLark() {
-  if (process.env.LARK_CLI) return process.env.LARK_CLI;
-  try {
-    const p = execSync('which lark-cli', { encoding: 'utf-8', stdio: ['pipe','pipe','pipe'] }).trim();
-    if (p) return p;
-  } catch {}
-  const candidates = [
-    path.join(process.env.HOME || '', '.npm-global/lib/node_modules/@larksuite/cli/bin/lark-cli'),
-    '/usr/local/lib/node_modules/@larksuite/cli/bin/lark-cli',
-    '/usr/local/bin/lark-cli',
-  ];
-  for (const c of candidates) { if (fs.existsSync(c)) return c; }
-  throw new Error('找不到 lark-cli，请安装或设置 LARK_CLI 环境变量');
+const FEISHU_API = 'https://open.feishu.cn/open-apis';
+const recordCache = new Map();
+let tenantAccessToken = null;
+
+async function getTenantAccessToken() {
+  const appId = process.env.LARK_APP_ID;
+  const appSecret = process.env.LARK_APP_SECRET;
+  if (!appId || !appSecret) {
+    throw new Error('缺少 LARK_APP_ID 或 LARK_APP_SECRET 环境变量');
+  }
+
+  const response = await fetch(`${FEISHU_API}/auth/v3/tenant_access_token/internal`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    body: JSON.stringify({ app_id: appId, app_secret: appSecret }),
+  });
+  const payload = await response.json();
+  if (!response.ok || payload.code !== 0 || !payload.tenant_access_token) {
+    throw new Error(`获取飞书 tenant_access_token 失败（code: ${payload.code ?? response.status}）`);
+  }
+  return payload.tenant_access_token;
 }
-const LARK = resolveLark();
+
+async function feishuRequest(url) {
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${tenantAccessToken}` },
+  });
+  const payload = await response.json();
+  if (!response.ok || payload.code !== 0) {
+    throw new Error(`飞书 Bitable API 请求失败（code: ${payload.code ?? response.status}）`);
+  }
+  return payload.data;
+}
+
+function normalizeFieldValue(value, fieldName) {
+  if (value == null || value === '') return null;
+  if (Array.isArray(value)) {
+    const values = value
+      .map(item => typeof item === 'object' && item !== null ? (item.text ?? item.name ?? item.id) : item)
+      .filter(item => item != null && item !== '');
+    return values.length ? values.join('、') : null;
+  }
+  if (typeof value === 'object') return value.text ?? value.name ?? value.id ?? null;
+  if ((fieldName.includes('时间') || fieldName.includes('日期')) && /^\d{12,}$/.test(String(value))) {
+    return new Date(Number(value)).toISOString().slice(0, 10);
+  }
+  return String(value);
+}
+
+async function loadTableRecords(baseToken, tableId) {
+  const cacheKey = `${baseToken}:${tableId}`;
+  if (recordCache.has(cacheKey)) return recordCache.get(cacheKey);
+
+  const records = [];
+  let pageToken = null;
+  do {
+    const params = new URLSearchParams({ page_size: '500' });
+    if (pageToken) params.set('page_token', pageToken);
+    const data = await feishuRequest(
+      `${FEISHU_API}/bitable/v1/apps/${encodeURIComponent(baseToken)}/tables/${encodeURIComponent(tableId)}/records?${params}`
+    );
+    records.push(...(data.items || []));
+    pageToken = data.has_more ? data.page_token : null;
+  } while (pageToken);
+
+  recordCache.set(cacheKey, records);
+  return records;
+}
+
+async function loadAllSourceRecords() {
+  tenantAccessToken = await getTenantAccessToken();
+  const sources = [
+    ...PRECISE_SOURCES.flatMap(({ baseToken, tableId, keywordTableId }) => [
+      [baseToken, tableId],
+      ...(keywordTableId ? [[baseToken, keywordTableId]] : []),
+    ]),
+    ...BRAND_MON_SOURCES.map(({ baseToken, tableId }) => [baseToken, tableId]),
+    [PAID_SOURCE.baseToken, PAID_SOURCE.tableId],
+    [COMPETITOR_SOURCE.baseToken, COMPETITOR_SOURCE.tableId],
+  ];
+  await Promise.all(sources.map(([baseToken, tableId]) => loadTableRecords(baseToken, tableId)));
+}
 
 // ── 数据源配置 ────────────────────────────────────────────────
 
@@ -42,171 +109,146 @@ const BRAND_MON_SOURCES = [
 // 第三方付费账号
 const PAID_SOURCE = { baseToken: 'KhAHbJRcNaCq03sxg8Bcw2Pfn1g', tableId: 'tblnoKwZHuCNuBCI' };
 
+// 竞品监控（日聚合表，按最近两个完整自然周比较）
+const COMPETITOR_SOURCE = {
+  baseToken: 'Y1uAbFprUawDWKsSoOucyvhPnrc',
+  tableId: 'tblRQe07VAZntyfq',
+  url: 'https://i6a1sqw3p2.feishu.cn/base/Y1uAbFprUawDWKsSoOucyvhPnrc?table=tblJ98nNIyyxI1KL&view=vewSBgAnvb',
+  brands: [
+    { key: 'tunepat', label: 'TunePat', field: 'TunePat提及数' },
+    { key: 'movpilot', label: 'Movpilot', field: 'Movpilot提及数' },
+    { key: 'audials', label: 'Audials', field: 'Audials提及数' },
+    { key: 'playon', label: 'Playon', field: 'Playon提及数' },
+    { key: 'keeprix', label: 'Keeprix', field: 'Keeprix提及数' },
+    { key: 'tunefab', label: 'Tunefab', field: 'Tunefab提及数' },
+    { key: 'other', label: '其他品牌', field: '其他品牌提及数' },
+  ],
+};
+
 // ── 工具函数 ──────────────────────────────────────────────────
 
-function dataQuery(baseToken, dsl) {
-  const result = spawnSync(LARK, [
-    'base', '+data-query',
-    '--base-token', baseToken,
-    '--dsl', JSON.stringify(dsl),
-    '--as', 'user',
-  ], { encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 });
-
-  const raw = result.stdout + result.stderr;
-  const start = raw.indexOf('{');
-  if (start === -1) throw new Error('lark-cli 无 JSON 输出:\n' + raw.slice(0, 500));
-  const d = JSON.parse(raw.slice(start));
-  if (!d.ok) throw new Error('data-query 失败: ' + JSON.stringify(d.error));
-  return d.data?.main_data || [];
+async function tableRecords(baseToken, tableId) {
+  return loadTableRecords(baseToken, tableId);
 }
 
-function toCountMap(rows, keyAlias, countAlias = 'count') {
+function fieldValue(record, fieldName) {
+  return normalizeFieldValue(record.fields?.[fieldName], fieldName);
+}
+
+function countBy(records, fieldName) {
   const map = {};
-  for (const row of rows) {
-    const k = row[keyAlias]?.value;
-    const v = row[countAlias]?.value;
-    if (k !== null && k !== undefined) map[String(k)] = Number(v);
+  for (const record of records) {
+    const value = fieldValue(record, fieldName);
+    if (value != null) map[value] = (map[value] || 0) + 1;
   }
   return map;
 }
 
-function buildDSL(tableId, dimensionField, alias) {
-  return {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [{ field_name: dimensionField, alias }],
-    measures:   [{ field_name: dimensionField, aggregation: 'count', alias: 'count' }],
-    sort:       [{ field_name: 'count', order: 'desc' }],
-    pagination: { limit: 50 },
-    shaper:     { format: 'flat' },
-  };
+function countByDate(records, dateField, valueField) {
+  const map = {};
+  for (const record of records) {
+    const date = normDate(fieldValue(record, dateField));
+    const value = fieldValue(record, valueField);
+    if (date && value != null) {
+      (map[date] = map[date] || {})[value] = (map[date][value] || 0) + 1;
+    }
+  }
+  return map;
 }
 
-function buildTotalDSL(tableId, field) {
-  return {
-    datasource: { type: 'table', table: { tableId } },
-    measures:   [{ field_name: field, aggregation: 'count', alias: 'total' }],
-    shaper:     { format: 'flat' },
-  };
+function countDates(records, dateField, limit = 60) {
+  const map = {};
+  for (const record of records) {
+    const date = normDate(fieldValue(record, dateField));
+    if (date) map[date] = (map[date] || 0) + 1;
+  }
+  return Object.entries(map)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-limit)
+    .map(([date, count]) => [date, count]);
+}
+
+function averageBy(records, fieldName) {
+  const values = records
+    .map(record => Number(fieldValue(record, fieldName)))
+    .filter(Number.isFinite);
+  if (!values.length) return null;
+  return (values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1);
+}
+
+function sortedCounts(map, limit) {
+  return Object.entries(map)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, limit);
 }
 
 function normDate(raw) {
-  return raw ? String(raw).replace(/\//g, '-') : null;
+  if (!raw) return null;
+  const match = String(raw).match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (!match) return null;
+  return `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
+}
+
+function isoDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function beijingToday() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date());
+  const value = type => parts.find(part => part.type === type)?.value;
+  return new Date(Date.UTC(Number(value('year')), Number(value('month')) - 1, Number(value('day'))));
+}
+
+function addUtcDays(date, days) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function weekRange(start) {
+  return { start: isoDate(start), end: isoDate(addUtcDays(start, 6)) };
+}
+
+function isInRange(date, range) {
+  return date >= range.start && date <= range.end;
 }
 
 // ── 精准词监控 ────────────────────────────────────────────────
 
 async function fetchPreciseStats(src) {
   const { baseToken, tableId, label, keywordTableId } = src;
+  const records = await tableRecords(baseToken, tableId);
+  const statusCount = countBy(records, '处理状态');
+  const intentCount = countBy(records, '意图分类');
+  const mentionCount = countBy(records, '产品提及');
+  const typeCount = countBy(records, '贴子/评论');
 
-  const totalRows  = dataQuery(baseToken, buildTotalDSL(tableId, '处理状态'));
-  const total      = totalRows[0]?.total?.value || 0;
-
-  const statusRows = dataQuery(baseToken, buildDSL(tableId, '处理状态', 'status'));
-  const statusCount = toCountMap(statusRows, 'status');
-
-  const intentRows  = dataQuery(baseToken, buildDSL(tableId, '意图分类', 'intent'));
-  const intentCount = toCountMap(intentRows, 'intent');
-
-  const mentionRows  = dataQuery(baseToken, buildDSL(tableId, '产品提及', 'mention'));
-  const mentionCount = toCountMap(mentionRows, 'mention');
-
-  const typeRows  = dataQuery(baseToken, buildDSL(tableId, '贴子/评论', 'type'));
-  const typeCount = toCountMap(typeRows, 'type');
-
-  // Build keyword allowlist from the brand's 关键词 table, then filter monitoring data
   let allowSet = null;
   if (keywordTableId) {
-    const allowRows = dataQuery(baseToken, { ...buildDSL(keywordTableId, '关键词', 'keyword'), pagination: { limit: 2000 } });
-    allowSet = new Set(allowRows.map(r => (r.keyword?.value || '').toLowerCase()).filter(Boolean));
+    const keywordRecords = await tableRecords(baseToken, keywordTableId);
+    allowSet = new Set(keywordRecords
+      .map(record => fieldValue(record, '关键词')?.toLowerCase())
+      .filter(Boolean));
   }
-  const keywordRows = dataQuery(baseToken, { ...buildDSL(tableId, '关键词', 'keyword'), pagination: { limit: 500 } });
-  const topKeywords = keywordRows
-    .map(r => [r.keyword?.value, r.count?.value])
-    .filter(([k]) => k && (!allowSet || allowSet.has(k.toLowerCase())))
+  const topKeywords = sortedCounts(countBy(records, '关键词'))
+    .filter(([keyword]) => !allowSet || allowSet.has(keyword.toLowerCase()))
     .slice(0, 15);
 
-  const dailyRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [{ field_name: '抓取时间', alias: 'date' }],
-    measures:   [{ field_name: '抓取时间', aggregation: 'count', alias: 'count' }],
-    sort:       [{ field_name: 'date', order: 'asc' }],
-    pagination: { limit: 90 },
-    shaper:     { format: 'flat' },
-  });
-  const dailyTrend = dailyRows
-    .map(r => [normDate(r.date?.value), r.count?.value])
-    .filter(([d]) => d)
-    .slice(-60);
-
-  // 按日 × 处理状态（供前端精确时间范围切片）
-  const statusDayRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [{ field_name: '抓取时间', alias: 'date' }, { field_name: '处理状态', alias: 'status' }],
-    measures:   [{ field_name: '处理状态', aggregation: 'count', alias: 'count' }],
-    sort:       [{ field_name: 'date', order: 'desc' }],
-    pagination: { limit: 5000 },
-    shaper:     { format: 'flat' },
-  });
-  const statusByDate = {};
-  for (const r of statusDayRows) {
-    const dt = normDate(r.date?.value), st = r.status?.value;
-    if (dt && st) (statusByDate[dt] = statusByDate[dt] || {})[st] = Number(r.count?.value) || 0;
-  }
-
-  // 按日 × 意图分类
-  const intentDayRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [{ field_name: '抓取时间', alias: 'date' }, { field_name: '意图分类', alias: 'intent' }],
-    measures:   [{ field_name: '意图分类', aggregation: 'count', alias: 'count' }],
-    sort:       [{ field_name: 'date', order: 'desc' }],
-    pagination: { limit: 5000 },
-    shaper:     { format: 'flat' },
-  });
-  const intentByDate = {};
-  for (const r of intentDayRows) {
-    const dt = normDate(r.date?.value), it = r.intent?.value;
-    if (dt && it) (intentByDate[dt] = intentByDate[dt] || {})[it] = Number(r.count?.value) || 0;
-  }
-
-  // 按日 × 产品提及
-  const mentionDayRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [{ field_name: '抓取时间', alias: 'date' }, { field_name: '产品提及', alias: 'mention' }],
-    measures:   [{ field_name: '产品提及', aggregation: 'count', alias: 'count' }],
-    sort:       [{ field_name: 'date', order: 'desc' }],
-    pagination: { limit: 5000 },
-    shaper:     { format: 'flat' },
-  });
-  const mentionByDate = {};
-  for (const r of mentionDayRows) {
-    const dt = normDate(r.date?.value), mn = r.mention?.value;
-    if (dt && mn) (mentionByDate[dt] = mentionByDate[dt] || {})[mn] = Number(r.count?.value) || 0;
-  }
-
-  // 按日 × 帖子/评论
-  const typeDayRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [{ field_name: '抓取时间', alias: 'date' }, { field_name: '贴子/评论', alias: 'postType' }],
-    measures:   [{ field_name: '贴子/评论', aggregation: 'count', alias: 'count' }],
-    sort:       [{ field_name: 'date', order: 'desc' }],
-    pagination: { limit: 5000 },
-    shaper:     { format: 'flat' },
-  });
-  const typeByDate = {};
-  for (const r of typeDayRows) {
-    const dt = normDate(r.date?.value), tp = r.postType?.value;
-    if (dt && tp) (typeByDate[dt] = typeByDate[dt] || {})[tp] = Number(r.count?.value) || 0;
-  }
-
   return {
-    label, total: Number(total),
+    label, total: records.length,
     published: statusCount['已发布'] || 0,
     posts:    typeCount['帖子']  || 0,
     comments: typeCount['评论']  || 0,
     statusCount, intentCount,
-    brandMention: { YES: mentionCount['YES'] || 0, NO: mentionCount['NO'] || 0 },
-    topKeywords, dailyTrend,
-    statusByDate, intentByDate, mentionByDate, typeByDate,
+    brandMention: { YES: mentionCount.YES || 0, NO: mentionCount.NO || 0 },
+    topKeywords,
+    dailyTrend: countDates(records, '抓取时间'),
+    statusByDate: countByDate(records, '抓取时间', '处理状态'),
+    intentByDate: countByDate(records, '抓取时间', '意图分类'),
+    mentionByDate: countByDate(records, '抓取时间', '产品提及'),
+    typeByDate: countByDate(records, '抓取时间', '贴子/评论'),
   };
 }
 
@@ -214,125 +256,97 @@ async function fetchPreciseStats(src) {
 
 async function fetchBrandMonStats(src) {
   const { baseToken, tableId, label } = src;
-
-  const totalRows = dataQuery(baseToken, buildTotalDSL(tableId, '处理状态'));
-  const total     = totalRows[0]?.total?.value || 0;
-
-  const statusRows  = dataQuery(baseToken, buildDSL(tableId, '处理状态', 'status'));
-  const statusCount = toCountMap(statusRows, 'status');
-
-  const problemRows = dataQuery(baseToken, buildDSL(tableId, '问题分类', 'problem'));
-  const problemType = toCountMap(problemRows, 'problem');
-
-  // 平均回复质量评分
-  const avgRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    measures:   [{ field_name: '回复质量评分', aggregation: 'avg', alias: 'avgScore' }],
-    shaper:     { format: 'flat' },
-  });
-  const avgQualityScore = avgRows[0]?.avgScore?.value != null
-    ? Number(avgRows[0].avgScore.value).toFixed(1)
-    : null;
-
-  // 抓取时间趋势（最近 60 天）
-  const scrapingRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [{ field_name: '抓取时间', alias: 'date' }],
-    measures:   [{ field_name: '抓取时间', aggregation: 'count', alias: 'count' }],
-    sort:       [{ field_name: 'date', order: 'desc' }],
-    pagination: { limit: 60 },
-    shaper:     { format: 'flat' },
-  });
-  const scrapingTrend = scrapingRows
-    .map(r => [normDate(r.date?.value), r.count?.value])
-    .filter(([d]) => d)
-    .reverse();
-
-  // 处理时间趋势（最近 60 天，已处理记录）
-  const trendRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [{ field_name: '处理时间', alias: 'date' }],
-    measures:   [{ field_name: '处理时间', aggregation: 'count', alias: 'count' }],
-    sort:       [{ field_name: 'date', order: 'desc' }],
-    pagination: { limit: 60 },
-    shaper:     { format: 'flat' },
-  });
-  const processingTrend = trendRows
-    .map(r => [normDate(r.date?.value), r.count?.value])
-    .filter(([d]) => d)
-    .reverse();
-
-  // 每日状态分布（供客户端时间范围筛选）
-  const statusDayRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [
-      { field_name: '抓取时间', alias: 'date' },
-      { field_name: '处理状态', alias: 'status' },
-    ],
-    measures: [{ field_name: '处理状态', aggregation: 'count', alias: 'count' }],
-    sort: [{ field_name: 'date', order: 'desc' }],
-    pagination: { limit: 2000 },
-    shaper: { format: 'flat' },
-  });
-  const statusByDate = {};
-  for (const r of statusDayRows) {
-    const dt = normDate(r.date?.value);
-    const st = r.status?.value;
-    if (dt && st) {
-      (statusByDate[dt] = statusByDate[dt] || {})[st] = Number(r.count?.value) || 0;
-    }
-  }
-
-  // 每日问题分类（供客户端时间范围筛选）
-  const probDayRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [
-      { field_name: '抓取时间', alias: 'date' },
-      { field_name: '问题分类', alias: 'problem' },
-    ],
-    measures: [{ field_name: '问题分类', aggregation: 'count', alias: 'count' }],
-    sort: [{ field_name: 'date', order: 'desc' }],
-    pagination: { limit: 2000 },
-    shaper: { format: 'flat' },
-  });
-  const problemByDate = {};
-  for (const r of probDayRows) {
-    const dt = normDate(r.date?.value);
-    const pb = r.problem?.value;
-    if (dt && pb) {
-      (problemByDate[dt] = problemByDate[dt] || {})[pb] = Number(r.count?.value) || 0;
-    }
-  }
-
-  // 问题分类 × 处理状态（供前端计算"未处理严重故障"等精细化指标）
-  const probStatusRows = dataQuery(baseToken, {
-    datasource: { type: 'table', table: { tableId } },
-    dimensions: [
-      { field_name: '问题分类',  alias: 'problem' },
-      { field_name: '处理状态', alias: 'status' },
-    ],
-    measures: [{ field_name: '处理状态', aggregation: 'count', alias: 'count' }],
-    sort: [{ field_name: 'count', order: 'desc' }],
-    pagination: { limit: 500 },
-    shaper: { format: 'flat' },
-  });
+  const records = await tableRecords(baseToken, tableId);
+  const statusCount = countBy(records, '处理状态');
+  const problemType = countBy(records, '问题分类');
   const problemStatusCross = {};
-  for (const r of probStatusRows) {
-    const pb = r.problem?.value;
-    const st = r.status?.value;
-    if (pb && st) {
-      (problemStatusCross[pb] = problemStatusCross[pb] || {})[st] = Number(r.count?.value) || 0;
+  for (const record of records) {
+    const problem = fieldValue(record, '问题分类');
+    const status = fieldValue(record, '处理状态');
+    if (problem && status) {
+      (problemStatusCross[problem] = problemStatusCross[problem] || {})[status] =
+        (problemStatusCross[problem][status] || 0) + 1;
     }
   }
 
   return {
-    label, total: Number(total),
+    label, total: records.length,
     processed: statusCount['已处理'] || 0,
     generated: statusCount['已生成'] || 0,
     pending:   statusCount['待处理'] || 0,
     noAction:  statusCount['无需处理'] || 0,
-    statusCount, problemType, avgQualityScore, scrapingTrend, processingTrend,
-    statusByDate, problemByDate, problemStatusCross,
+    statusCount,
+    problemType,
+    avgQualityScore: averageBy(records, '回复质量评分'),
+    scrapingTrend: countDates(records, '抓取时间'),
+    processingTrend: countDates(records, '处理时间'),
+    statusByDate: countByDate(records, '抓取时间', '处理状态'),
+    problemByDate: countByDate(records, '抓取时间', '问题分类'),
+    problemStatusCross,
+  };
+}
+
+// ── 竞品监控 ──────────────────────────────────────────────────
+
+async function fetchCompetitorStats() {
+  const records = await tableRecords(COMPETITOR_SOURCE.baseToken, COMPETITOR_SOURCE.tableId);
+  const today = beijingToday();
+  const dayOfWeek = today.getUTCDay();
+  const daysSinceMonday = (dayOfWeek + 6) % 7;
+  const currentWeek = weekRange(addUtcDays(today, -(daysSinceMonday + 7)));
+  const previousWeek = weekRange(addUtcDays(today, -(daysSinceMonday + 14)));
+
+  const byDate = new Map();
+  for (const record of records) {
+    const date = normDate(fieldValue(record, '检查日期'));
+    if (!date) continue;
+
+    const values = Object.fromEntries(COMPETITOR_SOURCE.brands.map(({ key, field }) => {
+      const value = Number(fieldValue(record, field));
+      return [key, Number.isFinite(value) ? value : 0];
+    }));
+    const total = COMPETITOR_SOURCE.brands.reduce((sum, { key }) => sum + values[key], 0);
+    byDate.set(date, { date, total, brands: values });
+  }
+
+  const totalForRange = range => [...byDate.values()]
+    .filter(day => isInRange(day.date, range))
+    .reduce((sum, day) => sum + day.total, 0);
+  const brandTotalForRange = (key, range) => [...byDate.values()]
+    .filter(day => isInRange(day.date, range))
+    .reduce((sum, day) => sum + day.brands[key], 0);
+
+  const brands = COMPETITOR_SOURCE.brands.map(({ key, label }) => {
+    const currentWeekTotal = brandTotalForRange(key, currentWeek);
+    const previousWeekTotal = brandTotalForRange(key, previousWeek);
+    const change = currentWeekTotal - previousWeekTotal;
+    return {
+      key,
+      label,
+      currentWeek: currentWeekTotal,
+      previousWeek: previousWeekTotal,
+      change,
+      changePct: previousWeekTotal ? Number((change / previousWeekTotal * 100).toFixed(1)) : null,
+    };
+  });
+
+  const dailyTrend = [...byDate.values()]
+    .filter(day => isInRange(day.date, previousWeek) || isInRange(day.date, currentWeek))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const currentTotal = totalForRange(currentWeek);
+  const previousTotal = totalForRange(previousWeek);
+
+  return {
+    sourceUrl: COMPETITOR_SOURCE.url,
+    currentWeek,
+    previousWeek,
+    currentTotal,
+    previousTotal,
+    totalChange: currentTotal - previousTotal,
+    totalChangePct: previousTotal ? Number(((currentTotal - previousTotal) / previousTotal * 100).toFixed(1)) : null,
+    currentWeekRecordCount: dailyTrend.filter(day => isInRange(day.date, currentWeek)).length,
+    brands,
+    dailyTrend,
   };
 }
 
@@ -433,6 +447,16 @@ function buildDataQuality(result, prev) {
     }
   }
 
+  // ── 竞品监控模块 ──
+  const competitor = result.competitorMonitoring;
+  if (competitor && competitor.currentWeekRecordCount === 0) {
+    checks.push({
+      source: 'competitorMonitoring',
+      level: 'warning',
+      message: `最近完整自然周（${competitor.currentWeek.start} 至 ${competitor.currentWeek.end}）没有日报记录，请检查竞品监控数据是否按日同步`,
+    });
+  }
+
   // ── AIO-BO 模块 ──
   for (const brand of ['streamfab', 'dvdfab']) {
     const ab = result.aioBo?.[brand];
@@ -477,23 +501,15 @@ function buildDataQuality(result, prev) {
 
 async function fetchPaidStats() {
   const { baseToken, tableId } = PAID_SOURCE;
+  const records = await tableRecords(baseToken, tableId);
 
-  const totalRows = dataQuery(baseToken, buildTotalDSL(tableId, '产线'));
-  const total     = totalRows[0]?.total?.value || 0;
-
-  const brandRows = dataQuery(baseToken, buildDSL(tableId, '产线', 'brand'));
-  const byBrand   = toCountMap(brandRows, 'brand');
-
-  const typeRows = dataQuery(baseToken, buildDSL(tableId, '帖子类型', 'postType'));
-  const byType   = toCountMap(typeRows, 'postType');
-
-  const s1Rows    = dataQuery(baseToken, buildDSL(tableId, '存活1天', 's1'));
-  const survive1day = toCountMap(s1Rows, 's1');
-
-  const s7Rows    = dataQuery(baseToken, buildDSL(tableId, '存活7天', 's7'));
-  const survive7day = toCountMap(s7Rows, 's7');
-
-  return { total: Number(total), byBrand, byType, survive1day, survive7day };
+  return {
+    total: records.length,
+    byBrand: countBy(records, '产线'),
+    byType: countBy(records, '帖子类型'),
+    survive1day: countBy(records, '存活1天'),
+    survive7day: countBy(records, '存活7天'),
+  };
 }
 
 // ── 主流程 ────────────────────────────────────────────────────
@@ -503,6 +519,7 @@ const autoPush   = exportArgs.includes('--push');
 
 (async () => {
   console.log('📊 开始从飞书拉取聚合数据...');
+  await loadAllSourceRecords();
   const result = { updatedAt: new Date().toISOString() };
 
   for (const src of PRECISE_SOURCES) {
@@ -523,6 +540,11 @@ const autoPush   = exportArgs.includes('--push');
   console.log(`  ⏳ 第三方付费账号...`);
   result.paidAccounts = await fetchPaidStats();
   console.log(`  ✅ 第三方账号: 共 ${result.paidAccounts.total} 条`);
+
+  console.log(`  ⏳ 竞品监控周环比...`);
+  result.competitorMonitoring = await fetchCompetitorStats();
+  const cm = result.competitorMonitoring;
+  console.log(`  ✅ 竞品监控: ${cm.currentWeek.start} 至 ${cm.currentWeek.end} 共 ${cm.currentTotal} 条（环比 ${cm.totalChange >= 0 ? '+' : ''}${cm.totalChange}）`);
 
   // aioBo / milestones 手动维护，不覆盖
   const outPath  = path.join(__dirname, 'stats.json');
@@ -547,7 +569,7 @@ const autoPush   = exportArgs.includes('--push');
   }
 
   // 基础校验（结构完整性）
-  const required = ['updatedAt', 'streamfab', 'dvdfab', 'brandMonitoring', 'paidAccounts'];
+  const required = ['updatedAt', 'streamfab', 'dvdfab', 'brandMonitoring', 'paidAccounts', 'competitorMonitoring'];
   for (const k of required) {
     if (result[k] == null) throw new Error(`校验失败：缺少字段 "${k}"`);
   }

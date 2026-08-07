@@ -1233,7 +1233,10 @@ function renderBrandMonitor(brand) {
   const label     = brand === 'streamfab' ? 'StreamFab' : 'DVDFab';
   const tagClass  = brand === 'streamfab' ? 'sf' : 'df';
   const wow       = calcWoW(d.scrapingTrend || []);
-  const processRate = d.total > 0 ? (((d.processed||0) / d.total) * 100).toFixed(1) : 0;
+  const { curr: initialStatus, currProb: initialProb } = bmGetRangeData(d, '7d');
+  const initialTotal = Object.values(initialStatus).reduce((sum, value) => sum + value, 0);
+  const initialPending = initialStatus['待处理'] || 0;
+  const initialSevere = initialProb['严重故障'] || 0;
 
   document.getElementById('main').innerHTML = `
   <div class="main-inner">
@@ -1269,19 +1272,19 @@ function renderBrandMonitor(brand) {
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">新增品牌提及</div>
-        <div class="stat-value" id="bm-kpi-total">${(d.total||0).toLocaleString()}</div>
-        <div class="stat-sub">品牌相关 Reddit 内容</div>
+        <div class="stat-value" id="bm-kpi-total">${initialTotal.toLocaleString()}</div>
+        <div class="stat-sub" id="bm-kpi-total-sub">近7天抓取的品牌相关 Reddit 内容</div>
         ${wowHTML(wow.thisWeek, wow.lastWeek)}
       </div>
-      <div class="stat-card ${(d.pending||0) > 20 ? 'warning' : 'info'}" id="bm-kpi-pending-card">
+      <div class="stat-card ${initialPending > 20 ? 'warning' : 'info'}" id="bm-kpi-pending-card">
         <div class="stat-label">未处理舆情</div>
-        <div class="stat-value" id="bm-kpi-pending">${(d.pending||0).toLocaleString()}</div>
-        <div class="stat-sub">待处理舆情内容</div>
+        <div class="stat-value" id="bm-kpi-pending">${initialPending.toLocaleString()}</div>
+        <div class="stat-sub" id="bm-kpi-pending-sub">近7天抓取且当前待处理</div>
       </div>
-      <div class="stat-card ${unresolvedSevereBrand(d) > 5 ? 'danger' : unresolvedSevereBrand(d) > 0 ? 'warning' : 'success'}" id="bm-kpi-severe-card">
-        <div class="stat-label">未处理严重故障</div>
-        <div class="stat-value" id="bm-kpi-severe">${unresolvedSevereBrand(d)}</div>
-        <div class="stat-sub" id="bm-kpi-severe-sub">${unresolvedSevereBrand(d) > 0 ? '需优先处理' : '暂无未处理记录'}</div>
+      <div class="stat-card ${initialSevere > 5 ? 'danger' : initialSevere > 0 ? 'warning' : 'success'}" id="bm-kpi-severe-card">
+        <div class="stat-label">严重故障</div>
+        <div class="stat-value" id="bm-kpi-severe">${initialSevere}</div>
+        <div class="stat-sub" id="bm-kpi-severe-sub">${initialSevere > 0 ? '近7天抓取，需优先处理' : '近7天暂无记录'}</div>
       </div>
       <div class="stat-card ${d.avgQualityScore && d.avgQualityScore >= 7 ? 'success' : 'info'}">
         <div class="stat-label">平均回复质量</div>
@@ -1413,6 +1416,7 @@ function toggleBmAnalysis() {
 // ── Banner KPI 随时间范围更新 ──────────────────────────────────
 function updateBmBanners(d, range) {
   const { curr: currStatus, currProb } = bmGetRangeData(d, range);
+  const rangeLabel = { all: '全部数据', '7d': '近7天', '30d': '近30天' }[range];
 
   const periodTotal   = range === 'all'
     ? (d.total || 0)
@@ -1425,9 +1429,11 @@ function updateBmBanners(d, range) {
     : (currProb['严重故障'] || 0);
 
   setText('bm-kpi-total',   periodTotal.toLocaleString());
+  setText('bm-kpi-total-sub', range === 'all' ? '全部品牌相关 Reddit 内容' : `${rangeLabel}抓取的品牌相关 Reddit 内容`);
   setText('bm-kpi-pending', periodPending.toLocaleString());
+  setText('bm-kpi-pending-sub', range === 'all' ? '全部当前待处理舆情内容' : `${rangeLabel}抓取且当前待处理`);
   setText('bm-kpi-severe',  String(periodSevere));
-  setText('bm-kpi-severe-sub', periodSevere > 0 ? '需优先处理' : '暂无未处理记录');
+  setText('bm-kpi-severe-sub', periodSevere > 0 ? (range === 'all' ? '需优先处理' : `${rangeLabel}抓取，需优先处理`) : (range === 'all' ? '暂无未处理记录' : `${rangeLabel}暂无记录`));
 
   const pendingCard = document.getElementById('bm-kpi-pending-card');
   if (pendingCard) pendingCard.className = `stat-card ${periodPending > 20 ? 'warning' : 'info'}`;
@@ -1550,14 +1556,15 @@ function bmGetRangeData(d, range) {
     return { curr: d.statusCount || {}, prev: null, currProb: d.problemType || {}, prevProb: null };
   }
   const days = range === '7d' ? 7 : 30;
-  const now  = new Date(); now.setHours(0, 0, 0, 0);
-  const currFrom = new Date(now); currFrom.setDate(now.getDate() - days);
-  const prevFrom = new Date(now); prevFrom.setDate(now.getDate() - days * 2);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const currFrom = new Date(today); currFrom.setDate(today.getDate() - days + 1);
+  const currTo = new Date(today); currTo.setDate(today.getDate() + 1);
+  const prevFrom = new Date(currFrom); prevFrom.setDate(currFrom.getDate() - days);
 
   return {
-    curr:     bmAggByDate(d.statusByDate  || {}, currFrom, now),
+    curr:     bmAggByDate(d.statusByDate  || {}, currFrom, currTo),
     prev:     bmAggByDate(d.statusByDate  || {}, prevFrom, currFrom),
-    currProb: bmAggByDate(d.problemByDate || {}, currFrom, now),
+    currProb: bmAggByDate(d.problemByDate || {}, currFrom, currTo),
     prevProb: bmAggByDate(d.problemByDate || {}, prevFrom, currFrom),
   };
 }
@@ -2222,6 +2229,7 @@ function ovAioBoCard(brandName, cls, fc) {
 /* ══════════════ 执行动作渲染 ══════════════ */
 
 function renderExecution() {
+  execBmRange = '7d';
   const bm = currentData.brandMonitoring || {};
   const sf = bm.streamfab || {};
   const df = bm.dvdfab    || {};
@@ -2294,23 +2302,24 @@ function renderExecution() {
     </div>
 
     <!-- 品牌舆情处理状态 -->
-    <div class="section-title">品牌舆情处理状态</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin:28px 0 12px">
+      <div class="section-title" style="margin:0">品牌舆情处理状态</div>
+      <div class="seg-group" id="exec-bm-range-seg">
+        <button class="seg-btn"        data-v="all" onclick="setExecBmRange('all')">全部</button>
+        <button class="seg-btn"        data-v="30d" onclick="setExecBmRange('30d')">近30天</button>
+        <button class="seg-btn active" data-v="7d"  onclick="setExecBmRange('7d')">近7天</button>
+      </div>
+    </div>
     <div class="chart-grid">
       <div class="chart-card">
         <div class="chart-title">StreamFab <span class="brand-tag sf">StreamFab</span></div>
-        <div class="chart-subtitle">
-          已处理 ${sf.processed||0} · AI已生成待发布 ${sf.generated||0} · 待处理 ${sf.pending||0}
-          &nbsp;${wowHTML(sfWow.thisWeek, sfWow.lastWeek)}
-        </div>
+        <div class="chart-subtitle" id="exec-sf-status-sub"></div>
         <div class="chart-box" id="chart-sf-status"></div>
         <div class="chart-insight" id="ins-sf-status"></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">DVDFab <span class="brand-tag df">DVDFab</span></div>
-        <div class="chart-subtitle">
-          已处理 ${df.processed||0} · AI已生成待发布 ${df.generated||0} · 待处理 ${df.pending||0}
-          &nbsp;${wowHTML(dfWow.thisWeek, dfWow.lastWeek)}
-        </div>
+        <div class="chart-subtitle" id="exec-df-status-sub"></div>
         <div class="chart-box" id="chart-df-status"></div>
         <div class="chart-insight" id="ins-df-status"></div>
       </div>
@@ -2367,8 +2376,7 @@ function renderExecution() {
   </div>
   `;
 
-  renderBMStatusChart('chart-sf-status', filterIgnored(sf.statusCount));
-  renderBMStatusChart('chart-df-status', filterIgnored(df.statusCount));
+  updateExecBmStatus();
   renderPaBrandChart(pa.byBrand||{});
   renderPaTypeChart(pa.byType||{});
   renderPaSurviveChart(pa.survive1day||{}, pa.survive7day||{});
@@ -2376,11 +2384,39 @@ function renderExecution() {
   renderHealthStatus(currentData.streamfab, currentData.dvdfab, sf, df, pa);
   renderBottleneckCard(currentData.streamfab, currentData.dvdfab);
 
-  setText('ins-sf-status', insightBMStatus(sf));
-  setText('ins-df-status', insightBMStatus(df));
   setText('ins-pa-brand', insightPaBrand(pa.byBrand||{}));
   setText('ins-pa-type',  insightPaType(pa.byType||{}));
   setText('ins-pa-survive', insightPaSurvive(pa.survive1day||{}, pa.survive7day||{}));
+}
+
+let execBmRange = '7d';
+
+function setExecBmRange(range) {
+  execBmRange = range;
+  document.querySelectorAll('#exec-bm-range-seg .seg-btn').forEach(button => button.classList.toggle('active', button.dataset.v === range));
+  updateExecBmStatus();
+}
+
+function updateExecBmStatus() {
+  const bm = currentData.brandMonitoring || {};
+  const rangeLabel = { all: '全部数据', '7d': '近7天', '30d': '近30天' }[execBmRange];
+
+  for (const [brand, prefix] of [['streamfab', 'sf'], ['dvdfab', 'df']]) {
+    const data = bm[brand] || {};
+    const { curr: status } = bmGetRangeData(data, execBmRange);
+    const total = execBmRange === 'all' ? (data.total || 0) : Object.values(status).reduce((sum, value) => sum + value, 0);
+    const scoped = {
+      total,
+      processed: execBmRange === 'all' ? (data.processed || 0) : (status['已处理'] || 0),
+      generated: execBmRange === 'all' ? (data.generated || 0) : (status['已生成'] || 0),
+      pending: execBmRange === 'all' ? (data.pending || 0) : (status['待处理'] || 0),
+      statusCount: status,
+    };
+    const statusText = `已处理 ${scoped.processed} · AI已生成待发布 ${scoped.generated} · 待处理 ${scoped.pending}`;
+    setText(`exec-${prefix}-status-sub`, `${rangeLabel}抓取 · ${statusText}`);
+    renderBMStatusChart(`chart-${prefix}-status`, filterIgnored(status));
+    setText(`ins-${prefix}-status`, insightBMStatus(scoped));
+  }
 }
 
 /* ══════════════ 阈值配置（集中管理，避免魔法数字散落各处）══════════════ */

@@ -1,21 +1,56 @@
 name: Update Stats
 
-# 每日 UTC 02/10 触发（对应北京时间 10/18），可手动运行
+# 每日 UTC 02:00 / 10:00 / 18:00（北京时间 10:00 / 18:00 / 次日 02:00）
 on:
   schedule:
-    - cron: '0 2,10 * * *'
+    - cron: '0 2,10,18 * * *'
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
+
+concurrency:
+  group: update-stats
+  cancel-in-progress: false
 
 jobs:
   update:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
-      - name: Run export and push to GitHub
-        run: bash "/Users/erikaleen/Desktop/进行项目/reddit/dashboard/push-stats.sh"
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Export stats from Feishu
+        run: node dashboard/export-stats.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
+          LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
+
+      - name: Validate generated data
+        run: node -e "JSON.parse(require('fs').readFileSync('stats.json', 'utf8')); console.log('stats.json is valid')"
+
+      - name: Commit updated stats
+        id: commit
+        run: |
+          if git diff --quiet -- stats.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stats.json
+          git commit -m "chore: update dashboard stats"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy updated dashboard
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

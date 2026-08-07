@@ -1,17 +1,13 @@
 # Ascend-Reddit 运营看板
 
-StreamFab & DVDFab 的 Reddit 舆情监控与 AIO-BO 追踪看板，基于 GitHub Pages 静态托管，数据源自飞书多维表格（通过 lark-cli 抓取）。
+StreamFab & DVDFab 的 Reddit 舆情监控与 AIO-BO 追踪看板，基于 GitHub Pages 静态托管，数据源自飞书多维表格（通过飞书 Open API 抓取）。
 
 ---
 
 ## 环境要求
 
 - **Node.js ≥ 18**
-- **lark-cli**（飞书命令行工具）：需已登录飞书账号
-  ```bash
-  npm install -g @larksuite/cli
-  lark-cli auth login
-  ```
+- **飞书企业自建应用凭证**：`LARK_APP_ID`、`LARK_APP_SECRET`（应用需具备多维表格读取权限，且已加入所有源数据表）
 
 ---
 
@@ -35,8 +31,9 @@ cp .env.example .env
 
 | 变量 | 用途 | 必需 |
 |------|------|------|
+| `LARK_APP_ID` | 飞书企业自建应用 App ID，用于读取多维表格 | export-stats.js 必需 |
+| `LARK_APP_SECRET` | 飞书企业自建应用 App Secret，用于换取短期访问令牌 | export-stats.js 必需 |
 | `GITHUB_TOKEN` | 推送 stats.json 到 GitHub（仅本地手动同步时需要） | 本地推送必需 |
-| `LARK_CLI` | 覆盖 lark-cli 路径（默认自动探测） | 可选 |
 | `SF_SERP_TABLE_ID` | StreamFab SERP 排名明细表 table_id（首次配置时使用） | export-aiobo.js 必需 |
 
 > **注意**：`.env` 已在 `.gitignore` 中，不会提交到仓库。
@@ -63,7 +60,7 @@ cp .env.example .env
 ### 3. 抓取飞书数据
 
 ```bash
-node export-stats.js
+node --env-file=.env export-stats.js
 ```
 
 运行完成后生成 `stats.json`（原子写入，先写 `stats.json.next` 再重命名，防止中途读取到残缺文件）。
@@ -81,15 +78,18 @@ python3 -m http.server 8000
 
 ### 方式一：GitHub Actions 自动更新（推荐）
 
-`.github/workflows/update-stats.yml` 在每天 UTC 02:00 / 10:00 / 18:00（北京时间 10:00 / 18:00 / 02:00）自动运行，无需手动干预。
+`.github/workflows/update-stats.yml` 在 GitHub-hosted runner（`ubuntu-latest`）上每天 UTC 02:00 / 10:00 / 18:00 自动运行，对应北京时间 10:00 / 18:00 / 次日 02:00；无需本机在线或 lark-cli 登录。
 
-**首次配置**：在仓库 Settings → Secrets → Actions 中添加：
+**首次配置**：在仓库 **Settings → Secrets and variables → Actions** 中添加：
 
 | Secret | 说明 |
 |--------|------|
-| `LARK_TOKEN` | 飞书用户 token（通过 `lark-cli auth status` 获取） |
+| `LARK_APP_ID` | 飞书企业自建应用的 App ID |
+| `LARK_APP_SECRET` | 飞书企业自建应用的 App Secret |
 
-也可手动触发：GitHub Actions 页面 → Update Stats → Run workflow。
+应用必须已发布/启用、具备多维表格读取权限，且已被添加为所有源多维表格的协作者。工作流只在运行中换取短期 tenant access token，不会将凭证写入仓库或页面。
+
+也可手动触发：GitHub Actions 页面 → Update Stats → Run workflow。成功运行会仅在 `stats.json` 有变化时提交并推送，随后触发 GitHub Pages 部署。
 
 ### 方式二：本地手动同步
 
@@ -127,6 +127,24 @@ SF_SERP_TABLE_ID=tblXXX node export-aiobo.js --update
 
 ---
 
+## 竞品监控周报
+
+看板的「竞品监控」页面读取 [竞品监控多维表格](https://i6a1sqw3p2.feishu.cn/base/Y1uAbFprUawDWKsSoOucyvhPnrc?table=tblJ98nNIyyxI1KL&view=vewSBgAnvb) 中的「日报表」日聚合数据，监控 TunePat、Movpilot、Audials、Playon、Keeprix、Tunefab 与其他品牌的每日提及数。
+
+- **比较口径**：最近一个已完整结束的自然周（周一至周日）对比前一个完整自然周；不把进行中的本周计入周报。
+- **数据质量提醒**：若最近完整自然周没有任何日报记录，`export-stats.js` 会写入 warning，前端顶部会展示提示。
+- **每周推送**：`.github/workflows/push-competitor-card.yml` 在每周一 09:00（北京时间，UTC 01:00）发送卡片。默认发往现有测试群；正式接收人尚未配置前，不会猜测或使用生产群。
+
+本地测试（会真正发送卡片，建议指定测试群或用户）：
+
+```bash
+node --env-file=.env push-lark-competitor.js --chat-id oc_xxx
+# 或使用默认测试群
+node --env-file=.env push-lark-competitor.js
+```
+
+卡片包含本周/上周总提及、增长与下降最明显的竞品，以及看板和多维表格的直达链接。应用需同时拥有该竞品 Base 的读取权限与向目标群发消息的权限。
+
 ## 数据源说明
 
 详见 [DATA_SOURCES.md](DATA_SOURCES.md)。
@@ -137,15 +155,15 @@ SF_SERP_TABLE_ID=tblXXX node export-aiobo.js --update
 
 ### 飞书数据为空 / 抓取失败
 
-1. 检查 lark-cli 是否登录：`lark-cli auth status`
-2. 检查飞书账号是否有对应多维表格的查看权限
+1. 检查 `LARK_APP_ID` / `LARK_APP_SECRET` 是否正确，且 App Secret 未过期或被轮换
+2. 检查飞书应用已启用、具备多维表格读取权限，并已加入所有源数据表的协作者
 3. 检查 `stats.json` 是否存在并格式正确：`node -e "require('./stats.json')" && echo OK`
 
 ### GitHub Actions 失败
 
-1. 检查 `LARK_TOKEN` Secret 是否设置，token 是否过期（飞书用户 token 有效期约 2 小时，每次 `lark-cli auth login` 刷新）
+1. 检查 `LARK_APP_ID`、`LARK_APP_SECRET` 两个 Actions Secret 是否设置且与当前飞书应用匹配
 2. 查看 Actions 日志中 `Export stats from Feishu` 步骤的错误输出
-3. 如果是权限问题，确认 workflow 中 `permissions: contents: write` 已配置
+3. 如果是推送问题，确认 workflow 中 `permissions: contents: write` 已配置
 
 ### 看板图表空白
 
@@ -176,6 +194,6 @@ SF_SERP_TABLE_ID=tblXXX node export-aiobo.js --update
 | `export-stats.js` | 从飞书抓取核心指标，生成 stats.json |
 | `export-aiobo.js` | AIO-BO 半自动化计算，结果写入 stats.json |
 | `push-stats.sh` | 本地手动推送脚本 |
-| `stats.json` | 看板数据（不提交到仓库，由 Actions 自动更新） |
+| `stats.json` | 看板数据（由 Actions 自动更新并提交，以触发 Pages 部署） |
 | `.env.example` | 环境变量模板 |
 | `.github/workflows/update-stats.yml` | 定时自动更新 GitHub Actions |

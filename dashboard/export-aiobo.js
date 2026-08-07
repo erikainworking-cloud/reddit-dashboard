@@ -236,6 +236,7 @@ async function calcDvdfabAiobo() {
   const kwCount      = Number(aioRow.kwCount?.value) || 0;
   const aioBoPercent = (kwCount / cfg.aioTriggerWords * 100).toFixed(2);
 
+  // DVDFab 预聚合表只有汇总数字，无逐词列表，故 newKws/lostKws 留空
   return {
     brand:           'DVDFab',
     kwCount,
@@ -244,6 +245,8 @@ async function calcDvdfabAiobo() {
     q3Target:        cfg.q3Target,
     q3TargetWords:   cfg.q3TargetWords,
     gap:             cfg.q3TargetWords - kwCount,
+    newKws:          [],
+    lostKws:         [],
   };
 }
 
@@ -284,7 +287,9 @@ function updateStatsJson(sfResult, dfResult) {
     entry.current      = result.aioBoPercent;
     entry.currentWords = result.kwCount;
     entry.dataAsOf     = today;
-    if (result.kwList) entry.kwList = result.kwList;
+    if (result.kwList)   entry.kwList      = result.kwList;
+    if (result.newKws)   entry.weeklyAdded = result.newKws;
+    if (result.lostKws)  entry.weeklyLost  = result.lostKws;
 
     const snapshots = entry.snapshots || [];
     const existIdx  = snapshots.findIndex(s => s.date === today);
@@ -314,6 +319,53 @@ function updateStatsJson(sfResult, dfResult) {
   console.log(`\n✅ stats.json 已更新 → ${statsPath}`);
 }
 
+// ── 推送到 GitHub ─────────────────────────────────────────────
+
+function pushToGitHub(statsPath) {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    console.error('❌ 请先设置 GITHUB_TOKEN 环境变量后再使用 --push');
+    process.exit(1);
+  }
+  const repo = 'erikainworking-cloud/reddit-dashboard';
+  const apiUrl = `https://api.github.com/repos/${repo}/contents/stats.json`;
+
+  console.log('\n🚀 推送到 GitHub...');
+
+  // 获取当前 SHA
+  const shaResult = spawnSync('curl', [
+    '-s', '-H', `Authorization: token ${token}`,
+    apiUrl,
+  ], { encoding: 'utf-8' });
+  const shaData = JSON.parse(shaResult.stdout || '{}');
+  const sha = shaData.sha || '';
+
+  // Base64 编码
+  const content = fs.readFileSync(statsPath).toString('base64');
+  const body = JSON.stringify({
+    message: `update aio-bo stats ${new Date().toISOString().slice(0, 10)}`,
+    content,
+    sha,
+  });
+
+  const pushResult = spawnSync('curl', [
+    '-s', '-X', 'PUT',
+    '-H', `Authorization: token ${token}`,
+    '-H', 'Accept: application/vnd.github+json',
+    '-H', 'Content-Type: application/json',
+    '-d', body,
+    apiUrl,
+  ], { encoding: 'utf-8' });
+
+  const pushData = JSON.parse(pushResult.stdout || '{}');
+  if (pushData.content) {
+    console.log('✅ 已推送到 GitHub，看板将自动刷新');
+    console.log('🌐 https://erikainworking-cloud.github.io/reddit-dashboard/');
+  } else {
+    console.error('❌ 推送失败：', pushData.message || pushResult.stdout.slice(0, 200));
+  }
+}
+
 // ── 主流程 ────────────────────────────────────────────────────
 
 const args = process.argv.slice(2);
@@ -339,10 +391,15 @@ if (args.includes('--list-tables-sf')) {
   const dfResult = await calcDvdfabAiobo().catch(e => { console.error('  ❌ DVDFab 计算失败:', e.message); return null; });
   printResult(dfResult);
 
-  if (args.includes('--update')) {
-    console.log('\n📝 --update 模式：写入 stats.json...');
+  const shouldUpdate = args.includes('--update') || args.includes('--push');
+  if (shouldUpdate) {
+    console.log('\n📝 写入 stats.json...');
     updateStatsJson(sfResult, dfResult);
   } else {
-    console.log('\n💡 预览模式（不写入）。添加 --update 参数可自动写入 stats.json。');
+    console.log('\n💡 预览模式（不写入）。添加 --update 写入本地，--push 写入并推送到线上。');
+  }
+
+  if (args.includes('--push')) {
+    pushToGitHub(path.join(__dirname, 'stats.json'));
   }
 })();

@@ -1,0 +1,44 @@
+name: Push Competitor Monitor Card to Feishu
+
+on:
+  schedule:
+    # Monday 01:00 UTC = Monday 09:00 Beijing time
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+    inputs:
+      chat_id:
+        description: 'Custom chat_id (oc_xxx); leave empty to use the test group'
+        required: false
+      user_id:
+        description: 'Custom user_id (ou_xxx); leave empty to use the test group'
+        required: false
+
+jobs:
+  push-card:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
+      LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify competitor monitor data
+        run: |
+          node -e "const s=require('./dashboard/stats.json'); if (!s.competitorMonitoring) throw new Error('stats.json lacks competitorMonitoring; run the data exporter before pushing this card.');"
+
+      - name: Push competitor monitor Feishu card
+        run: |
+          ARGS=""
+          CHAT_ID="${{ github.event.inputs.chat_id }}"
+          USER_ID="${{ github.event.inputs.user_id }}"
+          if [ -n "$CHAT_ID" ]; then
+            ARGS="--chat-id $CHAT_ID"
+          elif [ -n "$USER_ID" ]; then
+            ARGS="--user-id $USER_ID"
+          fi
+          node dashboard/push-lark-competitor.js $ARGS

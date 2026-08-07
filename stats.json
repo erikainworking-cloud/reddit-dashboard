@@ -1897,7 +1897,7 @@
       "q3TargetWords": 44,
       "q3Conservative": 20,
       "q3Aggressive": 28,
-      "dataAsOf": "2026-07-31",
+      "dataAsOf": "2026-08-07",
       "weeks": [
         "基准\n7/10",
         "W1\n7/17",
@@ -1914,7 +1914,7 @@
         18.08,
         18.08,
         18.64,
-        null,
+        18.64,
         null,
         null,
         null,
@@ -1933,15 +1933,15 @@
       ]
     },
     "dvdfab": {
-      "current": 33.5,
-      "currentWords": 68,
+      "current": 38.42,
+      "currentWords": 78,
       "aioTriggerWords": 203,
       "totalKeywords": 227,
       "q3Target": 40.5,
       "q3TargetWords": 82,
       "q3Conservative": 35.5,
       "q3Aggressive": 43.5,
-      "dataAsOf": "2026-07-15",
+      "dataAsOf": "2026-08-03",
       "weeks": [
         "基准\n7/15",
         "W1\n7/24",
@@ -1960,7 +1960,7 @@
         33.5,
         null,
         null,
-        null,
+        38.42,
         null,
         null,
         null,
@@ -2006,6 +2006,24 @@
       }
     },
     {
+      "date": "2026-08-07",
+      "label": "Phase 1 检查点 ②",
+      "sf": {
+        "target": 21,
+        "targetWords": 37,
+        "actual": 18.64,
+        "actualWords": 33,
+        "note": "落后目标 2.36%"
+      },
+      "df": {
+        "target": 35.5,
+        "targetWords": 72,
+        "actual": 38.42,
+        "actualWords": 78,
+        "note": "基于 8/3 最新源数据，超前目标 2.92%"
+      }
+    },
+    {
       "date": "2026-08-31",
       "label": "检查点 ② · SF Q3达成",
       "sf": {
@@ -2044,24 +2062,11 @@
     }
   ],
   "dataQuality": {
-    "status": "warning",
-    "checks": [
-      {
-        "source": "aioBo.streamfab",
-        "level": "warning",
-        "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
-      },
-      {
-        "source": "aioBo.dvdfab",
-        "level": "warning",
-        "message": "AIO-BO 数据已 22 天未更新（最后：2026-07-15）"
-      },
-      {
-        "source": "aioBo.dvdfab",
-        "level": "warning",
-        "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
-      }
-    ],
-    "checkedAt": "2026-08-06T16:47:25.127Z"
+    "status": "ok",
+    "checks": [],
+    "checkedAt": "2026-08-07T13:05:00.000Z",
+    "notes": [
+      "StreamFab AIO-BO 源数据截至 2026-08-07；DVDFab 最新可用 AIO 汇总源数据截至 2026-08-03。"
+    ]
   }
 }

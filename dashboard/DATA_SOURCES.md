@@ -11,8 +11,8 @@
 ```
 飞书多维表格（原始业务数据）
          ↓
-GitHub Actions / 本地脚本
-  1. export-stats.js   ← 拉取飞书数据，计算按日聚合、运营漏斗、数据质量
+GitHub Actions（GitHub-hosted runner）
+  1. export-stats.js   ← 通过飞书 Open API 拉取数据，计算按日聚合、运营漏斗、数据质量
   2. export-aiobo.js   ← 半自动计算 AIO-BO（每周触发一次）
   3. 原子写入 stats.json（先写 .next，再 renameSync）
          ↓
@@ -21,7 +21,7 @@ GitHub Pages（静态部署）
   → 飞书日报 / 周报卡片
 ```
 
-**自动更新**（GitHub Actions）：每天 UTC 02:00 / 10:00 / 18:00，自动运行 `export-stats.js` 并推送 `stats.json`，不含 AIO-BO。
+**自动更新**（GitHub Actions）：在 GitHub-hosted runner 上每天 UTC 02:00 / 10:00 / 18:00（北京时间 10:00 / 18:00 / 次日 02:00）自动运行 `export-stats.js` 并提交 `stats.json`，不含 AIO-BO。使用飞书企业自建应用的短期 tenant access token，不依赖本机或 lark-cli。
 
 **半自动更新**（AIO-BO）：每周手动运行 `node export-aiobo.js --update`，结果写入 `stats.json`。
 
@@ -95,7 +95,36 @@ GitHub Pages（静态部署）
 
 ---
 
-## 四、数据质量检查（`dataQuality`）
+## 四、竞品监控（`competitorMonitoring`）
+
+### 数据来源
+
+- **多维表格**：[竞品监控](https://i6a1sqw3p2.feishu.cn/base/Y1uAbFprUawDWKsSoOucyvhPnrc?table=tblJ98nNIyyxI1KL&view=vewSBgAnvb)
+- **Base token**：`Y1uAbFprUawDWKsSoOucyvhPnrc`
+- **日聚合表**：`日报表`（`tblRQe07VAZntyfq`）
+
+周环比必须读取「日报表」，而不是明细表「输出数据」：日报表每个检查日期只有一条聚合记录，可避免将同一轮 SERP 中的多条明细误当作独立日提及。
+
+### 字段与计算口径
+
+| stats.json 字段 | 来源字段 | 计算方式 |
+|----------------|---------|---------|
+| `brands[].currentWeek` | `TunePat提及数`、`Movpilot提及数`、`Audials提及数`、`Playon提及数`、`Keeprix提及数`、`Tunefab提及数`、`其他品牌提及数` | 本周每日值求和 |
+| `brands[].previousWeek` | 同上 | 上周每日值求和 |
+| `brands[].change` | 同上 | 本周 − 上周 |
+| `brands[].changePct` | 同上 | `(本周 − 上周) / 上周 × 100`；上周为 0 时为 `null` |
+| `currentTotal` / `previousTotal` | 七个竞品字段 | 对应周期内所有品牌每日提及数求和 |
+| `dailyTrend` | `检查日期` + 七个竞品字段 | 两个对比周内按日保留总量与品牌明细 |
+
+**周定义**：始终比较最近一个已经完整结束的自然周（周一 00:00 至周日 23:59）与其前一个完整自然周，不使用尚在进行的本周。缺失日期按 0 计入，不会推断或补造未存在的日报记录。
+
+**质量检查**：若最近完整周没有一条日报记录，写入 `dataQuality` 的 warning，提示检查竞品数据同步。
+
+**推送**：`push-lark-competitor.js` 读取该数据生成卡片；GitHub workflow 计划每周一 01:00 UTC（北京时间 09:00）运行。卡片默认使用测试群，支持 `--chat-id` / `--user-id` 定向测试，并包含看板与该多维表格链接。
+
+---
+
+## 五、数据质量检查（`dataQuality`）
 
 由 `export-stats.js` 自动生成，写入 `stats.json.dataQuality`。
 
@@ -129,7 +158,7 @@ GitHub Pages（静态部署）
 
 ---
 
-## 五、第三方付费账号（`paidAccounts`）
+## 六、第三方付费账号（`paidAccounts`）
 
 | 飞书多维表格 base_token | 表格 table_id |
 |----------------------|--------------|
@@ -145,7 +174,7 @@ GitHub Pages（静态部署）
 
 ---
 
-## 六、AIO-BO 进度追踪（`aioBo`）
+## 七、AIO-BO 进度追踪（`aioBo`）
 
 > ⚠️ 此部分**不由 `export-stats.js` 自动拉取**，需手动运行 `export-aiobo.js`。
 
@@ -224,7 +253,7 @@ node --env-file=.env export-aiobo.js --update
 
 ---
 
-## 七、stats.json 数据结构速查
+## 八、stats.json 数据结构速查
 
 ```
 stats.json
@@ -241,6 +270,11 @@ stats.json
 ├── brandMonitoring
 │   ├── streamfab           品牌舆情 - StreamFab
 │   └── dvdfab              品牌舆情 - DVDFab
+├── competitorMonitoring    竞品提及完整自然周环比
+│   ├── sourceUrl, currentWeek, previousWeek
+│   ├── currentTotal, previousTotal, totalChange, totalChangePct
+│   ├── brands              [{key, label, currentWeek, previousWeek, change, changePct}]
+│   └── dailyTrend          [{date, total, brands}]
 ├── dataQuality             ← v2 新增
 │   ├── checkedAt           检查时间戳
 │   └── checks              [{source, level, message}]
@@ -255,12 +289,12 @@ stats.json
 
 ---
 
-## 八、运行方式汇总
+## 九、运行方式汇总
 
 ```bash
 cd dashboard
 
-# 拉取飞书数据，生成 stats.json（精准词 + 品牌舆情 + 付费账号 + 数据质量）
+# 拉取飞书数据，生成 stats.json（精准词 + 品牌舆情 + 竞品周环比 + 付费账号 + 数据质量）
 node --env-file=.env export-stats.js
 # 或：node export-stats.js  （如已通过其他方式设置环境变量）
 

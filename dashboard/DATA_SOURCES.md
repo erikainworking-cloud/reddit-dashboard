@@ -92,6 +92,10 @@ GitHub Pages（静态部署）
 | `problemType` | `问题分类` | GROUP BY COUNT |
 | `avgQualityScore` | `回复质量评分` | AVG，保留 1 位小数 |
 | `processingTrend` | `处理时间` | 按日期 GROUP BY COUNT（已处理记录）|
+| `statusByDate` | `抓取时间` × `处理状态` | `{date: {status: count}}`，按抓取日期聚合当前处理状态 |
+| `problemByDate` | `抓取时间` × `问题分类` | `{date: {problem: count}}`，按抓取日期聚合问题分类 |
+
+> **品牌舆情的时间筛选口径**：默认展示近 7 天（可切换近 30 天或全部）抓取的记录，并按这些记录的当前处理状态统计“待处理 / 已生成 / 已处理”等数量；“全部”展示全量当前状态汇总。这样“待处理”不会把历史所有积压误作近期新增待处理。
 
 ---
 

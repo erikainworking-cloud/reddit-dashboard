@@ -29,23 +29,20 @@ const CONFIG = {
   streamfab: {
     label:          'StreamFab',
     baseToken:      'EeTUbRHV3anTKTsvl2dcjaAenBf',
-    // SERP 排名明细表 table_id（若未知，运行 node export-aiobo.js --list-tables-sf 自动发现）
-    serpTableId:    process.env.SF_SERP_TABLE_ID || '',
+    serpTableId:    'tbl5CRbEcPUCdwoR',
     aioTriggerWords: 177,
     q3Target:       25.0,
     q3TargetWords:  44,
     // 需要从全链路中排除的细分来源
     excludeSources: ['dvdfab.cn', 'streamfab.com', 'streamfab.dvdfab.cn', 'AIO正文'],
-    // 飞书字段名
     fields: {
-      sourceType:    '来源类别',
+      citationType:  'AIO引用类别',
       subSource:     '细分来源',
       mentionBrand:  '是否提及StreamFab',
-      keyword:       '关键词',
+      keyword:       '触发关键词',
     },
-    // 全链路筛选值
     filterValues: {
-      sourceType:   '来源引用',
+      citationType: '来源引用',
       mentionBrand: '是',
     },
   },
@@ -59,7 +56,7 @@ const CONFIG = {
     q3TargetWords:  82,
     fields: {
       source:       '来源',
-      kwCount:      'DVDFab覆盖关键词数',
+      kwCount:      'DVDFab 覆盖关键词数',
     },
     filterValues: {
       source:       'AIO',
@@ -143,33 +140,51 @@ async function calcStreamfabAiobo() {
 
   console.log(`  📊 查询 StreamFab SERP 排名明细表（${serpTableId}）...`);
 
-  // GROUP BY 来源类别 × 细分来源 × 是否提及StreamFab × 关键词，JS 侧过滤
-  const rows = dataQuery(cfg.baseToken, {
-    datasource: { type: 'table', table: { tableId: serpTableId } },
-    dimensions: [
-      { field_name: cfg.fields.sourceType,   alias: 'sourceType' },
-      { field_name: cfg.fields.subSource,    alias: 'subSource' },
-      { field_name: cfg.fields.mentionBrand, alias: 'mention' },
-      { field_name: cfg.fields.keyword,      alias: 'keyword' },
+  // 明细表规模较大，+data-query 在飞书侧会超时。改为先由记录接口云端筛选，再逐页读取
+  // 关键词和细分来源，在本地完成官方来源排除与关键词去重。
+  const filterJson = JSON.stringify({
+    logic: 'and',
+    conditions: [
+      [cfg.fields.citationType, 'intersects', [cfg.filterValues.citationType]],
+      [cfg.fields.mentionBrand, 'intersects', [cfg.filterValues.mentionBrand]],
     ],
-    measures: [{ field_name: cfg.fields.keyword, aggregation: 'count', alias: 'count' }],
-    sort:     [{ field_name: 'count', order: 'desc' }],
-    pagination: { limit: 5000 },
-    shaper: { format: 'flat' },
   });
-
-  // 收集满足全链路的关键词（去重），排除官方来源
   const qualifiedKws = new Set();
-  for (const r of rows) {
-    const sourceType = r.sourceType?.value;
-    const mention    = r.mention?.value;
-    const keyword    = r.keyword?.value;
-    if (!keyword) continue;
-    const subSource = String(r.subSource?.value || '').toLowerCase();
-    const excluded  = cfg.excludeSources.some(s => subSource.includes(s.toLowerCase()));
-    if (sourceType === cfg.filterValues.sourceType && mention === cfg.filterValues.mentionBrand && !excluded) {
-      qualifiedKws.add(keyword);
+  let offset = 0;
+  while (true) {
+    const result = spawnSync(LARK, [
+      'base', '+record-list',
+      '--base-token', cfg.baseToken,
+      '--table-id', serpTableId,
+      '--field-id', cfg.fields.keyword,
+      '--field-id', cfg.fields.subSource,
+      '--filter-json', filterJson,
+      '--offset', String(offset),
+      '--limit', '200',
+      '--format', 'json',
+      '--as', 'user',
+    ], { encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 });
+    const raw = result.stdout + result.stderr;
+    const start = raw.indexOf('{');
+    if (start === -1) throw new Error('StreamFab 记录查询无 JSON 输出:\n' + raw.slice(0, 500));
+    const payload = JSON.parse(raw.slice(start));
+    if (!payload.ok) throw new Error('StreamFab 记录查询失败: ' + JSON.stringify(payload.error));
+
+    const fields = payload.data?.fields || [];
+    const records = payload.data?.data || [];
+    const keywordIndex = fields.indexOf(cfg.fields.keyword);
+    const sourceIndex = fields.indexOf(cfg.fields.subSource);
+    if (keywordIndex === -1 || sourceIndex === -1) {
+      throw new Error(`StreamFab 明细表缺少字段：${cfg.fields.keyword} 或 ${cfg.fields.subSource}`);
     }
+    for (const row of records) {
+      const keyword = String(row[keywordIndex] || '').trim();
+      const subSource = String(row[sourceIndex] || '').toLowerCase();
+      const excluded = cfg.excludeSources.some(s => subSource.includes(s.toLowerCase()));
+      if (keyword && !excluded) qualifiedKws.add(keyword);
+    }
+    if (!payload.data?.has_more || records.length === 0) break;
+    offset += records.length;
   }
 
   // 从上一次结果对比新增关键词
@@ -209,31 +224,43 @@ async function calcDvdfabAiobo() {
   console.log(`  📊 查询 DVDFab 占位率统计表（${cfg.statsTableId}）...`);
 
   // 读取预聚合表，取来源=AIO 的最新行
-  const rows = dataQuery(cfg.baseToken, {
-    datasource: { type: 'table', table: { tableId: cfg.statsTableId } },
-    dimensions: [{ field_name: cfg.fields.source, alias: 'source' }],
-    measures: [
-      { field_name: cfg.fields.kwCount, aggregation: 'max', alias: 'kwCount' },
-    ],
-    sort: [{ field_name: 'kwCount', order: 'desc' }],
-    pagination: { limit: 50 },
-    shaper: { format: 'flat' },
-  });
+  // 统计表按周保留历史记录。读取“来源=AIO”的最新一条，不能对全历史取 max，
+  // 否则数据下降时会错误展示旧峰值。
+  const result = spawnSync(LARK, [
+    'base', '+record-list',
+    '--base-token', cfg.baseToken,
+    '--table-id', cfg.statsTableId,
+    '--field-id', cfg.fields.source,
+    '--field-id', cfg.fields.kwCount,
+    '--field-id', '统计时间',
+    '--sort-json', JSON.stringify([{ field: '统计时间', desc: true }]),
+    '--limit', '200',
+    '--format', 'json',
+    '--as', 'user',
+  ], { encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 });
+  const raw = result.stdout + result.stderr;
+  const start = raw.indexOf('{');
+  if (start === -1) throw new Error('DVDFab 记录查询无 JSON 输出:\n' + raw.slice(0, 500));
+  const payload = JSON.parse(raw.slice(start));
+  if (!payload.ok) throw new Error('DVDFab 记录查询失败: ' + JSON.stringify(payload.error));
 
-  // 找到 来源 包含 AIO 的行，取 kwCount
-  const aioRow = rows.find(r => {
-    const src = r.source?.value;
-    if (!src) return false;
-    if (Array.isArray(src)) return src.includes(cfg.filterValues.source);
-    return String(src).includes(cfg.filterValues.source);
+  const fields = payload.data?.fields || [];
+  const records = payload.data?.data || [];
+  const sourceIndex = fields.indexOf(cfg.fields.source);
+  const countIndex  = fields.indexOf(cfg.fields.kwCount);
+  const aioRow = records.find(row => {
+    const source = row[sourceIndex];
+    return Array.isArray(source)
+      ? source.includes(cfg.filterValues.source)
+      : String(source || '').includes(cfg.filterValues.source);
   });
 
   if (!aioRow) {
-    console.log('  ⚠️  未找到 来源=AIO 的行，请确认表结构');
+    console.log('  ⚠️  未找到 来源=AIO 的记录，请确认表结构');
     return null;
   }
 
-  const kwCount      = Number(aioRow.kwCount?.value) || 0;
+  const kwCount      = Number(aioRow[countIndex]) || 0;
   const aioBoPercent = (kwCount / cfg.aioTriggerWords * 100).toFixed(2);
 
   // DVDFab 预聚合表只有汇总数字，无逐词列表，故 newKws/lostKws 留空

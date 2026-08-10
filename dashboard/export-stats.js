@@ -27,7 +27,9 @@ async function getTenantAccessToken() {
   });
   const payload = await response.json();
   if (!response.ok || payload.code !== 0 || !payload.tenant_access_token) {
-    throw new Error(`获取飞书 tenant_access_token 失败（code: ${payload.code ?? response.status}）`);
+    const code = payload.code ?? response.status;
+    const message = payload.msg || payload.message || '未知错误';
+    throw new Error(`获取飞书 tenant_access_token 失败（code: ${code}，message: ${message}）。请检查 GitHub Actions Secrets 中的 LARK_APP_ID / LARK_APP_SECRET 是否为已启用飞书自建应用的有效凭证`);
   }
   return payload.tenant_access_token;
 }

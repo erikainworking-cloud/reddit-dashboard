@@ -320,9 +320,16 @@ function updateStatsJson(sfResult, dfResult) {
 
     const snapshots = entry.snapshots || [];
     const existIdx  = snapshots.findIndex(s => s.date === today);
+    const plannedWeek = (entry.weeks || []).reduce((best, label) => {
+      const match = label.match(/(\d+)\/(\d+)/);
+      if (!match) return best;
+      const date = new Date(`${today.slice(0, 4)}-${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')}T00:00:00Z`);
+      const distance = Math.abs(date - new Date(`${today}T00:00:00Z`));
+      return !best || distance < best.distance ? { label, distance } : best;
+    }, null);
     const snap = {
       date:  today,
-      week:  weekLabel || `W${snapshots.length + 1}`,
+      week:  weekLabel || plannedWeek?.label || `W${snapshots.length + 1}`,
       value: result.aioBoPercent,
       words: result.kwCount,
     };

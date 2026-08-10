@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2026-08-10T05:19:29.569Z",
+  "updatedAt": "2026-08-10T06:21:16.857Z",
   "streamfab": {
     "label": "StreamFab",
-    "total": 1845,
+    "total": 1846,
     "published": 3,
     "posts": 1257,
-    "comments": 588,
+    "comments": 589,
     "statusCount": {
       "已忽略": 1295,
       "已发布": 3,
@@ -14,7 +14,7 @@
       "需要复核": 138,
       "待处理": 10,
       "暂不回复": 4,
-      "已生成": 257
+      "已生成": 258
     },
     "intentCount": {
       "方案探索": 226,
@@ -27,16 +27,17 @@
       "高意向工具寻找": 15,
       "功能随口提及": 9,
       "一般需求讨论": 12,
-      "官方下载受限": 8
+      "官方下载受限": 8,
+      "现有工具替代": 1
     },
     "brandMention": {
-      "YES": 56,
+      "YES": 57,
       "NO": 993
     },
     "topKeywords": [
       [
         "download netflix video",
-        699
+        700
       ],
       [
         "netflix downloader",
@@ -264,7 +265,7 @@
       },
       "2026-08-10": {
         "netflix downloader": 1,
-        "download netflix video": 1,
+        "download netflix video": 2,
         "bypass netflix drm": 1,
         "download amazon video": 1,
         "amazon to mp4": 1
@@ -337,7 +338,7 @@
       ],
       [
         "2026-08-10",
-        5
+        6
       ]
     ],
     "statusByDate": {
@@ -413,7 +414,7 @@
         "需要复核": 1
       },
       "2026-08-10": {
-        "已生成": 5
+        "已生成": 6
       }
     },
     "intentByDate": {
@@ -497,7 +498,8 @@
       "2026-08-10": {
         "官方下载受限": 3,
         "明确技术求助": 1,
-        "高意向工具寻找": 1
+        "高意向工具寻找": 1,
+        "现有工具替代": 1
       }
     },
     "mentionByDate": {
@@ -550,7 +552,7 @@
         "NO": 1
       },
       "2026-08-10": {
-        "YES": 5
+        "YES": 6
       }
     },
     "typeByDate": {
@@ -618,7 +620,7 @@
       },
       "2026-08-10": {
         "帖子": 1,
-        "评论": 4
+        "评论": 5
       }
     }
   },
@@ -3602,7 +3604,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-09",
-      "calculatedAt": "2026-08-10T05:19:29.637Z",
+      "calculatedAt": "2026-08-10T06:21:16.922Z",
       "dataThrough": "2026-08-09",
       "periodComplete": false,
       "missingDates": [
@@ -4044,6 +4046,6 @@
         "message": "竞品当前周期（2026-08-03 至 2026-08-09）缺少 2026-08-03 的原始记录；周环比仅供参考"
       }
     ],
-    "checkedAt": "2026-08-10T05:19:29.639Z"
+    "checkedAt": "2026-08-10T06:21:16.924Z"
   }
 }

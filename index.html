@@ -2811,14 +2811,30 @@ function renderAiobo() {
   const dfMin = Math.floor(Math.min(...(df.target||[33])) - 1);
   const dfMax = Math.ceil(Math.max(...(df.target||[41])) + 1);
 
-  // 支持 snapshots（日期快照），兼容旧的 weeks/actual 平行数组
+  // 以预估周计划作为统一横轴；按快照日期将每周实际值映射回对应计划周。
+  // 不可用 snapshots 直接作为横轴，否则只有一次快照时会压缩实际趋势、并与目标路径错位。
   function aioChartData(brand) {
-    if (brand.snapshots && brand.snapshots.length > 0) {
-      const weeks  = brand.snapshots.map(s => s.week || s.date);
-      const actual = brand.snapshots.map(s => s.value);
-      return { weeks, actual };
+    const weeks = brand.weeks || [];
+    const actual = [...(brand.actual || [])];
+    if (!weeks.length) return { weeks: [], actual: [] };
+
+    for (const snapshot of brand.snapshots || []) {
+      const snapshotDate = new Date(`${snapshot.date}T00:00:00`);
+      let bestIndex = -1;
+      let bestDistance = Infinity;
+      weeks.forEach((week, index) => {
+        const match = week.match(/(\d+)\/(\d+)/);
+        if (!match) return;
+        const plannedDate = new Date(snapshotDate.getFullYear(), Number(match[1]) - 1, Number(match[2]));
+        const distance = Math.abs(plannedDate - snapshotDate);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
+      });
+      if (bestIndex >= 0) actual[bestIndex] = snapshot.value;
     }
-    return { weeks: brand.weeks || [], actual: brand.actual || [] };
+    return { weeks, actual };
   }
   const sfCD = aioChartData(sf), dfCD = aioChartData(df);
   renderAioboChart('chart-sf-aiobo', sfCD.weeks, sfCD.actual, sf.target||[], '#ff4500', '#fca07a', sfMin, sfMax);

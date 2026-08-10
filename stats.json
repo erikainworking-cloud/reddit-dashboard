@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-06T16:47:07.040Z",
+  "updatedAt": "2026-08-10T03:24:42.031Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1590,
@@ -2067,6 +2067,225 @@
     "checkedAt": "2026-08-07T13:05:00.000Z",
     "notes": [
       "StreamFab AIO-BO 源数据截至 2026-08-07；DVDFab 最新可用 AIO 汇总源数据截至 2026-08-03。"
+    ]
+  },
+  "competitorMonitoring": {
+    "sourceUrl": "https://i6a1sqw3p2.feishu.cn/base/Y1uAbFprUawDWKsSoOucyvhPnrc?table=tblJ98nNIyyxI1KL&view=vewSBgAnvb",
+    "currentWeek": {
+      "start": "2026-08-03",
+      "end": "2026-08-09"
+    },
+    "previousWeek": {
+      "start": "2026-07-27",
+      "end": "2026-08-02"
+    },
+    "currentTotal": 17,
+    "previousTotal": 21,
+    "totalChange": -4,
+    "totalChangePct": -19,
+    "currentWeekRecordCount": 5,
+    "brands": [
+      {
+        "key": "tunepat",
+        "label": "TunePat",
+        "currentWeek": 0,
+        "previousWeek": 0,
+        "change": 0,
+        "changePct": null
+      },
+      {
+        "key": "movpilot",
+        "label": "Movpilot",
+        "currentWeek": 0,
+        "previousWeek": 0,
+        "change": 0,
+        "changePct": null
+      },
+      {
+        "key": "audials",
+        "label": "Audials",
+        "currentWeek": 0,
+        "previousWeek": 2,
+        "change": -2,
+        "changePct": -100
+      },
+      {
+        "key": "playon",
+        "label": "Playon",
+        "currentWeek": 15,
+        "previousWeek": 15,
+        "change": 0,
+        "changePct": 0
+      },
+      {
+        "key": "keeprix",
+        "label": "Keeprix",
+        "currentWeek": 2,
+        "previousWeek": 4,
+        "change": -2,
+        "changePct": -50
+      },
+      {
+        "key": "tunefab",
+        "label": "Tunefab",
+        "currentWeek": 0,
+        "previousWeek": 0,
+        "change": 0,
+        "changePct": null
+      },
+      {
+        "key": "other",
+        "label": "其他品牌",
+        "currentWeek": 0,
+        "previousWeek": 0,
+        "change": 0,
+        "changePct": null
+      }
+    ],
+    "dailyTrend": [
+      {
+        "date": "2026-07-28",
+        "total": 3,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 1,
+          "playon": 2,
+          "keeprix": 0,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-07-29",
+        "total": 4,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 1,
+          "playon": 3,
+          "keeprix": 0,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-07-30",
+        "total": 3,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 2,
+          "keeprix": 1,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-07-31",
+        "total": 3,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 2,
+          "keeprix": 1,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-08-01",
+        "total": 5,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 4,
+          "keeprix": 1,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-08-02",
+        "total": 3,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 2,
+          "keeprix": 1,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-08-04",
+        "total": 2,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 1,
+          "keeprix": 1,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-08-05",
+        "total": 3,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 3,
+          "keeprix": 0,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-08-06",
+        "total": 3,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 3,
+          "keeprix": 0,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-08-07",
+        "total": 4,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 4,
+          "keeprix": 0,
+          "tunefab": 0,
+          "other": 0
+        }
+      },
+      {
+        "date": "2026-08-08",
+        "total": 5,
+        "brands": {
+          "tunepat": 0,
+          "movpilot": 0,
+          "audials": 0,
+          "playon": 4,
+          "keeprix": 1,
+          "tunefab": 0,
+          "other": 0
+        }
+      }
     ]
   }
 }

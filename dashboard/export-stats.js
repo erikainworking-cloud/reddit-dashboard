@@ -89,7 +89,8 @@ async function loadAllSourceRecords() {
     ]),
     ...BRAND_MON_SOURCES.map(({ baseToken, tableId }) => [baseToken, tableId]),
     [PAID_SOURCE.baseToken, PAID_SOURCE.tableId],
-    [COMPETITOR_SOURCE.baseToken, COMPETITOR_SOURCE.tableId],
+    [COMPETITOR_SOURCE.baseToken, COMPETITOR_SOURCE.rawTableId],
+    [COMPETITOR_SOURCE.baseToken, COMPETITOR_SOURCE.dailyTableId],
   ];
   await Promise.all(sources.map(([baseToken, tableId]) => loadTableRecords(baseToken, tableId)));
 }
@@ -111,20 +112,17 @@ const BRAND_MON_SOURCES = [
 // 第三方付费账号
 const PAID_SOURCE = { baseToken: 'KhAHbJRcNaCq03sxg8Bcw2Pfn1g', tableId: 'tblnoKwZHuCNuBCI' };
 
-// 竞品监控（日聚合表，按最近两个完整自然周比较）
+// 竞品监控：输出数据为 URL 级原始事实，日报表保留用于历史核对。
 const COMPETITOR_SOURCE = {
   baseToken: 'Y1uAbFprUawDWKsSoOucyvhPnrc',
-  tableId: 'tblRQe07VAZntyfq',
+  rawTableId: 'tblJ98nNIyyxI1KL',
+  dailyTableId: 'tblRQe07VAZntyfq',
   url: 'https://i6a1sqw3p2.feishu.cn/base/Y1uAbFprUawDWKsSoOucyvhPnrc?table=tblJ98nNIyyxI1KL&view=vewSBgAnvb',
-  brands: [
-    { key: 'tunepat', label: 'TunePat', field: 'TunePat提及数' },
-    { key: 'movpilot', label: 'Movpilot', field: 'Movpilot提及数' },
-    { key: 'audials', label: 'Audials', field: 'Audials提及数' },
-    { key: 'playon', label: 'Playon', field: 'Playon提及数' },
-    { key: 'keeprix', label: 'Keeprix', field: 'Keeprix提及数' },
-    { key: 'tunefab', label: 'Tunefab', field: 'Tunefab提及数' },
-    { key: 'other', label: '其他品牌', field: '其他品牌提及数' },
-  ],
+  brandLabels: {
+    tunepat: 'TunePat', movpilot: 'Movpilot', audials: 'Audials',
+    playon: 'PlayOn', keeprix: 'Keeprix', tunefab: 'TuneFab', other: '其他品牌',
+  },
+  priority: { topRank: 3, keywordCoverage: 3, exposureIncrease: 3 },
 };
 
 // ── 工具函数 ──────────────────────────────────────────────────
@@ -307,65 +305,148 @@ async function fetchBrandMonStats(src) {
 
 // ── 竞品监控 ──────────────────────────────────────────────────
 
-async function fetchCompetitorStats() {
-  const records = await tableRecords(COMPETITOR_SOURCE.baseToken, COMPETITOR_SOURCE.tableId);
-  const today = beijingToday();
-  const dayOfWeek = today.getUTCDay();
-  const daysSinceMonday = (dayOfWeek + 6) % 7;
-  const currentWeek = weekRange(addUtcDays(today, -(daysSinceMonday + 7)));
-  const previousWeek = weekRange(addUtcDays(today, -(daysSinceMonday + 14)));
+function canonicalUrl(value) {
+  if (!value) return null;
+  try {
+    const url = new URL(String(value).trim());
+    url.hash = '';
+    for (const key of [...url.searchParams.keys()]) {
+      if (/^(utm_|ref$|source$|fbclid$|gclid$)/i.test(key)) url.searchParams.delete(key);
+    }
+    url.pathname = url.pathname.replace(/\/$/, '');
+    return url.toString();
+  } catch (_) { return null; }
+}
 
-  const byDate = new Map();
-  for (const record of records) {
-    const date = normDate(fieldValue(record, '检查日期'));
-    if (!date) continue;
+function normalizedKey(value) {
+  return value ? String(value).trim().toLowerCase().replace(/\s+/g, ' ') : null;
+}
 
-    const values = Object.fromEntries(COMPETITOR_SOURCE.brands.map(({ key, field }) => {
-      const value = Number(fieldValue(record, field));
-      return [key, Number.isFinite(value) ? value : 0];
-    }));
-    const total = COMPETITOR_SOURCE.brands.reduce((sum, { key }) => sum + values[key], 0);
-    byDate.set(date, { date, total, brands: values });
-  }
+function competitorBrand(value, otherNote) {
+  const key = normalizedKey(value);
+  const aliases = { playon: 'playon', 'play on': 'playon', keeprix: 'keeprix', keepstreams: 'keeprix', tunepat: 'tunepat', movpilot: 'movpilot', audials: 'audials', tunefab: 'tunefab' };
+  if (aliases[key]) return aliases[key];
+  return key === '其他品牌' && otherNote ? 'other' : null;
+}
 
-  const totalForRange = range => [...byDate.values()]
-    .filter(day => isInRange(day.date, range))
-    .reduce((sum, day) => sum + day.total, 0);
-  const brandTotalForRange = (key, range) => [...byDate.values()]
-    .filter(day => isInRange(day.date, range))
-    .reduce((sum, day) => sum + day.brands[key], 0);
+function mondayFor(dateString) {
+  const date = new Date(`${dateString}T00:00:00Z`);
+  return addUtcDays(date, -((date.getUTCDay() + 6) % 7));
+}
 
-  const brands = COMPETITOR_SOURCE.brands.map(({ key, label }) => {
-    const currentWeekTotal = brandTotalForRange(key, currentWeek);
-    const previousWeekTotal = brandTotalForRange(key, previousWeek);
-    const change = currentWeekTotal - previousWeekTotal;
-    return {
-      key,
-      label,
-      currentWeek: currentWeekTotal,
-      previousWeek: previousWeekTotal,
-      change,
-      changePct: previousWeekTotal ? Number((change / previousWeekTotal * 100).toFixed(1)) : null,
-    };
-  });
+function metricCount(records, mode) {
+  if (mode === 'uniqueUrls') return new Set(records.map(r => r.url).filter(Boolean)).size;
+  if (mode === 'keywordUrlPairs') return new Set(records.map(r => r.url && r.keyword ? `${r.keyword}|${r.url}` : null).filter(Boolean)).size;
+  return records.length;
+}
 
-  const dailyTrend = [...byDate.values()]
-    .filter(day => isInRange(day.date, previousWeek) || isInRange(day.date, currentWeek))
-    .sort((a, b) => a.date.localeCompare(b.date));
-  const currentTotal = totalForRange(currentWeek);
-  const previousTotal = totalForRange(previousWeek);
-
+function summarizeOpportunity(url, currentRecords, previousRecords) {
+  const all = [...currentRecords, ...previousRecords];
+  const field = name => all.map(r => r[name]).find(Boolean) || null;
+  const brands = all.reduce((counts, r) => { if (r.brand) counts[r.brand] = (counts[r.brand] || 0) + 1; return counts; }, {});
+  const brand = Object.entries(brands).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+  const keywords = [...new Set(all.map(r => r.keyword).filter(Boolean))].sort();
+  const ranks = all.map(r => r.rank).filter(Number.isFinite);
+  const bestRank = ranks.length ? Math.min(...ranks) : null;
+  const aioCited = all.some(r => r.aioCited);
+  const status = currentRecords.length && previousRecords.length ? '持续' : currentRecords.length ? '新增' : '消失';
+  const change = currentRecords.length - previousRecords.length;
+  const { topRank, keywordCoverage, exposureIncrease } = COMPETITOR_SOURCE.priority;
+  const p1 = status === '新增' && bestRank != null && bestRank <= topRank || aioCited || keywords.length >= keywordCoverage || change >= exposureIncrease;
+  const p2 = status === '新增' || change > 0;
+  const priority = p1 ? 'P1' : p2 ? 'P2' : 'P3';
   return {
-    sourceUrl: COMPETITOR_SOURCE.url,
-    currentWeek,
-    previousWeek,
-    currentTotal,
-    previousTotal,
-    totalChange: currentTotal - previousTotal,
-    totalChangePct: previousTotal ? Number(((currentTotal - previousTotal) / previousTotal * 100).toFixed(1)) : null,
-    currentWeekRecordCount: dailyTrend.filter(day => isInRange(day.date, currentWeek)).length,
-    brands,
-    dailyTrend,
+    url, title: field('title'), subreddit: field('subreddit'), brand,
+    keywords, keywordCount: keywords.length, bestRank, aioCited,
+    aioCategory: field('aioCategory'), status, priority,
+    currentRecords: currentRecords.length, previousRecords: previousRecords.length, change,
+    action: priority === 'P1' ? '查看来源并优先评估回复/内容机会' : priority === 'P2' ? '评估价值并持续跟踪' : '持续观察',
+  };
+}
+
+function buildCompetitorInsights(metrics, brands, opportunities, dataStatus) {
+  const insights = [];
+  const leader = [...brands].sort((a, b) => b.current.uniqueUrls - a.current.uniqueUrls)[0];
+  if (leader?.current.uniqueUrls) insights.push(`${leader.label} 占本周独立竞品帖子的 ${Math.round(leader.current.uniqueUrls / metrics.uniqueUrls * 100)}%。`);
+  const p1 = opportunities.filter(item => item.priority === 'P1' && item.status !== '消失').length;
+  if (p1) insights.push(`发现 ${p1} 个 P1 机会，优先查看 AIO 引用、高排名或多关键词覆盖的来源。`);
+  if (metrics.uniqueUrls && metrics.rawRecords > metrics.uniqueUrls) insights.push(`声量集中于 ${metrics.uniqueUrls} 个 URL，重复曝光系数为 ${metrics.exposureCoefficient}。`);
+  const growing = brands.filter(item => item.change.uniqueUrls > 0).sort((a, b) => b.change.uniqueUrls - a.change.uniqueUrls)[0];
+  if (growing) insights.push(`${growing.label} 新增 ${growing.change.uniqueUrls} 个独立帖子，竞争压力上升。`);
+  if (!dataStatus.periodComplete) insights.push(`数据仅覆盖至 ${dataStatus.dataThrough || '—'}，本周期不完整，周环比仅供参考。`);
+  return insights.slice(0, 5);
+}
+
+async function fetchCompetitorStats() {
+  const sourceRecords = await tableRecords(COMPETITOR_SOURCE.baseToken, COMPETITOR_SOURCE.rawTableId);
+  const quality = { invalidDates: 0, emptyUrls: 0, missingBrands: 0, duplicateRawKeys: 0 };
+  const duplicateKeys = new Set();
+  const seenKeys = new Set();
+  const records = sourceRecords.flatMap(record => {
+    const date = normDate(fieldValue(record, '检查日期'));
+    if (!date) { quality.invalidDates++; return []; }
+    if (fieldValue(record, '是否提及竞品') !== '是') return [];
+    const url = canonicalUrl(fieldValue(record, 'URL'));
+    if (!url) { quality.emptyUrls++; return []; }
+    const keyword = normalizedKey(fieldValue(record, '触发关键词'));
+    const brand = competitorBrand(fieldValue(record, '竞品品牌'), fieldValue(record, '其他品牌备注'));
+    if (!brand) quality.missingBrands++;
+    const rawKey = `${date}|${keyword || ''}|${url}`;
+    if (seenKeys.has(rawKey)) duplicateKeys.add(rawKey);
+    seenKeys.add(rawKey);
+    const rankValue = Number.parseInt(fieldValue(record, 'SERP排名'), 10);
+    return [{
+      date, url, keyword, brand, title: fieldValue(record, '帖子标题'), subreddit: fieldValue(record, '细分来源'),
+      rank: Number.isFinite(rankValue) ? rankValue : null, aioCited: fieldValue(record, '是否AIO引用') === '是',
+      aioCategory: fieldValue(record, 'AIO引用类别'),
+    }];
+  });
+  quality.duplicateRawKeys = duplicateKeys.size;
+  const dataThrough = records.map(record => record.date).sort().at(-1) || null;
+  const currentWeek = dataThrough ? weekRange(mondayFor(dataThrough)) : weekRange(addUtcDays(beijingToday(), -7));
+  const previousWeek = weekRange(addUtcDays(new Date(`${currentWeek.start}T00:00:00Z`), -7));
+  const currentRecords = records.filter(record => isInRange(record.date, currentWeek));
+  const previousRecords = records.filter(record => isInRange(record.date, previousWeek));
+  const presentDates = new Set(currentRecords.map(record => record.date));
+  const missingDates = Array.from({ length: 7 }, (_, index) => isoDate(addUtcDays(new Date(`${currentWeek.start}T00:00:00Z`), index))).filter(date => !presentDates.has(date));
+  const metricsFor = set => ({
+    uniqueUrls: metricCount(set, 'uniqueUrls'), keywordUrlPairs: metricCount(set, 'keywordUrlPairs'), rawRecords: metricCount(set, 'rawRecords'),
+  });
+  const metrics = metricsFor(currentRecords);
+  metrics.exposureCoefficient = metrics.uniqueUrls ? Number((metrics.rawRecords / metrics.uniqueUrls).toFixed(2)) : null;
+  const previousMetrics = metricsFor(previousRecords);
+  const allBrands = [...new Set([...records.map(record => record.brand).filter(Boolean), ...Object.keys(COMPETITOR_SOURCE.brandLabels)])];
+  const brands = allBrands.map(key => {
+    const current = metricsFor(currentRecords.filter(record => record.brand === key));
+    const previous = metricsFor(previousRecords.filter(record => record.brand === key));
+    const change = Object.fromEntries(['uniqueUrls', 'keywordUrlPairs', 'rawRecords'].map(mode => [mode, current[mode] - previous[mode]]));
+    return { key, label: COMPETITOR_SOURCE.brandLabels[key] || key, current, previous, change,
+      changePct: Object.fromEntries(['uniqueUrls', 'keywordUrlPairs', 'rawRecords'].map(mode => [mode, previous[mode] ? Number((change[mode] / previous[mode] * 100).toFixed(1)) : null])) };
+  });
+  const byUrl = new Map();
+  for (const record of [...currentRecords, ...previousRecords]) {
+    const entry = byUrl.get(record.url) || { current: [], previous: [] };
+    entry[isInRange(record.date, currentWeek) ? 'current' : 'previous'].push(record);
+    byUrl.set(record.url, entry);
+  }
+  const opportunities = [...byUrl.entries()].map(([url, entry]) => summarizeOpportunity(url, entry.current, entry.previous))
+    .sort((a, b) => a.priority.localeCompare(b.priority) || b.currentRecords - a.currentRecords || a.title?.localeCompare(b.title || '') || 0);
+  const dailyTrend = Array.from({ length: 7 }, (_, index) => {
+    const currentDate = isoDate(addUtcDays(new Date(`${currentWeek.start}T00:00:00Z`), index));
+    const previousDate = isoDate(addUtcDays(new Date(`${previousWeek.start}T00:00:00Z`), index));
+    const current = currentRecords.filter(record => record.date === currentDate);
+    const previous = previousRecords.filter(record => record.date === previousDate);
+    return { label: currentDate.slice(5), currentDate, previousDate, current: metricsFor(current), previous: metricsFor(previous) };
+  });
+  const dataStatus = { sourceUpdatedAt: dataThrough, calculatedAt: new Date().toISOString(), dataThrough, periodComplete: missingDates.length === 0, missingDates, quality };
+  metrics.attentionItems = opportunities.filter(item => item.status !== '消失' && item.priority !== 'P3').length;
+  return {
+    version: 2, sourceUrl: COMPETITOR_SOURCE.url, currentWeek, previousWeek, dataStatus, metrics, previousMetrics, brands, dailyTrend, opportunities,
+    insights: buildCompetitorInsights(metrics, brands, opportunities, dataStatus),
+    // Legacy fields are raw record totals, retained for notifications and external consumers.
+    currentTotal: metrics.rawRecords, previousTotal: previousMetrics.rawRecords, totalChange: metrics.rawRecords - previousMetrics.rawRecords,
+    totalChangePct: previousMetrics.rawRecords ? Number(((metrics.rawRecords - previousMetrics.rawRecords) / previousMetrics.rawRecords * 100).toFixed(1)) : null,
+    currentWeekRecordCount: presentDates.size,
   };
 }
 
@@ -507,12 +588,19 @@ function buildDataQuality(result, prev) {
 
   // ── 竞品监控模块 ──
   const competitor = result.competitorMonitoring;
-  if (competitor && competitor.currentWeekRecordCount < 7) {
+  if (competitor && !competitor.dataStatus?.periodComplete) {
     checks.push({
       source: 'competitorMonitoring',
       level: 'warning',
-      message: `最近完整自然周（${competitor.currentWeek.start} 至 ${competitor.currentWeek.end}）仅有 ${competitor.currentWeekRecordCount}/7 条日报记录；缺失日期按 0 计入周环比，请检查竞品监控数据是否按日同步`,
+      message: `竞品当前周期（${competitor.currentWeek.start} 至 ${competitor.currentWeek.end}）缺少 ${competitor.dataStatus?.missingDates?.join('、') || '未知'} 的原始记录；周环比仅供参考`,
     });
+  }
+  if (competitor?.dataStatus?.quality) {
+    const quality = competitor.dataStatus.quality;
+    const issues = [['emptyUrls', '空 URL'], ['invalidDates', '无法解析日期'], ['missingBrands', '缺少或未知品牌'], ['duplicateRawKeys', '重复唯一索引']]
+      .filter(([key]) => quality[key] > 0)
+      .map(([key, label]) => `${label} ${quality[key]} 条`);
+    if (issues.length) checks.push({ source: 'competitorMonitoring', level: 'warning', message: `竞品原始数据质量：${issues.join('；')}` });
   }
 
   // ── AIO-BO 模块 ──

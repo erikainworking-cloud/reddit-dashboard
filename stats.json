@@ -4114,46 +4114,12 @@
         "watch m6 plus offline",
         "watch onlyfans offline"
       ],
-      "weeklyAdded": [
-        "bypass apple tv drm",
-        "bypass hbo max drm",
-        "bypass onlyfans drm",
-        "fandango to mp4",
-        "hbo max to mp4",
-        "apple tv downloader",
-        "itvx downloader",
-        "bypass itvx drm",
-        "disney plus to mp4",
-        "bypass tubi drm",
-        "hbo max downloader",
-        "bypass channel 4 drm",
-        "bypass starz drm",
-        "itvx to mp4",
-        "disney plus downloader",
-        "bypass skyshowtime drm",
-        "skyshowtime to mp4",
-        "fandango downloader",
-        "tubi downloader",
-        "peacock downloader",
-        "watch m6 plus offline",
-        "viki downloader",
-        "viki to mp4",
-        "bypass now drm",
-        "bypass paramount plus drm",
-        "bypass rtl plus drm",
-        "how to download videos from onlyfans",
-        "watch onlyfans offline",
-        "paramount plus downloader",
-        "bypass m6 plus drm",
-        "espn plus downloader",
-        "bypass zdf drm",
-        "bypass vix drm"
-      ],
+      "weeklyAdded": [],
       "weeklyLost": [],
       "snapshots": [
         {
           "date": "2026-08-10",
-          "week": "W1",
+          "week": "W4\n8/7",
           "value": 18.64,
           "words": 33
         }
@@ -4216,7 +4182,7 @@
       "snapshots": [
         {
           "date": "2026-08-10",
-          "week": "W1",
+          "week": "W3\n8/7",
           "value": 38.42,
           "words": 78
         }

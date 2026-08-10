@@ -144,13 +144,28 @@ function countBy(records, fieldName) {
   return map;
 }
 
-function countByDate(records, dateField, valueField) {
+function countByDate(records, dateField, valueField, include = () => true) {
   const map = {};
   for (const record of records) {
     const date = normDate(fieldValue(record, dateField));
     const value = fieldValue(record, valueField);
-    if (date && value != null) {
+    if (date && value != null && include(record, value)) {
       (map[date] = map[date] || {})[value] = (map[date][value] || 0) + 1;
+    }
+  }
+  return map;
+}
+
+function countNestedByDate(records, dateField, outerField, innerField) {
+  const map = {};
+  for (const record of records) {
+    const date = normDate(fieldValue(record, dateField));
+    const outer = fieldValue(record, outerField);
+    const inner = fieldValue(record, innerField);
+    if (date && outer != null && inner != null) {
+      const byDate = map[date] = map[date] || {};
+      const byOuter = byDate[outer] = byDate[outer] || {};
+      byOuter[inner] = (byOuter[inner] || 0) + 1;
     }
   }
   return map;
@@ -244,6 +259,7 @@ async function fetchPreciseStats(src) {
     statusCount, intentCount,
     brandMention: { YES: mentionCount.YES || 0, NO: mentionCount.NO || 0 },
     topKeywords,
+    keywordByDate: countByDate(records, '抓取时间', '关键词', (_record, keyword) => !allowSet || allowSet.has(keyword.toLowerCase())),
     dailyTrend: countDates(records, '抓取时间'),
     statusByDate: countByDate(records, '抓取时间', '处理状态'),
     intentByDate: countByDate(records, '抓取时间', '意图分类'),
@@ -282,6 +298,7 @@ async function fetchBrandMonStats(src) {
     processingTrend: countDates(records, '处理时间'),
     statusByDate: countByDate(records, '抓取时间', '处理状态'),
     problemByDate: countByDate(records, '抓取时间', '问题分类'),
+    problemStatusByDate: countNestedByDate(records, '抓取时间', '问题分类', '处理状态'),
     problemStatusCross,
   };
 }
@@ -364,6 +381,23 @@ function buildDataQuality(result, prev) {
     if (!d) continue;
     const src = `${brand}.precise`;
 
+    if (!d.keywordByDate || Object.keys(d.keywordByDate).length === 0) {
+      checks.push({ source: src, level: 'warning',
+        message: '缺少 keywordByDate，Top 关键词无法按近7天/近30天真实聚合' });
+    } else {
+      const keywordTotals = {};
+      for (const byKeyword of Object.values(d.keywordByDate)) {
+        for (const [keyword, count] of Object.entries(byKeyword)) {
+          keywordTotals[keyword] = (keywordTotals[keyword] || 0) + (Number(count) || 0);
+        }
+      }
+      const mismatchedKeywords = (d.topKeywords || []).filter(([keyword, count]) => keywordTotals[keyword] !== count);
+      if (mismatchedKeywords.length) {
+        checks.push({ source: src, level: 'warning',
+          message: `keywordByDate 与全量 Top 关键词不一致（${mismatchedKeywords.slice(0, 3).map(([keyword]) => keyword).join('、')}）` });
+      }
+    }
+
     // 帖子 + 评论之和与总量一致性（允许 10% 误差）
     const typeSum = (d.posts || 0) + (d.comments || 0);
     if (typeSum > 0 && Math.abs(typeSum - d.total) / d.total > 0.10) {
@@ -420,6 +454,28 @@ function buildDataQuality(result, prev) {
     if (!d) continue;
     const src = `brandMonitoring.${brand}`;
 
+    if (!d.problemStatusByDate || Object.keys(d.problemStatusByDate).length === 0) {
+      checks.push({ source: src, level: 'warning',
+        message: '缺少 problemStatusByDate，时间范围内的未处理严重故障无法准确统计' });
+    } else {
+      const problemStatusTotals = {};
+      for (const byProblem of Object.values(d.problemStatusByDate)) {
+        for (const [problem, byStatus] of Object.entries(byProblem)) {
+          const target = problemStatusTotals[problem] = problemStatusTotals[problem] || {};
+          for (const [status, count] of Object.entries(byStatus)) {
+            target[status] = (target[status] || 0) + (Number(count) || 0);
+          }
+        }
+      }
+      const mismatchedProblems = Object.entries(d.problemStatusCross || {}).filter(([problem, byStatus]) =>
+        JSON.stringify(problemStatusTotals[problem] || {}) !== JSON.stringify(byStatus)
+      );
+      if (mismatchedProblems.length) {
+        checks.push({ source: src, level: 'warning',
+          message: `problemStatusByDate 与全量问题状态不一致（${mismatchedProblems.slice(0, 3).map(([problem]) => problem).join('、')}）` });
+      }
+    }
+
     const statusSum = Object.values(d.statusCount || {}).reduce((s, v) => s + v, 0);
     if (statusSum > 0 && Math.abs(statusSum - d.total) / d.total > 0.15) {
       checks.push({ source: src, level: 'warning',
@@ -449,11 +505,11 @@ function buildDataQuality(result, prev) {
 
   // ── 竞品监控模块 ──
   const competitor = result.competitorMonitoring;
-  if (competitor && competitor.currentWeekRecordCount === 0) {
+  if (competitor && competitor.currentWeekRecordCount < 7) {
     checks.push({
       source: 'competitorMonitoring',
       level: 'warning',
-      message: `最近完整自然周（${competitor.currentWeek.start} 至 ${competitor.currentWeek.end}）没有日报记录，请检查竞品监控数据是否按日同步`,
+      message: `最近完整自然周（${competitor.currentWeek.start} 至 ${competitor.currentWeek.end}）仅有 ${competitor.currentWeekRecordCount}/7 条日报记录；缺失日期按 0 计入周环比，请检查竞品监控数据是否按日同步`,
     });
   }
 

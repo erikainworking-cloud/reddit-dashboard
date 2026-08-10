@@ -69,12 +69,22 @@ function buildCard() {
   const envTag = isProd ? '' : ' [TEST]';
   const currentRange = `${monitor.currentWeek?.start || '—'} 至 ${monitor.currentWeek?.end || '—'}`;
   const previousRange = `${monitor.previousWeek?.start || '—'} 至 ${monitor.previousWeek?.end || '—'}`;
-  const brands = [...(monitor.brands || [])].sort((a, b) => Math.abs(b.change || 0) - Math.abs(a.change || 0));
+  const metric = monitor.metrics?.rawRecords ?? monitor.currentTotal ?? 0;
+  const previousMetric = monitor.previousMetrics?.rawRecords ?? monitor.previousTotal ?? 0;
+  const totalChange = metric - previousMetric;
+  const totalPct = previousMetric ? `${totalChange > 0 ? '+' : ''}${(totalChange / previousMetric * 100).toFixed(1)}%` : '—';
+  const brands = [...(monitor.brands || [])].map(brand => ({
+    ...brand,
+    currentWeek: brand.current?.rawRecords ?? brand.currentWeek ?? 0,
+    previousWeek: brand.previous?.rawRecords ?? brand.previousWeek ?? 0,
+    change: brand.change?.rawRecords ?? brand.change ?? 0,
+    changePct: brand.changePct?.rawRecords ?? brand.changePct ?? null,
+  })).sort((a, b) => Math.abs(b.change || 0) - Math.abs(a.change || 0));
   const increased = brands.filter(brand => (brand.change || 0) > 0);
   const decreased = brands.filter(brand => (brand.change || 0) < 0);
-  const keyMovements = brands.slice(0, 5).map(changeDescription).join('\n') || '暂无竞品日报数据';
-  const totalChange = monitor.totalChange || 0;
-  const totalPct = monitor.totalChangePct == null ? '—' : `${totalChange > 0 ? '+' : ''}${monitor.totalChangePct}%`;
+  const keyMovements = brands.slice(0, 5).map(changeDescription).join('\n') || '暂无竞品监控数据';
+  const completeness = monitor.dataStatus?.periodComplete === false ? `\n⚠ 数据截至 ${monitor.dataStatus.dataThrough || '—'}，当前周期不完整，环比仅供参考。` : '';
+  const attention = monitor.metrics?.attentionItems ?? 0;
 
   return JSON.stringify({
     config: { wide_screen_mode: true },
@@ -87,7 +97,7 @@ function buildCard() {
         tag: 'div',
         text: {
           tag: 'lark_md',
-          content: `**本周竞品提及 ${monitor.currentTotal || 0} 条** · 上周 ${monitor.previousTotal || 0} 条 · 环比 **${signed(totalChange)}**（${totalPct}）\n本周：${currentRange}\n上周：${previousRange}`,
+          content: `**本周竞品记录 ${metric} 条** · 上周 ${previousMetric} 条 · 环比 **${signed(totalChange)}**（${totalPct}）\n独立竞品帖子 ${monitor.metrics?.uniqueUrls ?? '—'} 个 · 需关注机会 ${attention} 个\n本周：${currentRange}\n上周：${previousRange}${completeness}`,
         },
       },
       { tag: 'hr' },
@@ -129,7 +139,7 @@ function buildCard() {
 
 (async () => {
   console.log(`\n${isProd ? '🚀 生产' : '🧪 测试'} 模式 · 竞品提及周报`);
-  console.log(`数据：${monitor.currentWeek?.start || '—'} 至 ${monitor.currentWeek?.end || '—'}，共 ${monitor.currentTotal || 0} 条`);
+  console.log(`数据：${monitor.currentWeek?.start || '—'} 至 ${monitor.currentWeek?.end || '—'}，竞品记录 ${monitor.metrics?.rawRecords ?? monitor.currentTotal ?? 0} 条`);
 
   const content = buildCard();
   let ok = 0;

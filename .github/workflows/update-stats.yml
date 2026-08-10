@@ -26,6 +26,16 @@ jobs:
         with:
           node-version: 20
 
+      - name: Check Feishu credentials
+        env:
+          LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
+          LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
+        run: |
+          if [ -z "$LARK_APP_ID" ] || [ -z "$LARK_APP_SECRET" ]; then
+            echo "Missing LARK_APP_ID or LARK_APP_SECRET. Configure both repository Actions Secrets before running Update Stats."
+            exit 1
+          fi
+
       - name: Export stats from Feishu
         run: node dashboard/export-stats.js
         env:

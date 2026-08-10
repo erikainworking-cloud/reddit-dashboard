@@ -1,20 +1,20 @@
 {
-  "updatedAt": "2026-08-10T12:12:13.423Z",
+  "updatedAt": "2026-08-10T20:10:35.905Z",
   "streamfab": {
     "label": "StreamFab",
-    "total": 1846,
+    "total": 1899,
     "published": 3,
-    "posts": 1257,
-    "comments": 589,
+    "posts": 1261,
+    "comments": 638,
     "statusCount": {
       "已忽略": 1295,
       "已发布": 3,
       "忽略": 104,
       "待审核": 5,
-      "需要复核": 138,
+      "需要复核": 145,
       "待处理": 10,
       "暂不回复": 4,
-      "已生成": 258
+      "已生成": 304
     },
     "intentCount": {
       "方案探索": 226,
@@ -23,16 +23,17 @@
       "高意向用户": 14,
       "无关内容": 336,
       "概念或假设讨论": 21,
-      "明确技术求助": 20,
-      "高意向工具寻找": 15,
+      "明确技术求助": 38,
+      "高意向工具寻找": 38,
       "功能随口提及": 9,
       "一般需求讨论": 12,
-      "官方下载受限": 8,
-      "现有工具替代": 1
+      "官方下载受限": 14,
+      "现有工具替代": 6,
+      "竞品用户流失": 1
     },
     "brandMention": {
-      "YES": 57,
-      "NO": 993
+      "YES": 109,
+      "NO": 994
     },
     "topKeywords": [
       [
@@ -45,11 +46,11 @@
       ],
       [
         "amazon prime downloader",
-        126
+        127
       ],
       [
         "record now",
-        61
+        62
       ],
       [
         "record netflix",
@@ -268,7 +269,46 @@
         "download netflix video": 2,
         "bypass netflix drm": 1,
         "download amazon video": 1,
-        "amazon to mp4": 1
+        "amazon to mp4": 1,
+        "amazon prime downloader": 1,
+        "hulu downloader": 1,
+        "record hulu": 1,
+        "fandango downloader": 1,
+        "download fandango video": 2,
+        "bypass apple tv drm": 1,
+        "record apple tv": 2,
+        "crunchyroll downloader": 1,
+        "download crunchyroll video": 1,
+        "bypass hbo max drm": 1,
+        "watch hbo max offline": 2,
+        "skyshowtime downloader": 3,
+        "download skyshowtime video": 2,
+        "record skyshowtime": 1,
+        "paramount plus to mp4": 2,
+        "watch paramount plus offline": 2,
+        "record paramount plus": 1,
+        "bypass peacock drm": 1,
+        "watch peacock offline": 2,
+        "record peacock": 1,
+        "viki downloader": 1,
+        "download viki video": 2,
+        "joyn downloader": 1,
+        "joyn to mp4": 1,
+        "record joyn": 1,
+        "bypass now drm": 1,
+        "record now": 1,
+        "download vix video": 2,
+        "record arte": 1,
+        "channel 4 to mp4": 1,
+        "bypass wow drm": 1,
+        "zdf to mp4": 2,
+        "ard to mp4": 1,
+        "watch ard offline": 2,
+        "itvx downloader": 1,
+        "download itvx video": 1,
+        "watch itvx offline": 1,
+        "record itvx": 2,
+        "download streaming video": 1
       }
     },
     "dailyTrend": [
@@ -338,7 +378,7 @@
       ],
       [
         "2026-08-10",
-        6
+        59
       ]
     ],
     "statusByDate": {
@@ -414,7 +454,8 @@
         "需要复核": 1
       },
       "2026-08-10": {
-        "已生成": 6
+        "已生成": 52,
+        "需要复核": 7
       }
     },
     "intentByDate": {
@@ -496,10 +537,11 @@
         "高意向工具寻找": 2
       },
       "2026-08-10": {
-        "官方下载受限": 3,
-        "明确技术求助": 1,
-        "高意向工具寻找": 1,
-        "现有工具替代": 1
+        "官方下载受限": 9,
+        "明确技术求助": 19,
+        "高意向工具寻找": 24,
+        "现有工具替代": 6,
+        "竞品用户流失": 1
       }
     },
     "mentionByDate": {
@@ -552,7 +594,8 @@
         "NO": 1
       },
       "2026-08-10": {
-        "YES": 6
+        "YES": 58,
+        "NO": 1
       }
     },
     "typeByDate": {
@@ -619,95 +662,95 @@
         "帖子": 5
       },
       "2026-08-10": {
-        "帖子": 1,
-        "评论": 5
+        "帖子": 5,
+        "评论": 54
       }
     }
   },
   "dvdfab": {
     "label": "DVDFab",
-    "total": 594,
+    "total": 949,
     "published": 0,
-    "posts": 451,
-    "comments": 143,
+    "posts": 468,
+    "comments": 481,
     "statusCount": {
       "已忽略": 498,
-      "已生成": 91,
-      "需要复核": 5
+      "已生成": 435,
+      "需要复核": 16
     },
     "intentCount": {
       "方案探索": 21,
       "竞品抱怨": 1,
       "技术求助": 3,
       "高意向用户": 2,
-      "明确技术求助": 41,
-      "高意向工具寻找": 30,
-      "现有工具替代": 3
+      "明确技术求助": 213,
+      "高意向工具寻找": 199,
+      "现有工具替代": 17
     },
     "brandMention": {
-      "YES": 94,
-      "NO": 57
+      "YES": 441,
+      "NO": 65
     },
     "topKeywords": [
       [
         "dvd ripping software",
-        51
+        54
       ],
       [
         "free dvd ripper",
         31
       ],
       [
+        "blu ray ripper",
+        16
+      ],
+      [
+        "dvd burning software",
+        13
+      ],
+      [
         "dvd decrypter",
         12
       ],
       [
-        "dvd burning software",
-        11
-      ],
-      [
-        "blu ray ripper",
-        9
+        "iso to mkv",
+        10
       ],
       [
         "dvd ripper",
-        7
+        9
       ],
       [
         "how to rip blu ray",
-        5
+        9
       ],
       [
-        "convert dvd to mp4",
-        4
+        "best software to convert dvd to mp4",
+        9
       ],
       [
-        "how to rip dvd to computer",
-        4
+        "convert bdmv to mp4",
+        8
       ],
       [
-        "best dvd ripper",
-        3
+        "convert bdmv to mkv",
+        8
       ],
       [
-        "convert dvd to digital",
-        3
+        "extract subtitle from dvd",
+        7
       ],
       [
-        "dvd to digital",
-        2
+        "mac rip dvd to mp4",
+        7
       ],
       [
-        "rip dvd to mp4",
-        2
+        "blu ray authoring software",
+        6
       ],
       [
-        "free dvd burning software",
-        2
-      ],
-      [
-        "dvd ripper software",
-        2
+        "best free dvd ripper",
+        6
       ]
     ],
     "keywordByDate": {
@@ -761,16 +804,129 @@
         "how to rip blu ray": 2
       },
       "2026-08-10": {
-        "dvd ripper": 2,
-        "dvd ripping software": 1,
-        "convert dvd to mp4": 1,
+        "dvd ripper": 4,
+        "dvd ripping software": 4,
+        "convert dvd to mp4": 2,
         "dvd to mp4": 1,
-        "dvd burning software": 4,
+        "dvd burning software": 6,
         "how to rip a dvd": 1,
-        "blu ray ripper": 3,
+        "blu ray ripper": 10,
         "how to rip dvd to computer": 2,
         "dvd ripper software": 1,
-        "how to rip blu ray": 2
+        "how to rip blu ray": 6,
+        "dvd to digital": 2,
+        "blu ray ripping software": 3,
+        "how to convert dvd to mp4": 3,
+        "burn mp4 to dvd": 2,
+        "iso to mp4": 2,
+        "how to burn a dvd": 5,
+        "best blu ray ripper": 3,
+        "dvd ripper for mac": 3,
+        "best dvd burning software": 2,
+        "dvd creator software": 2,
+        "blu ray creator": 2,
+        "dvd menu creator": 3,
+        "blu ray authoring software": 6,
+        "clone dvd": 1,
+        "burn iso to dvd": 5,
+        "free blu ray ripper": 3,
+        "dvd burning software for mac": 3,
+        "create iso from dvd": 5,
+        "dvd to mkv": 2,
+        "best dvd ripper for mac": 5,
+        "dvd backup": 4,
+        "best dvd ripping software": 2,
+        "best free dvd ripper": 6,
+        "remove cinavia": 1,
+        "uhd ripper": 5,
+        "rip 4k blu ray": 4,
+        "iso to mkv": 10,
+        "blu ray ripper software": 3,
+        "extract audio from dvd": 4,
+        "how to rip a dvd on a mac": 3,
+        "free dvd authoring software": 3,
+        "dvd burning software windows 11": 5,
+        "dvd ripper to mp4": 2,
+        "dvd to mp4 converter free": 4,
+        "free dvd copy software": 2,
+        "blu ray burning software for mac": 3,
+        "decrypt blu ray": 3,
+        "rip blu ray to plex": 2,
+        "rip blu ray to mp4": 3,
+        "blu ray to mp4": 2,
+        "how to burn dvd on mac": 3,
+        "rip dvd with subtitles": 2,
+        "dvd ripper freeware": 4,
+        "ps3 cinavia removal": 4,
+        "how to burn mp4 to dvd": 3,
+        "ripping dvds on mac": 2,
+        "best dvd decrypter": 5,
+        "free dvd ripper for mac": 5,
+        "best dvd ripper for windows": 4,
+        "dvd iso ripper": 6,
+        "how to rip dvds for plex": 3,
+        "convert dvd to mp4 on mac": 4,
+        "how to transfer dvd to usb": 1,
+        "best dvd burning software for windows 10": 2,
+        "blu ray iso": 3,
+        "blu ray ripper for mac": 5,
+        "rip uhd blu ray": 2,
+        "best way to rip blu ray": 4,
+        "how to burn dvd on windows 10": 5,
+        "extract subtitle from dvd": 7,
+        "how to convert dvds to digital": 2,
+        "dvd copy mac": 1,
+        "rip blu ray to mkv": 3,
+        "mkv dvd ripper": 2,
+        "how to convert dvd to mp4 on mac": 1,
+        "dvd copier software": 2,
+        "rip dvd to mkv": 4,
+        "best dvd authoring software": 3,
+        "convert bdmv to mp4": 8,
+        "convert bdmv to mkv": 8,
+        "dvd creator mac": 1,
+        "blu ray to digital converter": 1,
+        "best way to convert dvd to digital": 2,
+        "bluray ripping": 3,
+        "convert blu ray to mp4": 2,
+        "dvds to digital": 2,
+        "how to convert mkv to dvd": 1,
+        "best software to convert dvd to mp4": 9,
+        "free blu ray copy software": 2,
+        "hd dvd decryption": 5,
+        "dvd ripping software for mac": 2,
+        "dvd decrypter software": 3,
+        "best free dvd ripper for mac": 2,
+        "dvd to mkv converter": 1,
+        "best way to rip dvds": 1,
+        "dvd decrypters for mac": 5,
+        "best free dvd to mp4 converter": 2,
+        "dvd ripper windows 10": 5,
+        "how to copy a dvd on a mac": 4,
+        "blu ray to iso": 2,
+        "how to extract audio from dvd": 3,
+        "best way to convert dvd to mp4": 4,
+        "how to copy a dvd to another dvd windows 10": 2,
+        "windows 11 create iso from dvd": 1,
+        "mac rip dvd to mp4": 7,
+        "rip dvds to mp4": 2,
+        "blu ray to mkv": 1,
+        "best dvd to usb converter": 1,
+        "burn dvd windows 11": 2,
+        "best dvd copy software free": 1,
+        "burn mkv to dvd": 2,
+        "convert dvd to iso": 1,
+        "rip dvd to iso": 3,
+        "best dvd to mp4 converter": 1,
+        "convert dvd to digital": 1,
+        "blu ray burning software": 1,
+        "best dvd to digital converter": 1,
+        "bluray ripping software": 1,
+        "best way to rip blu ray for plex": 1,
+        "software to convert dvd to mp4": 1,
+        "best dvd burning software free": 1,
+        "dvd ripping software windows": 1,
+        "copy decrypted dvd": 1
       }
     },
     "dailyTrend": [
@@ -796,7 +952,7 @@
       ],
       [
         "2026-08-10",
-        18
+        373
       ]
     ],
     "statusByDate": {
@@ -818,8 +974,8 @@
         "已生成": 13
       },
       "2026-08-10": {
-        "已生成": 15,
-        "需要复核": 3
+        "已生成": 359,
+        "需要复核": 14
       }
     },
     "intentByDate": {
@@ -847,9 +1003,9 @@
         "明确技术求助": 7
       },
       "2026-08-10": {
-        "高意向工具寻找": 4,
-        "明确技术求助": 13,
-        "现有工具替代": 1
+        "高意向工具寻找": 173,
+        "明确技术求助": 185,
+        "现有工具替代": 15
       }
     },
     "mentionByDate": {
@@ -872,7 +1028,8 @@
         "YES": 13
       },
       "2026-08-10": {
-        "YES": 18
+        "YES": 365,
+        "NO": 8
       }
     },
     "typeByDate": {
@@ -897,8 +1054,8 @@
         "帖子": 4
       },
       "2026-08-10": {
-        "评论": 11,
-        "帖子": 7
+        "评论": 349,
+        "帖子": 24
       }
     }
   },
@@ -3604,7 +3761,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-09",
-      "calculatedAt": "2026-08-10T12:12:13.489Z",
+      "calculatedAt": "2026-08-10T20:10:35.977Z",
       "dataThrough": "2026-08-09",
       "periodComplete": false,
       "missingDates": [
@@ -4046,6 +4203,6 @@
         "message": "竞品当前周期（2026-08-03 至 2026-08-09）缺少 2026-08-03 的原始记录；周环比仅供参考"
       }
     ],
-    "checkedAt": "2026-08-10T12:12:13.491Z"
+    "checkedAt": "2026-08-10T20:10:35.979Z"
   }
 }

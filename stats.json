@@ -1,20 +1,20 @@
 {
-  "updatedAt": "2026-08-11T05:40:18.645Z",
+  "updatedAt": "2026-08-11T12:29:59.698Z",
   "streamfab": {
     "label": "StreamFab",
-    "total": 1563,
+    "total": 1596,
     "published": 3,
-    "posts": 1017,
-    "comments": 546,
+    "posts": 1035,
+    "comments": 561,
     "statusCount": {
       "已忽略": 1044,
       "已发布": 3,
       "忽略": 104,
       "待审核": 5,
-      "需要复核": 60,
+      "需要复核": 64,
       "待处理": 10,
       "暂不回复": 4,
-      "已生成": 304
+      "已生成": 333
     },
     "intentCount": {
       "方案探索": 226,
@@ -22,30 +22,31 @@
       "技术求助": 31,
       "概念或假设讨论": 21,
       "一般需求讨论": 12,
-      "明确技术求助": 38,
+      "明确技术求助": 41,
       "功能随口提及": 9,
       "高意向用户": 14,
-      "高意向工具寻找": 38,
-      "官方下载受限": 14,
-      "现有工具替代": 6,
-      "竞品用户流失": 1
+      "高意向工具寻找": 44,
+      "官方下载受限": 15,
+      "现有工具替代": 7,
+      "竞品用户流失": 1,
+      "暂不处理": 22
     },
     "brandMention": {
-      "YES": 109,
+      "YES": 142,
       "NO": 658
     },
     "topKeywords": [
       [
         "download netflix video",
-        668
+        670
       ],
       [
         "netflix downloader",
-        288
+        289
       ],
       [
         "record now",
-        62
+        63
       ],
       [
         "video downloader",
@@ -57,18 +58,18 @@
       ],
       [
         "record netflix",
-        36
+        39
       ],
       [
         "watch netflix offline",
         30
       ],
       [
-        "download fansly video",
-        15
+        "download disney video",
+        17
       ],
       [
-        "download disney video",
+        "download fansly video",
         15
       ],
       [
@@ -300,6 +301,33 @@
         "watch itvx offline": 1,
         "record itvx": 2,
         "download streaming video": 1
+      },
+      "2026-08-11": {
+        "netflix downloader": 1,
+        "download netflix video": 2,
+        "record netflix": 3,
+        "record amazon": 2,
+        "disney plus downloader": 1,
+        "download disney video": 2,
+        "tubi downloader": 1,
+        "record hulu": 1,
+        "apple tv downloader": 1,
+        "apple tv to mp4": 2,
+        "record apple tv": 1,
+        "hbo max downloader": 1,
+        "hbo max to mp4": 1,
+        "record espn plus": 3,
+        "paramount plus downloader": 1,
+        "watch paramount plus offline": 1,
+        "bypass peacock drm": 1,
+        "viki downloader": 1,
+        "download viki video": 1,
+        "bypass viki drm": 1,
+        "record now": 1,
+        "channel 4 to mp4": 1,
+        "wow downloader": 1,
+        "watch itvx offline": 1,
+        "download streaming video": 1
       }
     },
     "dailyTrend": [
@@ -370,6 +398,10 @@
       [
         "2026-08-10",
         59
+      ],
+      [
+        "2026-08-11",
+        33
       ]
     ],
     "statusByDate": {
@@ -447,6 +479,10 @@
       "2026-08-10": {
         "已生成": 52,
         "需要复核": 7
+      },
+      "2026-08-11": {
+        "已生成": 29,
+        "需要复核": 4
       }
     },
     "intentByDate": {
@@ -531,6 +567,13 @@
         "高意向工具寻找": 24,
         "现有工具替代": 6,
         "竞品用户流失": 1
+      },
+      "2026-08-11": {
+        "明确技术求助": 3,
+        "暂不处理": 22,
+        "高意向工具寻找": 6,
+        "现有工具替代": 1,
+        "官方下载受限": 1
       }
     },
     "mentionByDate": {
@@ -585,6 +628,9 @@
       "2026-08-10": {
         "YES": 58,
         "NO": 1
+      },
+      "2026-08-11": {
+        "YES": 33
       }
     },
     "typeByDate": {
@@ -653,91 +699,96 @@
       "2026-08-10": {
         "帖子": 5,
         "评论": 54
+      },
+      "2026-08-11": {
+        "帖子": 18,
+        "评论": 15
       }
     }
   },
   "dvdfab": {
     "label": "DVDFab",
-    "total": 451,
+    "total": 557,
     "published": 0,
-    "posts": 46,
-    "comments": 405,
+    "posts": 74,
+    "comments": 483,
     "statusCount": {
-      "已生成": 435,
-      "需要复核": 16
+      "已生成": 538,
+      "需要复核": 19
     },
     "intentCount": {
       "方案探索": 19,
       "高意向用户": 2,
       "技术求助": 1,
-      "明确技术求助": 213,
-      "高意向工具寻找": 199,
-      "现有工具替代": 17
+      "明确技术求助": 267,
+      "高意向工具寻找": 248,
+      "现有工具替代": 19,
+      "竞品用户流失": 1
     },
     "brandMention": {
-      "YES": 441,
-      "NO": 10
+      "YES": 543,
+      "NO": 14
     },
     "topKeywords": [
       [
         "dvd ripping software",
-        27
+        40
+      ],
+      [
+        "dvd burning software",
+        17
       ],
       [
         "blu ray ripper",
         16
       ],
       [
-        "dvd burning software",
-        13
-      ],
-      [
         "dvd decrypter",
         11
+      ],
+      [
+        "best software to convert dvd to mp4",
+        11
+      ],
+      [
+        "how to rip blu ray",
+        10
       ],
       [
         "iso to mkv",
         10
       ],
       [
-        "how to rip blu ray",
+        "dvd to iso",
         9
       ],
       [
-        "best software to convert dvd to mp4",
-        9
-      ],
-      [
-        "convert bdmv to mp4",
-        8
-      ],
-      [
-        "convert bdmv to mkv",
+        "free dvd ripper",
         8
       ],
       [
         "dvd ripper",
-        7
-      ],
-      [
-        "extract subtitle from dvd",
-        7
-      ],
-      [
-        "mac rip dvd to mp4",
-        7
-      ],
-      [
-        "free dvd ripper",
-        6
+        8
       ],
       [
         "blu ray authoring software",
-        6
+        8
       ],
       [
-        "best free dvd ripper",
-        6
+        "burn iso to dvd",
+        8
+      ],
+      [
+        "rip 4k blu ray",
+        8
+      ],
+      [
+        "blu ray burning software for mac",
+        8
+      ],
+      [
+        "convert bdmv to mp4",
+        8
       ]
     ],
     "keywordByDate": {
@@ -908,6 +959,56 @@
         "best dvd burning software free": 1,
         "dvd ripping software windows": 1,
         "copy decrypted dvd": 1
+      },
+      "2026-08-11": {
+        "dvd ripper": 1,
+        "dvd ripping software": 13,
+        "free dvd ripper": 2,
+        "convert dvd to digital": 2,
+        "dvd to mp4": 2,
+        "dvd burning software": 4,
+        "blu ray ripping software": 2,
+        "how to convert dvd to mp4": 3,
+        "how to make a dvd": 2,
+        "blu ray creator": 2,
+        "blu ray authoring software": 2,
+        "burn iso to dvd": 3,
+        "dvd to iso": 9,
+        "dvd backup": 1,
+        "remove dvd copy protection": 2,
+        "remove cinavia": 2,
+        "uhd ripper": 1,
+        "rip 4k blu ray": 4,
+        "blu ray ripper software": 2,
+        "best dvd to digital converter": 1,
+        "blu ray burning software for mac": 5,
+        "rip blu ray to plex": 4,
+        "how to burn dvd on mac": 2,
+        "dvd to avi": 1,
+        "best dvd burning software for windows 10": 1,
+        "copy dvd to dvd free": 1,
+        "how to digitize blu ray": 2,
+        "mac burn bluray": 3,
+        "best way to convert dvd to digital": 1,
+        "best software to convert dvd to mp4": 2,
+        "best way to rip dvds": 2,
+        "dvd decrypters for mac": 2,
+        "best free dvd to mp4 converter": 1,
+        "how to rip copy protected dvd": 1,
+        "best way to convert dvd to mp4": 1,
+        "best program for ripping dvds": 3,
+        "digitize a dvd": 2,
+        "rip dvd to iso": 2,
+        "dvd to digital": 1,
+        "how to rip blu ray": 1,
+        "how to burn a dvd": 1,
+        "dvd to mp4 converter free": 1,
+        "free dvd copy software": 1,
+        "ps3 cinavia removal": 1,
+        "bluray ripping software": 1,
+        "bluray ripping": 1,
+        "convert dvd to mp3": 1,
+        "burn mkv to dvd": 1
       }
     },
     "dailyTrend": [
@@ -930,6 +1031,10 @@
       [
         "2026-08-10",
         373
+      ],
+      [
+        "2026-08-11",
+        106
       ]
     ],
     "statusByDate": {
@@ -949,6 +1054,10 @@
       "2026-08-10": {
         "已生成": 359,
         "需要复核": 14
+      },
+      "2026-08-11": {
+        "已生成": 103,
+        "需要复核": 3
       }
     },
     "intentByDate": {
@@ -974,6 +1083,12 @@
         "高意向工具寻找": 173,
         "明确技术求助": 185,
         "现有工具替代": 15
+      },
+      "2026-08-11": {
+        "明确技术求助": 54,
+        "高意向工具寻找": 49,
+        "现有工具替代": 2,
+        "竞品用户流失": 1
       }
     },
     "mentionByDate": {
@@ -994,6 +1109,10 @@
       "2026-08-10": {
         "YES": 365,
         "NO": 8
+      },
+      "2026-08-11": {
+        "YES": 102,
+        "NO": 4
       }
     },
     "typeByDate": {
@@ -1016,6 +1135,10 @@
       "2026-08-10": {
         "评论": 349,
         "帖子": 24
+      },
+      "2026-08-11": {
+        "评论": 78,
+        "帖子": 28
       }
     }
   },
@@ -3734,14 +3857,14 @@
     }
   },
   "paidAccounts": {
-    "total": 5,
+    "total": 7,
     "byBrand": {
-      "DVDFab": 3,
+      "DVDFab": 5,
       "StreamFab": 2
     },
     "byType": {
       "新帖": 2,
-      "旧帖": 3
+      "旧帖": 5
     },
     "survive1day": {
       "是": 2,
@@ -3765,7 +3888,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-11",
-      "calculatedAt": "2026-08-11T05:40:18.714Z",
+      "calculatedAt": "2026-08-11T12:29:59.740Z",
       "dataThrough": "2026-08-11",
       "periodComplete": false,
       "missingDates": [
@@ -4191,6 +4314,6 @@
         "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-12、2026-08-13、2026-08-14、2026-08-15、2026-08-16 的原始记录；周环比仅供参考"
       }
     ],
-    "checkedAt": "2026-08-11T05:40:18.717Z"
+    "checkedAt": "2026-08-11T12:29:59.741Z"
   }
 }

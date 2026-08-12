@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-12T06:57:17.920Z",
+  "updatedAt": "2026-08-12T12:36:35.520Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1596,
@@ -3929,13 +3929,13 @@
     }
   },
   "paidAccounts": {
-    "total": 7,
+    "total": 8,
     "byBrand": {
-      "DVDFab": 5,
+      "DVDFab": 6,
       "StreamFab": 2
     },
     "byType": {
-      "新帖": 2,
+      "新帖": 3,
       "旧帖": 5
     },
     "survive1day": {
@@ -3960,7 +3960,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-12",
-      "calculatedAt": "2026-08-12T06:57:17.986Z",
+      "calculatedAt": "2026-08-12T12:36:35.586Z",
       "dataThrough": "2026-08-12",
       "periodComplete": false,
       "missingDates": [
@@ -4377,17 +4377,6 @@
     "totalChangePct": -70,
     "currentWeekRecordCount": 2
   },
-  "dataQuality": {
-    "status": "warning",
-    "checks": [
-      {
-        "source": "competitorMonitoring",
-        "level": "warning",
-        "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-13、2026-08-14、2026-08-15、2026-08-16 的原始记录；周环比仅供参考"
-      }
-    ],
-    "checkedAt": "2026-08-12T06:57:17.988Z"
-  },
   "aioBo": {
     "streamfab": {
       "current": 18.64,
@@ -4616,5 +4605,26 @@
         "note": null
       }
     }
-  ]
+  ],
+  "dataQuality": {
+    "status": "warning",
+    "checks": [
+      {
+        "source": "competitorMonitoring",
+        "level": "warning",
+        "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-13、2026-08-14、2026-08-15、2026-08-16 的原始记录；周环比仅供参考"
+      },
+      {
+        "source": "aioBo.streamfab",
+        "level": "warning",
+        "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
+      },
+      {
+        "source": "aioBo.dvdfab",
+        "level": "warning",
+        "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
+      }
+    ],
+    "checkedAt": "2026-08-12T12:36:35.592Z"
+  }
 }

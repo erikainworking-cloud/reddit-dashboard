@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-11T20:12:26.235Z",
+  "updatedAt": "2026-08-12T06:57:17.920Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1596,
@@ -708,42 +708,50 @@
   },
   "dvdfab": {
     "label": "DVDFab",
-    "total": 557,
+    "total": 607,
     "published": 0,
-    "posts": 74,
-    "comments": 483,
+    "posts": 91,
+    "comments": 516,
     "statusCount": {
-      "已生成": 538,
-      "需要复核": 19
+      "已生成": 587,
+      "需要复核": 20
     },
     "intentCount": {
       "方案探索": 19,
       "高意向用户": 2,
       "技术求助": 1,
-      "明确技术求助": 267,
-      "高意向工具寻找": 248,
-      "现有工具替代": 19,
+      "明确技术求助": 298,
+      "高意向工具寻找": 266,
+      "现有工具替代": 20,
       "竞品用户流失": 1
     },
     "brandMention": {
-      "YES": 543,
-      "NO": 14
+      "YES": 589,
+      "NO": 18
     },
     "topKeywords": [
       [
         "dvd ripping software",
-        40
+        44
       ],
       [
         "dvd burning software",
-        17
+        19
       ],
       [
         "blu ray ripper",
-        16
+        17
       ],
       [
         "dvd decrypter",
+        11
+      ],
+      [
+        "convert dvd to digital",
+        11
+      ],
+      [
+        "how to rip blu ray",
         11
       ],
       [
@@ -751,43 +759,35 @@
         11
       ],
       [
-        "how to rip blu ray",
-        10
-      ],
-      [
         "iso to mkv",
         10
       ],
       [
+        "convert bdmv to mkv",
+        10
+      ],
+      [
         "dvd to iso",
-        9
+        10
       ],
       [
         "free dvd ripper",
-        8
+        9
+      ],
+      [
+        "rip 4k blu ray",
+        9
+      ],
+      [
+        "convert bdmv to mp4",
+        9
       ],
       [
         "dvd ripper",
         8
       ],
       [
-        "blu ray authoring software",
-        8
-      ],
-      [
-        "burn iso to dvd",
-        8
-      ],
-      [
-        "rip 4k blu ray",
-        8
-      ],
-      [
-        "blu ray burning software for mac",
-        8
-      ],
-      [
-        "convert bdmv to mp4",
+        "convert dvd to mp4",
         8
       ]
     ],
@@ -962,23 +962,23 @@
       },
       "2026-08-11": {
         "dvd ripper": 1,
-        "dvd ripping software": 13,
-        "free dvd ripper": 2,
-        "convert dvd to digital": 2,
-        "dvd to mp4": 2,
-        "dvd burning software": 4,
+        "dvd ripping software": 17,
+        "free dvd ripper": 3,
+        "convert dvd to digital": 7,
+        "dvd to mp4": 3,
+        "dvd burning software": 6,
         "blu ray ripping software": 2,
         "how to convert dvd to mp4": 3,
         "how to make a dvd": 2,
-        "blu ray creator": 2,
+        "blu ray creator": 3,
         "blu ray authoring software": 2,
         "burn iso to dvd": 3,
-        "dvd to iso": 9,
-        "dvd backup": 1,
+        "dvd to iso": 10,
+        "dvd backup": 2,
         "remove dvd copy protection": 2,
-        "remove cinavia": 2,
+        "remove cinavia": 3,
         "uhd ripper": 1,
-        "rip 4k blu ray": 4,
+        "rip 4k blu ray": 5,
         "blu ray ripper software": 2,
         "best dvd to digital converter": 1,
         "blu ray burning software for mac": 5,
@@ -991,24 +991,43 @@
         "mac burn bluray": 3,
         "best way to convert dvd to digital": 1,
         "best software to convert dvd to mp4": 2,
-        "best way to rip dvds": 2,
+        "best way to rip dvds": 4,
         "dvd decrypters for mac": 2,
         "best free dvd to mp4 converter": 1,
         "how to rip copy protected dvd": 1,
         "best way to convert dvd to mp4": 1,
         "best program for ripping dvds": 3,
         "digitize a dvd": 2,
-        "rip dvd to iso": 2,
+        "rip dvd to iso": 4,
         "dvd to digital": 1,
-        "how to rip blu ray": 1,
+        "how to rip blu ray": 2,
         "how to burn a dvd": 1,
         "dvd to mp4 converter free": 1,
         "free dvd copy software": 1,
         "ps3 cinavia removal": 1,
         "bluray ripping software": 1,
-        "bluray ripping": 1,
+        "bluray ripping": 2,
         "convert dvd to mp3": 1,
-        "burn mkv to dvd": 1
+        "burn mkv to dvd": 1,
+        "convert dvd to mp4": 3,
+        "blu ray ripper": 1,
+        "dvd ripper software": 1,
+        "iso to mp4": 1,
+        "best blu ray ripper": 1,
+        "dvd ripping": 2,
+        "dvd ripper free": 1,
+        "dvd copy software": 3,
+        "best dvd ripper for mac": 1,
+        "best dvd ripping software": 1,
+        "disc 2 digital": 1,
+        "blu ray creator software": 1,
+        "blu ray iso": 2,
+        "rip uhd blu ray": 1,
+        "rip blu ray to mkv": 1,
+        "convert bdmv to mp4": 1,
+        "convert bdmv to mkv": 2,
+        "blu ray to iso": 1,
+        "best free dvd ripper for windows 10": 1
       }
     },
     "dailyTrend": [
@@ -1034,7 +1053,7 @@
       ],
       [
         "2026-08-11",
-        106
+        156
       ]
     ],
     "statusByDate": {
@@ -1056,8 +1075,8 @@
         "需要复核": 14
       },
       "2026-08-11": {
-        "已生成": 103,
-        "需要复核": 3
+        "已生成": 152,
+        "需要复核": 4
       }
     },
     "intentByDate": {
@@ -1085,9 +1104,9 @@
         "现有工具替代": 15
       },
       "2026-08-11": {
-        "明确技术求助": 54,
-        "高意向工具寻找": 49,
-        "现有工具替代": 2,
+        "明确技术求助": 85,
+        "高意向工具寻找": 67,
+        "现有工具替代": 3,
         "竞品用户流失": 1
       }
     },
@@ -1111,8 +1130,8 @@
         "NO": 8
       },
       "2026-08-11": {
-        "YES": 102,
-        "NO": 4
+        "YES": 148,
+        "NO": 8
       }
     },
     "typeByDate": {
@@ -1137,37 +1156,33 @@
         "帖子": 24
       },
       "2026-08-11": {
-        "评论": 78,
-        "帖子": 28
+        "评论": 111,
+        "帖子": 45
       }
     }
   },
   "brandMonitoring": {
     "streamfab": {
       "label": "StreamFab",
-      "total": 487,
+      "total": 489,
       "processed": 73,
-      "generated": 6,
+      "generated": 8,
       "pending": 259,
       "noAction": 148,
       "statusCount": {
         "待处理": 259,
         "已处理": 73,
         "无需处理": 148,
-        "已生成": 6
+        "已生成": 8
       },
       "problemType": {
-        "正向夸奖": 95,
+        "正向夸奖": 96,
         "严重故障": 138,
         "咨询请求": 173,
-        "体验吐槽": 80
+        "体验吐槽": 81
       },
-      "avgQualityScore": "1.2",
+      "avgQualityScore": "1.3",
       "scrapingTrend": [
-        [
-          "2026-05-28",
-          1
-        ],
         [
           "2026-05-29",
           3
@@ -1403,6 +1418,10 @@
         [
           "2026-08-11",
           5
+        ],
+        [
+          "2026-08-12",
+          2
         ]
       ],
       "processingTrend": [
@@ -1537,6 +1556,10 @@
         [
           "2026-08-11",
           5
+        ],
+        [
+          "2026-08-12",
+          2
         ]
       ],
       "statusByDate": {
@@ -1921,6 +1944,9 @@
         },
         "2026-08-11": {
           "已生成": 5
+        },
+        "2026-08-12": {
+          "已生成": 2
         }
       },
       "problemByDate": {
@@ -2419,6 +2445,10 @@
           "体验吐槽": 3,
           "正向夸奖": 1,
           "咨询请求": 1
+        },
+        "2026-08-12": {
+          "正向夸奖": 1,
+          "体验吐槽": 1
         }
       },
       "problemStatusByDate": {
@@ -3485,6 +3515,14 @@
           "咨询请求": {
             "已生成": 1
           }
+        },
+        "2026-08-12": {
+          "正向夸奖": {
+            "已生成": 1
+          },
+          "体验吐槽": {
+            "已生成": 1
+          }
         }
       },
       "problemStatusCross": {
@@ -3492,7 +3530,7 @@
           "待处理": 44,
           "无需处理": 37,
           "已处理": 13,
-          "已生成": 1
+          "已生成": 2
         },
         "严重故障": {
           "待处理": 80,
@@ -3509,30 +3547,30 @@
           "待处理": 36,
           "无需处理": 25,
           "已处理": 15,
-          "已生成": 4
+          "已生成": 5
         }
       }
     },
     "dvdfab": {
       "label": "DVDFab",
-      "total": 53,
+      "total": 59,
       "processed": 6,
-      "generated": 10,
+      "generated": 15,
       "pending": 2,
-      "noAction": 35,
+      "noAction": 36,
       "statusCount": {
-        "无需处理": 35,
+        "无需处理": 36,
         "待处理": 2,
-        "已生成": 10,
+        "已生成": 15,
         "已处理": 6
       },
       "problemType": {
-        "严重故障": 7,
-        "体验吐槽": 7,
-        "咨询请求": 19,
-        "正向夸奖": 20
+        "严重故障": 8,
+        "体验吐槽": 8,
+        "咨询请求": 21,
+        "正向夸奖": 22
       },
-      "avgQualityScore": "8.6",
+      "avgQualityScore": "8.5",
       "scrapingTrend": [
         [
           "2026-07-30",
@@ -3577,6 +3615,10 @@
         [
           "2026-08-11",
           1
+        ],
+        [
+          "2026-08-12",
+          6
         ]
       ],
       "processingTrend": [
@@ -3623,6 +3665,10 @@
         [
           "2026-08-11",
           1
+        ],
+        [
+          "2026-08-12",
+          6
         ]
       ],
       "statusByDate": {
@@ -3666,6 +3712,10 @@
         },
         "2026-08-11": {
           "已生成": 1
+        },
+        "2026-08-12": {
+          "已生成": 5,
+          "无需处理": 1
         }
       },
       "problemByDate": {
@@ -3718,6 +3768,12 @@
         },
         "2026-08-11": {
           "体验吐槽": 1
+        },
+        "2026-08-12": {
+          "咨询请求": 2,
+          "正向夸奖": 2,
+          "体验吐槽": 1,
+          "严重故障": 1
         }
       },
       "problemStatusByDate": {
@@ -3831,25 +3887,41 @@
           "体验吐槽": {
             "已生成": 1
           }
+        },
+        "2026-08-12": {
+          "咨询请求": {
+            "已生成": 1,
+            "无需处理": 1
+          },
+          "正向夸奖": {
+            "已生成": 2
+          },
+          "体验吐槽": {
+            "已生成": 1
+          },
+          "严重故障": {
+            "已生成": 1
+          }
         }
       },
       "problemStatusCross": {
         "严重故障": {
           "无需处理": 3,
-          "已处理": 4
+          "已处理": 4,
+          "已生成": 1
         },
         "体验吐槽": {
           "无需处理": 5,
-          "已生成": 2
+          "已生成": 3
         },
         "咨询请求": {
-          "无需处理": 15,
+          "无需处理": 16,
           "待处理": 2,
-          "已生成": 1,
+          "已生成": 2,
           "已处理": 1
         },
         "正向夸奖": {
-          "已生成": 7,
+          "已生成": 9,
           "无需处理": 12,
           "已处理": 1
         }
@@ -3868,10 +3940,10 @@
     },
     "survive1day": {
       "是": 2,
-      "否": 3
+      "否": 5
     },
     "survive7day": {
-      "否": 4,
+      "否": 6,
       "是": 1
     }
   },
@@ -3887,13 +3959,12 @@
       "end": "2026-08-09"
     },
     "dataStatus": {
-      "sourceUpdatedAt": "2026-08-11",
-      "calculatedAt": "2026-08-11T20:12:26.304Z",
-      "dataThrough": "2026-08-11",
+      "sourceUpdatedAt": "2026-08-12",
+      "calculatedAt": "2026-08-12T06:57:17.986Z",
+      "dataThrough": "2026-08-12",
       "periodComplete": false,
       "missingDates": [
         "2026-08-10",
-        "2026-08-12",
         "2026-08-13",
         "2026-08-14",
         "2026-08-15",
@@ -3909,8 +3980,8 @@
     "metrics": {
       "uniqueUrls": 3,
       "keywordUrlPairs": 3,
-      "rawRecords": 3,
-      "exposureCoefficient": 1,
+      "rawRecords": 6,
+      "exposureCoefficient": 2,
       "attentionItems": 3
     },
     "previousMetrics": {
@@ -3925,7 +3996,7 @@
         "current": {
           "uniqueUrls": 2,
           "keywordUrlPairs": 2,
-          "rawRecords": 2
+          "rawRecords": 4
         },
         "previous": {
           "uniqueUrls": 4,
@@ -3935,12 +4006,12 @@
         "change": {
           "uniqueUrls": -2,
           "keywordUrlPairs": -4,
-          "rawRecords": -15
+          "rawRecords": -13
         },
         "changePct": {
           "uniqueUrls": -50,
           "keywordUrlPairs": -66.7,
-          "rawRecords": -88.2
+          "rawRecords": -76.5
         }
       },
       {
@@ -3949,7 +4020,7 @@
         "current": {
           "uniqueUrls": 1,
           "keywordUrlPairs": 1,
-          "rawRecords": 1
+          "rawRecords": 2
         },
         "previous": {
           "uniqueUrls": 1,
@@ -3959,12 +4030,12 @@
         "change": {
           "uniqueUrls": 0,
           "keywordUrlPairs": 0,
-          "rawRecords": -2
+          "rawRecords": -1
         },
         "changePct": {
           "uniqueUrls": 0,
           "keywordUrlPairs": 0,
-          "rawRecords": -66.7
+          "rawRecords": -33.3
         }
       },
       {
@@ -4124,9 +4195,9 @@
         "currentDate": "2026-08-12",
         "previousDate": "2026-08-05",
         "current": {
-          "uniqueUrls": 0,
-          "keywordUrlPairs": 0,
-          "rawRecords": 0
+          "uniqueUrls": 3,
+          "keywordUrlPairs": 3,
+          "rawRecords": 3
         },
         "previous": {
           "uniqueUrls": 3,
@@ -4210,9 +4281,9 @@
         "aioCategory": "来源引用",
         "status": "持续",
         "priority": "P1",
-        "currentRecords": 1,
+        "currentRecords": 2,
         "previousRecords": 3,
-        "change": -2,
+        "change": -1,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
@@ -4229,9 +4300,9 @@
         "aioCategory": "-",
         "status": "持续",
         "priority": "P1",
-        "currentRecords": 1,
+        "currentRecords": 2,
         "previousRecords": 6,
-        "change": -5,
+        "change": -4,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
@@ -4248,9 +4319,9 @@
         "aioCategory": "来源引用",
         "status": "持续",
         "priority": "P1",
-        "currentRecords": 1,
+        "currentRecords": 2,
         "previousRecords": 3,
-        "change": -2,
+        "change": -1,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
@@ -4297,13 +4368,14 @@
     "insights": [
       "PlayOn 占本周独立竞品帖子的 67%。",
       "发现 3 个 P1 机会，优先查看 AIO 引用、高排名或多关键词覆盖的来源。",
-      "数据仅覆盖至 2026-08-11，本周期不完整，周环比仅供参考。"
+      "声量集中于 3 个 URL，重复曝光系数为 2。",
+      "数据仅覆盖至 2026-08-12，本周期不完整，周环比仅供参考。"
     ],
-    "currentTotal": 3,
+    "currentTotal": 6,
     "previousTotal": 20,
-    "totalChange": -17,
-    "totalChangePct": -85,
-    "currentWeekRecordCount": 1
+    "totalChange": -14,
+    "totalChangePct": -70,
+    "currentWeekRecordCount": 2
   },
   "dataQuality": {
     "status": "warning",
@@ -4311,9 +4383,9 @@
       {
         "source": "competitorMonitoring",
         "level": "warning",
-        "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-12、2026-08-13、2026-08-14、2026-08-15、2026-08-16 的原始记录；周环比仅供参考"
+        "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-13、2026-08-14、2026-08-15、2026-08-16 的原始记录；周环比仅供参考"
       }
     ],
-    "checkedAt": "2026-08-11T20:12:26.307Z"
+    "checkedAt": "2026-08-12T06:57:17.988Z"
   }
 }

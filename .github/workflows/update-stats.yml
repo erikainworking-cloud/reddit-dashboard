@@ -36,6 +36,9 @@ jobs:
             exit 1
           fi
 
+      - name: Restore manually maintained dashboard fields
+        run: cp stats.json dashboard/stats.json
+
       - name: Export stats from Feishu
         run: node dashboard/export-stats.js
         env:

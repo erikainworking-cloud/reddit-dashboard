@@ -1,86 +1,68 @@
 {
-  "updatedAt": "2026-08-10T05:14:54.610Z",
+  "updatedAt": "2026-08-14T03:27:03.199Z",
   "streamfab": {
     "label": "StreamFab",
-    "total": 1845,
+    "total": 1596,
     "published": 3,
-    "posts": 1257,
-    "comments": 588,
+    "posts": 1035,
+    "comments": 561,
     "statusCount": {
-      "已忽略": 1295,
+      "已忽略": 1044,
       "已发布": 3,
       "忽略": 104,
       "待审核": 5,
-      "需要复核": 138,
+      "需要复核": 64,
       "待处理": 10,
       "暂不回复": 4,
-      "已生成": 257
+      "已生成": 333
     },
     "intentCount": {
       "方案探索": 226,
       "竞品抱怨": 7,
       "技术求助": 31,
-      "高意向用户": 14,
-      "无关内容": 336,
       "概念或假设讨论": 21,
-      "明确技术求助": 20,
-      "高意向工具寻找": 15,
-      "功能随口提及": 9,
       "一般需求讨论": 12,
-      "官方下载受限": 8
+      "明确技术求助": 41,
+      "功能随口提及": 9,
+      "高意向用户": 14,
+      "高意向工具寻找": 44,
+      "官方下载受限": 15,
+      "现有工具替代": 7,
+      "竞品用户流失": 1,
+      "暂不处理": 22
     },
     "brandMention": {
-      "YES": 56,
-      "NO": 993
+      "YES": 142,
+      "NO": 658
     },
     "topKeywords": [
       [
         "download netflix video",
-        699
+        670
       ],
       [
         "netflix downloader",
-        307
-      ],
-      [
-        "amazon prime downloader",
-        126
+        289
       ],
       [
         "record now",
-        61
-      ],
-      [
-        "record netflix",
-        60
+        63
       ],
       [
         "video downloader",
         57
       ],
       [
+        "amazon prime downloader",
+        48
+      ],
+      [
+        "record netflix",
+        39
+      ],
+      [
         "watch netflix offline",
-        52
-      ],
-      [
-        "record amazon",
-        47
-      ],
-      [
-        "disney plus downloader",
-        40
-      ],
-      [
-        "watch amazon offline",
-        27
-      ],
-      [
-        "watch disney plus offline",
-        24
-      ],
-      [
-        "record disney plus",
-        18
+        30
       ],
       [
         "download disney video",
@@ -91,14 +73,31 @@
         15
       ],
       [
-        "bypass amazon drm",
-        15
+        "watch fansly offline",
+        13
+      ],
+      [
+        "watch amazon offline",
+        12
+      ],
+      [
+        "netflix to mp4",
+        11
+      ],
+      [
+        "amazon to mp4",
+        9
+      ],
+      [
+        "fansly downloader",
+        8
+      ],
+      [
+        "watch onlyfans offline",
+        8
       ]
     ],
     "keywordByDate": {
-      "2026-07-21": {
-        "video downloader": 29
-      },
       "2026-07-23": {
         "download netflix video": 10,
         "record fansly": 2,
@@ -158,6 +157,37 @@
         "record netflix": 13,
         "amazon prime downloader": 21
       },
+      "2026-08-06": {
+        "watch netflix offline": 11,
+        "netflix downloader": 21,
+        "netflix to mp4": 1,
+        "download netflix video": 9,
+        "record netflix": 13,
+        "amazon prime downloader": 23,
+        "bypass amazon drm": 3,
+        "watch amazon offline": 11,
+        "download disney video": 14,
+        "record amazon": 3,
+        "amazon to mp4": 2,
+        "disney plus downloader": 2,
+        "download onlyfans video": 1,
+        "record disney plus": 2
+      },
+      "2026-08-07": {
+        "netflix downloader": 6,
+        "download netflix video": 5,
+        "watch netflix offline": 5,
+        "bypass netflix drm": 4,
+        "record netflix": 8,
+        "amazon prime downloader": 2,
+        "amazon to mp4": 1,
+        "record amazon": 1,
+        "download amazon video": 1,
+        "netflix to mp4": 1
+      },
+      "2026-07-21": {
+        "video downloader": 29
+      },
       "2026-08-05": {
         "watch netflix offline": 1,
         "netflix downloader": 4,
@@ -215,42 +245,6 @@
         "hbo max downloader": 4,
         "hbo max to mp4": 3
       },
-      "2026-08-06": {
-        "watch netflix offline": 19,
-        "netflix downloader": 26,
-        "netflix to mp4": 2,
-        "download netflix video": 15,
-        "record netflix": 20,
-        "amazon prime downloader": 59,
-        "bypass amazon drm": 9,
-        "watch amazon offline": 22,
-        "download disney video": 16,
-        "record amazon": 26,
-        "download amazon video": 11,
-        "bypass disney plus drm": 5,
-        "watch disney plus offline": 12,
-        "disney plus downloader": 13,
-        "record disney plus": 16,
-        "amazon to mp4": 5,
-        "onlyfans downloader": 3,
-        "download onlyfans video": 1
-      },
-      "2026-08-07": {
-        "netflix downloader": 20,
-        "download netflix video": 31,
-        "watch netflix offline": 19,
-        "bypass netflix drm": 4,
-        "record netflix": 25,
-        "amazon prime downloader": 45,
-        "amazon to mp4": 1,
-        "download amazon video": 3,
-        "watch amazon offline": 4,
-        "bypass amazon drm": 3,
-        "record amazon": 20,
-        "disney plus downloader": 25,
-        "watch disney plus offline": 5,
-        "netflix to mp4": 1
-      },
       "2026-08-08": {
         "download netflix video": 3,
         "netflix downloader": 3
@@ -264,10 +258,76 @@
       },
       "2026-08-10": {
         "netflix downloader": 1,
-        "download netflix video": 1,
+        "download netflix video": 2,
         "bypass netflix drm": 1,
         "download amazon video": 1,
-        "amazon to mp4": 1
+        "amazon to mp4": 1,
+        "amazon prime downloader": 1,
+        "hulu downloader": 1,
+        "record hulu": 1,
+        "fandango downloader": 1,
+        "download fandango video": 2,
+        "bypass apple tv drm": 1,
+        "record apple tv": 2,
+        "crunchyroll downloader": 1,
+        "download crunchyroll video": 1,
+        "bypass hbo max drm": 1,
+        "watch hbo max offline": 2,
+        "skyshowtime downloader": 3,
+        "download skyshowtime video": 2,
+        "record skyshowtime": 1,
+        "paramount plus to mp4": 2,
+        "watch paramount plus offline": 2,
+        "record paramount plus": 1,
+        "bypass peacock drm": 1,
+        "watch peacock offline": 2,
+        "record peacock": 1,
+        "viki downloader": 1,
+        "download viki video": 2,
+        "joyn downloader": 1,
+        "joyn to mp4": 1,
+        "record joyn": 1,
+        "bypass now drm": 1,
+        "record now": 1,
+        "download vix video": 2,
+        "record arte": 1,
+        "channel 4 to mp4": 1,
+        "bypass wow drm": 1,
+        "zdf to mp4": 2,
+        "ard to mp4": 1,
+        "watch ard offline": 2,
+        "itvx downloader": 1,
+        "download itvx video": 1,
+        "watch itvx offline": 1,
+        "record itvx": 2,
+        "download streaming video": 1
+      },
+      "2026-08-11": {
+        "netflix downloader": 1,
+        "download netflix video": 2,
+        "record netflix": 3,
+        "record amazon": 2,
+        "disney plus downloader": 1,
+        "download disney video": 2,
+        "tubi downloader": 1,
+        "record hulu": 1,
+        "apple tv downloader": 1,
+        "apple tv to mp4": 2,
+        "record apple tv": 1,
+        "hbo max downloader": 1,
+        "hbo max to mp4": 1,
+        "record espn plus": 3,
+        "paramount plus downloader": 1,
+        "watch paramount plus offline": 1,
+        "bypass peacock drm": 1,
+        "viki downloader": 1,
+        "download viki video": 1,
+        "bypass viki drm": 1,
+        "record now": 1,
+        "channel 4 to mp4": 1,
+        "wow downloader": 1,
+        "watch itvx offline": 1,
+        "download streaming video": 1
       }
     },
     "dailyTrend": [
@@ -321,11 +381,11 @@
       ],
       [
         "2026-08-06",
-        280
+        116
       ],
       [
         "2026-08-07",
-        206
+        34
       ],
       [
         "2026-08-08",
@@ -337,7 +397,11 @@
       ],
       [
         "2026-08-10",
-        5
+        59
+      ],
+      [
+        "2026-08-11",
+        33
       ]
     ],
     "statusByDate": {
@@ -368,8 +432,8 @@
         "已生成": 11
       },
       "2026-07-31": {
-        "已生成": 6,
-        "已忽略": 73
+        "已忽略": 73,
+        "已生成": 6
       },
       "2026-08-01": {
         "已忽略": 89,
@@ -388,21 +452,21 @@
         "需要复核": 4,
         "已生成": 22
       },
+      "2026-08-06": {
+        "已忽略": 87,
+        "已生成": 5,
+        "需要复核": 24
+      },
+      "2026-08-07": {
+        "已忽略": 12,
+        "已生成": 8,
+        "忽略": 10,
+        "已发布": 1,
+        "需要复核": 3
+      },
       "2026-08-05": {
         "已生成": 173,
         "需要复核": 15
-      },
-      "2026-08-06": {
-        "已忽略": 200,
-        "已生成": 5,
-        "需要复核": 75
-      },
-      "2026-08-07": {
-        "已忽略": 150,
-        "已生成": 8,
-        "需要复核": 37,
-        "忽略": 10,
-        "已发布": 1
       },
       "2026-08-08": {
         "已生成": 5,
@@ -413,41 +477,26 @@
         "需要复核": 1
       },
       "2026-08-10": {
-        "已生成": 5
+        "已生成": 52,
+        "需要复核": 7
+      },
+      "2026-08-11": {
+        "已生成": 29,
+        "需要复核": 4
       }
     },
     "intentByDate": {
-      "2026-07-21": {
-        "方案探索": 1
-      },
-      "2026-07-23": {
-        "竞品抱怨": 2,
-        "方案探索": 5
-      },
       "2026-07-27": {
         "方案探索": 3,
         "竞品抱怨": 1
-      },
-      "2026-07-28": {
-        "技术求助": 1,
-        "方案探索": 1,
-        "竞品抱怨": 1
-      },
-      "2026-07-29": {
-        "方案探索": 2
       },
       "2026-07-30": {
         "技术求助": 6,
         "方案探索": 11
       },
       "2026-07-31": {
-        "方案探索": 6,
-        "技术求助": 5
-      },
-      "2026-08-01": {
-        "方案探索": 4,
-        "高意向用户": 1,
-        "技术求助": 1
+        "技术求助": 5,
+        "方案探索": 6
       },
       "2026-08-02": {
         "方案探索": 8,
@@ -457,32 +506,50 @@
         "技术求助": 2
       },
       "2026-08-04": {
-        "方案探索": 23,
-        "技术求助": 4
+        "技术求助": 4,
+        "方案探索": 23
+      },
+      "2026-08-06": {
+        "概念或假设讨论": 7,
+        "一般需求讨论": 10,
+        "明确技术求助": 2,
+        "高意向工具寻找": 5,
+        "功能随口提及": 6,
+        "官方下载受限": 1
+      },
+      "2026-08-07": {
+        "概念或假设讨论": 14,
+        "明确技术求助": 8,
+        "功能随口提及": 3,
+        "高意向工具寻找": 5,
+        "一般需求讨论": 2,
+        "官方下载受限": 2
+      },
+      "2026-07-21": {
+        "方案探索": 1
+      },
+      "2026-07-23": {
+        "竞品抱怨": 2,
+        "方案探索": 5
+      },
+      "2026-07-28": {
+        "技术求助": 1,
+        "方案探索": 1,
+        "竞品抱怨": 1
+      },
+      "2026-07-29": {
+        "方案探索": 2
+      },
+      "2026-08-01": {
+        "方案探索": 4,
+        "高意向用户": 1,
+        "技术求助": 1
       },
       "2026-08-05": {
         "方案探索": 162,
         "高意向用户": 13,
         "竞品抱怨": 3,
         "技术求助": 10
-      },
-      "2026-08-06": {
-        "无关内容": 164,
-        "概念或假设讨论": 7,
-        "明确技术求助": 2,
-        "高意向工具寻找": 5,
-        "功能随口提及": 6,
-        "一般需求讨论": 10,
-        "官方下载受限": 1
-      },
-      "2026-08-07": {
-        "概念或假设讨论": 14,
-        "无关内容": 172,
-        "高意向工具寻找": 5,
-        "一般需求讨论": 2,
-        "明确技术求助": 8,
-        "功能随口提及": 3,
-        "官方下载受限": 2
       },
       "2026-08-08": {
         "明确技术求助": 3,
@@ -495,25 +562,28 @@
         "高意向工具寻找": 2
       },
       "2026-08-10": {
-        "官方下载受限": 3,
-        "明确技术求助": 1,
-        "高意向工具寻找": 1
+        "官方下载受限": 9,
+        "明确技术求助": 19,
+        "高意向工具寻找": 24,
+        "现有工具替代": 6,
+        "竞品用户流失": 1
+      },
+      "2026-08-11": {
+        "明确技术求助": 3,
+        "暂不处理": 22,
+        "高意向工具寻找": 6,
+        "现有工具替代": 1,
+        "官方下载受限": 1
       }
     },
     "mentionByDate": {
-      "2026-07-23": {
-        "NO": 1
-      },
-      "2026-07-27": {
-        "NO": 1
-      },
       "2026-07-30": {
-        "YES": 11,
-        "NO": 62
+        "NO": 62,
+        "YES": 11
       },
       "2026-07-31": {
-        "YES": 6,
-        "NO": 73
+        "NO": 73,
+        "YES": 6
       },
       "2026-08-01": {
         "NO": 90,
@@ -530,17 +600,23 @@
         "NO": 125,
         "https://accounts.feishu.cn/oauth/v1/device/verify?flow_id=OdVIx4ISGeilOOOOOOOOOO00-v_oLCLtQlaRxOwCRIZn&user_code=4GUJ-8PLG": 22
       },
-      "2026-08-05": {
-        "https://accounts.feishu.cn/oauth/v1/device/verify?flow_id=OdVIx4ISGeilOOOOOOOOOO00-v_oLCLtQlaRxOwCRIZn&user_code=4GUJ-8PLG": 180,
-        "NO": 8
-      },
       "2026-08-06": {
-        "NO": 275,
+        "NO": 111,
         "https://accounts.feishu.cn/oauth/v1/device/verify?flow_id=OdVIx4ISGeilOOOOOOOOOO00-v_oLCLtQlaRxOwCRIZn&user_code=4GUJ-8PLG": 5
       },
       "2026-08-07": {
-        "NO": 197,
+        "NO": 25,
         "YES": 9
+      },
+      "2026-07-23": {
+        "NO": 1
+      },
+      "2026-07-27": {
+        "NO": 1
+      },
+      "2026-08-05": {
+        "https://accounts.feishu.cn/oauth/v1/device/verify?flow_id=OdVIx4ISGeilOOOOOOOOOO00-v_oLCLtQlaRxOwCRIZn&user_code=4GUJ-8PLG": 180,
+        "NO": 8
       },
       "2026-08-08": {
         "YES": 6
@@ -550,13 +626,14 @@
         "NO": 1
       },
       "2026-08-10": {
-        "YES": 5
+        "YES": 58,
+        "NO": 1
+      },
+      "2026-08-11": {
+        "YES": 33
       }
     },
     "typeByDate": {
-      "2026-07-21": {
-        "评论": 29
-      },
       "2026-07-23": {
         "帖子": 78,
         "评论": 102
@@ -597,17 +674,20 @@
         "帖子": 110,
         "评论": 37
       },
+      "2026-08-06": {
+        "帖子": 70,
+        "评论": 46
+      },
+      "2026-08-07": {
+        "帖子": 18,
+        "评论": 16
+      },
+      "2026-07-21": {
+        "评论": 29
+      },
       "2026-08-05": {
         "帖子": 10,
         "评论": 178
-      },
-      "2026-08-06": {
-        "帖子": 178,
-        "评论": 102
-      },
-      "2026-08-07": {
-        "帖子": 154,
-        "评论": 52
       },
       "2026-08-08": {
         "帖子": 6
@@ -617,107 +697,104 @@
         "帖子": 5
       },
       "2026-08-10": {
-        "帖子": 1,
-        "评论": 4
+        "帖子": 5,
+        "评论": 54
+      },
+      "2026-08-11": {
+        "帖子": 18,
+        "评论": 15
       }
     }
   },
   "dvdfab": {
     "label": "DVDFab",
-    "total": 594,
+    "total": 607,
     "published": 0,
-    "posts": 451,
-    "comments": 143,
+    "posts": 91,
+    "comments": 516,
     "statusCount": {
-      "已忽略": 498,
-      "已生成": 91,
-      "需要复核": 5
+      "已生成": 587,
+      "需要复核": 20
     },
     "intentCount": {
-      "方案探索": 21,
-      "竞品抱怨": 1,
-      "技术求助": 3,
+      "方案探索": 19,
       "高意向用户": 2,
-      "明确技术求助": 41,
-      "高意向工具寻找": 30,
-      "现有工具替代": 3
+      "技术求助": 1,
+      "明确技术求助": 298,
+      "高意向工具寻找": 266,
+      "现有工具替代": 20,
+      "竞品用户流失": 1
     },
     "brandMention": {
-      "YES": 94,
-      "NO": 57
+      "YES": 589,
+      "NO": 18
     },
     "topKeywords": [
       [
         "dvd ripping software",
-        51
-      ],
-      [
-        "free dvd ripper",
-        31
-      ],
-      [
-        "dvd decrypter",
-        12
+        44
       ],
       [
         "dvd burning software",
-        11
+        19
       ],
       [
         "blu ray ripper",
+        17
+      ],
+      [
+        "dvd decrypter",
+        11
+      ],
+      [
+        "convert dvd to digital",
+        11
+      ],
+      [
+        "how to rip blu ray",
+        11
+      ],
+      [
+        "best software to convert dvd to mp4",
+        11
+      ],
+      [
+        "iso to mkv",
+        10
+      ],
+      [
+        "convert bdmv to mkv",
+        10
+      ],
+      [
+        "dvd to iso",
+        10
+      ],
+      [
+        "free dvd ripper",
+        9
+      ],
+      [
+        "rip 4k blu ray",
+        9
+      ],
+      [
+        "convert bdmv to mp4",
         9
       ],
       [
         "dvd ripper",
-        7
-      ],
-      [
-        "how to rip blu ray",
-        5
+        8
       ],
       [
         "convert dvd to mp4",
-        4
-      ],
-      [
-        "how to rip dvd to computer",
-        4
-      ],
-      [
-        "best dvd ripper",
-        3
-      ],
-      [
-        "convert dvd to digital",
-        3
-      ],
-      [
-        "dvd to digital",
-        2
-      ],
-      [
-        "rip dvd to mp4",
-        2
-      ],
-      [
-        "free dvd burning software",
-        2
-      ],
-      [
-        "dvd ripper software",
-        2
+        8
       ]
     ],
     "keywordByDate": {
-      "2026-07-30": {
-        "dvd ripping software": 23,
-        "free dvd ripper": 22,
-        "dvd decrypter": 1
-      },
       "2026-08-04": {
-        "dvd ripper": 2,
-        "dvd ripping software": 16,
-        "free dvd ripper": 4,
+        "dvd ripping software": 12,
+        "free dvd ripper": 1,
         "dvd decrypter": 9
       },
       "2026-08-07": {
@@ -759,26 +836,204 @@
         "how to rip blu ray": 2
       },
       "2026-08-10": {
-        "dvd ripper": 2,
-        "dvd ripping software": 1,
-        "convert dvd to mp4": 1,
+        "dvd ripper": 4,
+        "dvd ripping software": 4,
+        "convert dvd to mp4": 2,
         "dvd to mp4": 1,
-        "dvd burning software": 4,
+        "dvd burning software": 6,
         "how to rip a dvd": 1,
-        "blu ray ripper": 3,
+        "blu ray ripper": 10,
         "how to rip dvd to computer": 2,
         "dvd ripper software": 1,
-        "how to rip blu ray": 2
+        "how to rip blu ray": 6,
+        "dvd to digital": 2,
+        "blu ray ripping software": 3,
+        "how to convert dvd to mp4": 3,
+        "burn mp4 to dvd": 2,
+        "iso to mp4": 2,
+        "how to burn a dvd": 5,
+        "best blu ray ripper": 3,
+        "dvd ripper for mac": 3,
+        "best dvd burning software": 2,
+        "dvd creator software": 2,
+        "blu ray creator": 2,
+        "dvd menu creator": 3,
+        "blu ray authoring software": 6,
+        "clone dvd": 1,
+        "burn iso to dvd": 5,
+        "free blu ray ripper": 3,
+        "dvd burning software for mac": 3,
+        "create iso from dvd": 5,
+        "dvd to mkv": 2,
+        "best dvd ripper for mac": 5,
+        "dvd backup": 4,
+        "best dvd ripping software": 2,
+        "best free dvd ripper": 6,
+        "remove cinavia": 1,
+        "uhd ripper": 5,
+        "rip 4k blu ray": 4,
+        "iso to mkv": 10,
+        "blu ray ripper software": 3,
+        "extract audio from dvd": 4,
+        "how to rip a dvd on a mac": 3,
+        "free dvd authoring software": 3,
+        "dvd burning software windows 11": 5,
+        "dvd ripper to mp4": 2,
+        "dvd to mp4 converter free": 4,
+        "free dvd copy software": 2,
+        "blu ray burning software for mac": 3,
+        "decrypt blu ray": 3,
+        "rip blu ray to plex": 2,
+        "rip blu ray to mp4": 3,
+        "blu ray to mp4": 2,
+        "how to burn dvd on mac": 3,
+        "rip dvd with subtitles": 2,
+        "dvd ripper freeware": 4,
+        "ps3 cinavia removal": 4,
+        "how to burn mp4 to dvd": 3,
+        "ripping dvds on mac": 2,
+        "best dvd decrypter": 5,
+        "free dvd ripper for mac": 5,
+        "best dvd ripper for windows": 4,
+        "dvd iso ripper": 6,
+        "how to rip dvds for plex": 3,
+        "convert dvd to mp4 on mac": 4,
+        "how to transfer dvd to usb": 1,
+        "best dvd burning software for windows 10": 2,
+        "blu ray iso": 3,
+        "blu ray ripper for mac": 5,
+        "rip uhd blu ray": 2,
+        "best way to rip blu ray": 4,
+        "how to burn dvd on windows 10": 5,
+        "extract subtitle from dvd": 7,
+        "how to convert dvds to digital": 2,
+        "dvd copy mac": 1,
+        "rip blu ray to mkv": 3,
+        "mkv dvd ripper": 2,
+        "how to convert dvd to mp4 on mac": 1,
+        "dvd copier software": 2,
+        "rip dvd to mkv": 4,
+        "best dvd authoring software": 3,
+        "convert bdmv to mp4": 8,
+        "convert bdmv to mkv": 8,
+        "dvd creator mac": 1,
+        "blu ray to digital converter": 1,
+        "best way to convert dvd to digital": 2,
+        "bluray ripping": 3,
+        "convert blu ray to mp4": 2,
+        "dvds to digital": 2,
+        "how to convert mkv to dvd": 1,
+        "best software to convert dvd to mp4": 9,
+        "free blu ray copy software": 2,
+        "hd dvd decryption": 5,
+        "dvd ripping software for mac": 2,
+        "dvd decrypter software": 3,
+        "best free dvd ripper for mac": 2,
+        "dvd to mkv converter": 1,
+        "best way to rip dvds": 1,
+        "dvd decrypters for mac": 5,
+        "best free dvd to mp4 converter": 2,
+        "dvd ripper windows 10": 5,
+        "how to copy a dvd on a mac": 4,
+        "blu ray to iso": 2,
+        "how to extract audio from dvd": 3,
+        "best way to convert dvd to mp4": 4,
+        "how to copy a dvd to another dvd windows 10": 2,
+        "windows 11 create iso from dvd": 1,
+        "mac rip dvd to mp4": 7,
+        "rip dvds to mp4": 2,
+        "blu ray to mkv": 1,
+        "best dvd to usb converter": 1,
+        "burn dvd windows 11": 2,
+        "best dvd copy software free": 1,
+        "burn mkv to dvd": 2,
+        "convert dvd to iso": 1,
+        "rip dvd to iso": 3,
+        "best dvd to mp4 converter": 1,
+        "convert dvd to digital": 1,
+        "blu ray burning software": 1,
+        "best dvd to digital converter": 1,
+        "bluray ripping software": 1,
+        "best way to rip blu ray for plex": 1,
+        "software to convert dvd to mp4": 1,
+        "best dvd burning software free": 1,
+        "dvd ripping software windows": 1,
+        "copy decrypted dvd": 1
+      },
+      "2026-08-11": {
+        "dvd ripper": 1,
+        "dvd ripping software": 17,
+        "free dvd ripper": 3,
+        "convert dvd to digital": 7,
+        "dvd to mp4": 3,
+        "dvd burning software": 6,
+        "blu ray ripping software": 2,
+        "how to convert dvd to mp4": 3,
+        "how to make a dvd": 2,
+        "blu ray creator": 3,
+        "blu ray authoring software": 2,
+        "burn iso to dvd": 3,
+        "dvd to iso": 10,
+        "dvd backup": 2,
+        "remove dvd copy protection": 2,
+        "remove cinavia": 3,
+        "uhd ripper": 1,
+        "rip 4k blu ray": 5,
+        "blu ray ripper software": 2,
+        "best dvd to digital converter": 1,
+        "blu ray burning software for mac": 5,
+        "rip blu ray to plex": 4,
+        "how to burn dvd on mac": 2,
+        "dvd to avi": 1,
+        "best dvd burning software for windows 10": 1,
+        "copy dvd to dvd free": 1,
+        "how to digitize blu ray": 2,
+        "mac burn bluray": 3,
+        "best way to convert dvd to digital": 1,
+        "best software to convert dvd to mp4": 2,
+        "best way to rip dvds": 4,
+        "dvd decrypters for mac": 2,
+        "best free dvd to mp4 converter": 1,
+        "how to rip copy protected dvd": 1,
+        "best way to convert dvd to mp4": 1,
+        "best program for ripping dvds": 3,
+        "digitize a dvd": 2,
+        "rip dvd to iso": 4,
+        "dvd to digital": 1,
+        "how to rip blu ray": 2,
+        "how to burn a dvd": 1,
+        "dvd to mp4 converter free": 1,
+        "free dvd copy software": 1,
+        "ps3 cinavia removal": 1,
+        "bluray ripping software": 1,
+        "bluray ripping": 2,
+        "convert dvd to mp3": 1,
+        "burn mkv to dvd": 1,
+        "convert dvd to mp4": 3,
+        "blu ray ripper": 1,
+        "dvd ripper software": 1,
+        "iso to mp4": 1,
+        "best blu ray ripper": 1,
+        "dvd ripping": 2,
+        "dvd ripper free": 1,
+        "dvd copy software": 3,
+        "best dvd ripper for mac": 1,
+        "best dvd ripping software": 1,
+        "disc 2 digital": 1,
+        "blu ray creator software": 1,
+        "blu ray iso": 2,
+        "rip uhd blu ray": 1,
+        "rip blu ray to mkv": 1,
+        "convert bdmv to mp4": 1,
+        "convert bdmv to mkv": 2,
+        "blu ray to iso": 1,
+        "best free dvd ripper for windows 10": 1
       }
     },
     "dailyTrend": [
       [
-        "2026-07-30",
-        489
-      ],
-      [
         "2026-08-04",
-        31
+        22
       ],
       [
         "2026-08-07",
@@ -794,15 +1049,15 @@
       ],
       [
         "2026-08-10",
-        18
+        373
+      ],
+      [
+        "2026-08-11",
+        156
       ]
     ],
     "statusByDate": {
-      "2026-07-30": {
-        "已忽略": 489
-      },
       "2026-08-04": {
-        "已忽略": 9,
         "已生成": 22
       },
       "2026-08-07": {
@@ -816,20 +1071,19 @@
         "已生成": 13
       },
       "2026-08-10": {
-        "已生成": 15,
-        "需要复核": 3
+        "已生成": 359,
+        "需要复核": 14
+      },
+      "2026-08-11": {
+        "已生成": 152,
+        "需要复核": 4
       }
     },
     "intentByDate": {
-      "2026-07-30": {
-        "方案探索": 2,
-        "竞品抱怨": 1,
-        "技术求助": 1
-      },
       "2026-08-04": {
         "方案探索": 19,
         "高意向用户": 2,
-        "技术求助": 2
+        "技术求助": 1
       },
       "2026-08-07": {
         "明确技术求助": 12,
@@ -845,17 +1099,19 @@
         "明确技术求助": 7
       },
       "2026-08-10": {
-        "高意向工具寻找": 4,
-        "明确技术求助": 13,
-        "现有工具替代": 1
+        "高意向工具寻找": 173,
+        "明确技术求助": 185,
+        "现有工具替代": 15
+      },
+      "2026-08-11": {
+        "明确技术求助": 85,
+        "高意向工具寻找": 67,
+        "现有工具替代": 3,
+        "竞品用户流失": 1
       }
     },
     "mentionByDate": {
-      "2026-07-30": {
-        "NO": 46
-      },
       "2026-08-04": {
-        "NO": 9,
         "YES": 22
       },
       "2026-08-07": {
@@ -870,17 +1126,18 @@
         "YES": 13
       },
       "2026-08-10": {
-        "YES": 18
+        "YES": 365,
+        "NO": 8
+      },
+      "2026-08-11": {
+        "YES": 148,
+        "NO": 8
       }
     },
     "typeByDate": {
-      "2026-07-30": {
-        "帖子": 416,
-        "评论": 73
-      },
       "2026-08-04": {
-        "评论": 21,
-        "帖子": 10
+        "帖子": 4,
+        "评论": 18
       },
       "2026-08-07": {
         "帖子": 6,
@@ -895,49 +1152,37 @@
         "帖子": 4
       },
       "2026-08-10": {
-        "评论": 11,
-        "帖子": 7
+        "评论": 349,
+        "帖子": 24
+      },
+      "2026-08-11": {
+        "评论": 111,
+        "帖子": 45
       }
     }
   },
   "brandMonitoring": {
     "streamfab": {
       "label": "StreamFab",
-      "total": 482,
+      "total": 496,
       "processed": 73,
-      "generated": 1,
+      "generated": 15,
       "pending": 259,
       "noAction": 148,
       "statusCount": {
         "待处理": 259,
         "已处理": 73,
         "无需处理": 148,
-        "已生成": 1
+        "已生成": 15
       },
       "problemType": {
-        "正向夸奖": 94,
+        "正向夸奖": 99,
         "严重故障": 138,
-        "咨询请求": 172,
-        "体验吐槽": 77
+        "咨询请求": 174,
+        "体验吐槽": 84
       },
-      "avgQualityScore": "1.1",
+      "avgQualityScore": "1.4",
       "scrapingTrend": [
-        [
-          "2026-05-27",
-          3
-        ],
-        [
-          "2026-05-28",
-          1
-        ],
-        [
-          "2026-05-29",
-          3
-        ],
-        [
-          "2026-05-30",
-          3
-        ],
         [
           "2026-05-31",
           4
@@ -1161,6 +1406,22 @@
         [
           "2026-08-10",
           1
+        ],
+        [
+          "2026-08-11",
+          5
+        ],
+        [
+          "2026-08-12",
+          2
+        ],
+        [
+          "2026-08-13",
+          3
+        ],
+        [
+          "2026-08-14",
+          4
         ]
       ],
       "processingTrend": [
@@ -1291,6 +1552,22 @@
         [
           "2026-08-10",
           1
+        ],
+        [
+          "2026-08-11",
+          5
+        ],
+        [
+          "2026-08-12",
+          2
+        ],
+        [
+          "2026-08-13",
+          3
+        ],
+        [
+          "2026-08-14",
+          4
         ]
       ],
       "statusByDate": {
@@ -1672,6 +1949,18 @@
         },
         "2026-08-10": {
           "已生成": 1
+        },
+        "2026-08-11": {
+          "已生成": 5
+        },
+        "2026-08-12": {
+          "已生成": 2
+        },
+        "2026-08-13": {
+          "已生成": 3
+        },
+        "2026-08-14": {
+          "已生成": 4
         }
       },
       "problemByDate": {
@@ -2165,6 +2454,24 @@
         },
         "2026-08-10": {
           "体验吐槽": 1
+        },
+        "2026-08-11": {
+          "体验吐槽": 3,
+          "正向夸奖": 1,
+          "咨询请求": 1
+        },
+        "2026-08-12": {
+          "正向夸奖": 1,
+          "体验吐槽": 1
+        },
+        "2026-08-13": {
+          "正向夸奖": 1,
+          "体验吐槽": 1,
+          "咨询请求": 1
+        },
+        "2026-08-14": {
+          "正向夸奖": 2,
+          "体验吐槽": 2
         }
       },
       "problemStatusByDate": {
@@ -3220,13 +3527,52 @@
           "体验吐槽": {
             "已生成": 1
           }
+        },
+        "2026-08-11": {
+          "体验吐槽": {
+            "已生成": 3
+          },
+          "正向夸奖": {
+            "已生成": 1
+          },
+          "咨询请求": {
+            "已生成": 1
+          }
+        },
+        "2026-08-12": {
+          "正向夸奖": {
+            "已生成": 1
+          },
+          "体验吐槽": {
+            "已生成": 1
+          }
+        },
+        "2026-08-13": {
+          "正向夸奖": {
+            "已生成": 1
+          },
+          "体验吐槽": {
+            "已生成": 1
+          },
+          "咨询请求": {
+            "已生成": 1
+          }
+        },
+        "2026-08-14": {
+          "正向夸奖": {
+            "已生成": 2
+          },
+          "体验吐槽": {
+            "已生成": 2
+          }
         }
       },
       "problemStatusCross": {
         "正向夸奖": {
           "待处理": 44,
           "无需处理": 37,
-          "已处理": 13
+          "已处理": 13,
+          "已生成": 5
         },
         "严重故障": {
           "待处理": 80,
@@ -3236,36 +3582,37 @@
         "咨询请求": {
           "待处理": 99,
           "已处理": 28,
-          "无需处理": 45
+          "无需处理": 45,
+          "已生成": 2
         },
         "体验吐槽": {
           "待处理": 36,
           "无需处理": 25,
           "已处理": 15,
-          "已生成": 1
+          "已生成": 8
         }
       }
     },
     "dvdfab": {
       "label": "DVDFab",
-      "total": 52,
+      "total": 71,
       "processed": 6,
-      "generated": 9,
+      "generated": 24,
       "pending": 2,
-      "noAction": 35,
+      "noAction": 39,
       "statusCount": {
-        "无需处理": 35,
+        "无需处理": 39,
         "待处理": 2,
-        "已生成": 9,
+        "已生成": 24,
         "已处理": 6
       },
       "problemType": {
-        "严重故障": 7,
-        "体验吐槽": 6,
-        "咨询请求": 19,
-        "正向夸奖": 20
+        "严重故障": 12,
+        "体验吐槽": 10,
+        "咨询请求": 24,
+        "正向夸奖": 25
       },
-      "avgQualityScore": "8.6",
+      "avgQualityScore": "8.3",
       "scrapingTrend": [
         [
           "2026-07-30",
@@ -3306,6 +3653,22 @@
         [
           "2026-08-10",
           5
+        ],
+        [
+          "2026-08-11",
+          1
+        ],
+        [
+          "2026-08-12",
+          6
+        ],
+        [
+          "2026-08-13",
+          5
+        ],
+        [
+          "2026-08-14",
+          7
         ]
       ],
       "processingTrend": [
@@ -3348,6 +3711,22 @@
         [
           "2026-08-10",
           5
+        ],
+        [
+          "2026-08-11",
+          1
+        ],
+        [
+          "2026-08-12",
+          6
+        ],
+        [
+          "2026-08-13",
+          5
+        ],
+        [
+          "2026-08-14",
+          7
         ]
       ],
       "statusByDate": {
@@ -3388,6 +3767,21 @@
         },
         "2026-08-10": {
           "无需处理": 5
+        },
+        "2026-08-11": {
+          "已生成": 1
+        },
+        "2026-08-12": {
+          "已生成": 5,
+          "无需处理": 1
+        },
+        "2026-08-13": {
+          "已生成": 3,
+          "无需处理": 2
+        },
+        "2026-08-14": {
+          "已生成": 6,
+          "无需处理": 1
         }
       },
       "problemByDate": {
@@ -3437,6 +3831,25 @@
           "正向夸奖": 3,
           "严重故障": 1,
           "体验吐槽": 1
+        },
+        "2026-08-11": {
+          "体验吐槽": 1
+        },
+        "2026-08-12": {
+          "咨询请求": 2,
+          "正向夸奖": 2,
+          "体验吐槽": 1,
+          "严重故障": 1
+        },
+        "2026-08-13": {
+          "严重故障": 3,
+          "咨询请求": 2
+        },
+        "2026-08-14": {
+          "严重故障": 1,
+          "正向夸奖": 3,
+          "体验吐槽": 2,
+          "咨询请求": 1
         }
       },
       "problemStatusByDate": {
@@ -3545,25 +3958,70 @@
           "体验吐槽": {
             "无需处理": 1
           }
+        },
+        "2026-08-11": {
+          "体验吐槽": {
+            "已生成": 1
+          }
+        },
+        "2026-08-12": {
+          "咨询请求": {
+            "已生成": 1,
+            "无需处理": 1
+          },
+          "正向夸奖": {
+            "已生成": 2
+          },
+          "体验吐槽": {
+            "已生成": 1
+          },
+          "严重故障": {
+            "已生成": 1
+          }
+        },
+        "2026-08-13": {
+          "严重故障": {
+            "已生成": 2,
+            "无需处理": 1
+          },
+          "咨询请求": {
+            "已生成": 1,
+            "无需处理": 1
+          }
+        },
+        "2026-08-14": {
+          "严重故障": {
+            "已生成": 1
+          },
+          "正向夸奖": {
+            "已生成": 3
+          },
+          "体验吐槽": {
+            "已生成": 2
+          },
+          "咨询请求": {
+            "无需处理": 1
+          }
         }
       },
       "problemStatusCross": {
         "严重故障": {
-          "无需处理": 3,
-          "已处理": 4
+          "无需处理": 4,
+          "已处理": 4,
+          "已生成": 4
         },
         "体验吐槽": {
           "无需处理": 5,
-          "已生成": 1
+          "已生成": 5
         },
         "咨询请求": {
-          "无需处理": 15,
+          "无需处理": 18,
           "待处理": 2,
-          "已生成": 1,
+          "已生成": 3,
           "已处理": 1
         },
         "正向夸奖": {
-          "已生成": 7,
+          "已生成": 12,
           "无需处理": 12,
           "已处理": 1
         }
@@ -3571,21 +4029,21 @@
     }
   },
   "paidAccounts": {
-    "total": 5,
+    "total": 9,
     "byBrand": {
-      "DVDFab": 3,
+      "DVDFab": 7,
       "StreamFab": 2
     },
     "byType": {
-      "新帖": 2,
-      "旧帖": 3
+      "新帖": 4,
+      "旧帖": 5
     },
     "survive1day": {
       "是": 2,
-      "否": 3
+      "否": 6
     },
     "survive7day": {
-      "否": 4,
+      "否": 7,
       "是": 1
     }
   },
@@ -3593,20 +4051,23 @@
     "version": 2,
     "sourceUrl": "https://i6a1sqw3p2.feishu.cn/base/Y1uAbFprUawDWKsSoOucyvhPnrc?table=tblJ98nNIyyxI1KL&view=vewSBgAnvb",
     "currentWeek": {
+      "start": "2026-08-10",
+      "end": "2026-08-16"
+    },
+    "previousWeek": {
       "start": "2026-08-03",
       "end": "2026-08-09"
     },
-    "previousWeek": {
-      "start": "2026-07-27",
-      "end": "2026-08-02"
-    },
     "dataStatus": {
-      "sourceUpdatedAt": "2026-08-09",
-      "calculatedAt": "2026-08-10T05:14:54.653Z",
-      "dataThrough": "2026-08-09",
+      "sourceUpdatedAt": "2026-08-14",
+      "calculatedAt": "2026-08-14T03:27:03.268Z",
+      "dataThrough": "2026-08-14",
       "periodComplete": false,
       "missingDates": [
-        "2026-08-03"
+        "2026-08-10",
+        "2026-08-13",
+        "2026-08-15",
+        "2026-08-16"
       ],
       "quality": {
         "invalidDates": 0,
@@ -3616,40 +4077,40 @@
       }
     },
     "metrics": {
-      "uniqueUrls": 5,
-      "keywordUrlPairs": 7,
-      "rawRecords": 20,
-      "exposureCoefficient": 4,
-      "attentionItems": 5
+      "uniqueUrls": 4,
+      "keywordUrlPairs": 4,
+      "rawRecords": 10,
+      "exposureCoefficient": 2.5,
+      "attentionItems": 4
     },
     "previousMetrics": {
-      "uniqueUrls": 6,
+      "uniqueUrls": 5,
       "keywordUrlPairs": 7,
-      "rawRecords": 21
+      "rawRecords": 20
     },
     "brands": [
       {
         "key": "playon",
         "label": "PlayOn",
         "current": {
+          "uniqueUrls": 3,
+          "keywordUrlPairs": 3,
+          "rawRecords": 7
+        },
+        "previous": {
           "uniqueUrls": 4,
           "keywordUrlPairs": 6,
           "rawRecords": 17
         },
-        "previous": {
-          "uniqueUrls": 4,
-          "keywordUrlPairs": 5,
-          "rawRecords": 15
-        },
         "change": {
-          "uniqueUrls": 0,
-          "keywordUrlPairs": 1,
-          "rawRecords": 2
+          "uniqueUrls": -1,
+          "keywordUrlPairs": -3,
+          "rawRecords": -10
         },
         "changePct": {
-          "uniqueUrls": 0,
-          "keywordUrlPairs": 20,
-          "rawRecords": 13.3
+          "uniqueUrls": -25,
+          "keywordUrlPairs": -50,
+          "rawRecords": -58.8
         }
       },
       {
@@ -3663,17 +4124,17 @@
         "previous": {
           "uniqueUrls": 1,
           "keywordUrlPairs": 1,
-          "rawRecords": 4
+          "rawRecords": 3
         },
         "change": {
           "uniqueUrls": 0,
           "keywordUrlPairs": 0,
-          "rawRecords": -1
+          "rawRecords": 0
         },
         "changePct": {
           "uniqueUrls": 0,
           "keywordUrlPairs": 0,
-          "rawRecords": -25
+          "rawRecords": 0
         }
       },
       {
@@ -3685,19 +4146,19 @@
           "rawRecords": 0
         },
         "previous": {
-          "uniqueUrls": 1,
-          "keywordUrlPairs": 1,
-          "rawRecords": 2
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
         },
         "change": {
-          "uniqueUrls": -1,
-          "keywordUrlPairs": -1,
-          "rawRecords": -2
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
         },
         "changePct": {
-          "uniqueUrls": -100,
-          "keywordUrlPairs": -100,
-          "rawRecords": -100
+          "uniqueUrls": null,
+          "keywordUrlPairs": null,
+          "rawRecords": null
         }
       },
       {
@@ -3799,9 +4260,9 @@
     ],
     "dailyTrend": [
       {
-        "label": "08-03",
-        "currentDate": "2026-08-03",
-        "previousDate": "2026-07-27",
+        "label": "08-10",
+        "currentDate": "2026-08-10",
+        "previousDate": "2026-08-03",
         "current": {
           "uniqueUrls": 0,
           "keywordUrlPairs": 0,
@@ -3814,13 +4275,28 @@
         }
       },
       {
-        "label": "08-04",
-        "currentDate": "2026-08-04",
-        "previousDate": "2026-07-28",
+        "label": "08-11",
+        "currentDate": "2026-08-11",
+        "previousDate": "2026-08-04",
         "current": {
+          "uniqueUrls": 3,
+          "keywordUrlPairs": 3,
+          "rawRecords": 3
+        },
+        "previous": {
           "uniqueUrls": 2,
           "keywordUrlPairs": 2,
           "rawRecords": 2
+        }
+      },
+      {
+        "label": "08-12",
+        "currentDate": "2026-08-12",
+        "previousDate": "2026-08-05",
+        "current": {
+          "uniqueUrls": 3,
+          "keywordUrlPairs": 3,
+          "rawRecords": 3
         },
         "previous": {
           "uniqueUrls": 3,
@@ -3829,13 +4305,28 @@
         }
       },
       {
-        "label": "08-05",
-        "currentDate": "2026-08-05",
-        "previousDate": "2026-07-29",
+        "label": "08-13",
+        "currentDate": "2026-08-13",
+        "previousDate": "2026-08-06",
         "current": {
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
+        },
+        "previous": {
           "uniqueUrls": 3,
           "keywordUrlPairs": 3,
           "rawRecords": 3
+        }
+      },
+      {
+        "label": "08-14",
+        "currentDate": "2026-08-14",
+        "previousDate": "2026-08-07",
+        "current": {
+          "uniqueUrls": 4,
+          "keywordUrlPairs": 4,
+          "rawRecords": 4
         },
         "previous": {
           "uniqueUrls": 4,
@@ -3844,43 +4335,13 @@
         }
       },
       {
-        "label": "08-06",
-        "currentDate": "2026-08-06",
-        "previousDate": "2026-07-30",
+        "label": "08-15",
+        "currentDate": "2026-08-15",
+        "previousDate": "2026-08-08",
         "current": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
-        },
-        "previous": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
-        }
-      },
-      {
-        "label": "08-07",
-        "currentDate": "2026-08-07",
-        "previousDate": "2026-07-31",
-        "current": {
-          "uniqueUrls": 4,
-          "keywordUrlPairs": 4,
-          "rawRecords": 4
-        },
-        "previous": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
-        }
-      },
-      {
-        "label": "08-08",
-        "currentDate": "2026-08-08",
-        "previousDate": "2026-08-01",
-        "current": {
-          "uniqueUrls": 5,
-          "keywordUrlPairs": 5,
-          "rawRecords": 5
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
         },
         "previous": {
           "uniqueUrls": 5,
@@ -3889,13 +4350,13 @@
         }
       },
       {
-        "label": "08-09",
-        "currentDate": "2026-08-09",
-        "previousDate": "2026-08-02",
+        "label": "08-16",
+        "currentDate": "2026-08-16",
+        "previousDate": "2026-08-09",
         "current": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
         },
         "previous": {
           "uniqueUrls": 3,
@@ -3905,66 +4366,6 @@
       }
     ],
     "opportunities": [
-      {
-        "url": "https://www.reddit.com/r/PlayOn/comments/1grcrh8",
-        "title": "Not able to record Vudu/Fandango : r/PlayOn",
-        "subreddit": "PlayOn",
-        "brand": "playon",
-        "keywords": [
-          "screen record fandango movies"
-        ],
-        "keywordCount": 1,
-        "bestRank": 2,
-        "aioCited": true,
-        "aioCategory": "-",
-        "status": "持续",
-        "priority": "P1",
-        "currentRecords": 6,
-        "previousRecords": 6,
-        "change": 0,
-        "action": "查看来源并优先评估回复/内容机会"
-      },
-      {
-        "url": "https://www.reddit.com/r/PlayOn/comments/1ncpiad",
-        "title": "Fandango : r/PlayOn - Reddit",
-        "subreddit": "PlayOn",
-        "brand": "playon",
-        "keywords": [
-          "screen record fandango movies"
-        ],
-        "keywordCount": 1,
-        "bestRank": 2,
-        "aioCited": true,
-        "aioCategory": "-",
-        "status": "持续",
-        "priority": "P1",
-        "currentRecords": 4,
-        "previousRecords": 3,
-        "change": 1,
-        "action": "查看来源并优先评估回复/内容机会"
-      },
-      {
-        "url": "https://www.reddit.com/r/DataHoarder/comments/1ocueie",
-        "title": "How to Download DRM-Protected Course Videos That Only Play on ...",
-        "subreddit": "DataHoarder",
-        "brand": "playon",
-        "keywords": [
-          "bypass joyn drm",
-          "bypass onlyfans drm",
-          "bypass skyshowtime drm",
-          "bypass starz drm"
-        ],
-        "keywordCount": 4,
-        "bestRank": null,
-        "aioCited": true,
-        "aioCategory": "来源引用",
-        "status": "持续",
-        "priority": "P1",
-        "currentRecords": 4,
-        "previousRecords": 2,
-        "change": 2,
-        "action": "查看来源并优先评估回复/内容机会"
-      },
       {
         "url": "https://www.reddit.com/r/appletv/comments/1lxoaeb",
         "title": "Apple TV downloading? : r/appletv",
@@ -3980,8 +4381,27 @@
         "status": "持续",
         "priority": "P1",
         "currentRecords": 3,
-        "previousRecords": 4,
-        "change": -1,
+        "previousRecords": 3,
+        "change": 0,
+        "action": "查看来源并优先评估回复/内容机会"
+      },
+      {
+        "url": "https://www.reddit.com/r/PlayOn/comments/1grcrh8",
+        "title": "Not able to record Vudu/Fandango : r/PlayOn",
+        "subreddit": "PlayOn",
+        "brand": "playon",
+        "keywords": [
+          "screen record fandango movies"
+        ],
+        "keywordCount": 1,
+        "bestRank": 2,
+        "aioCited": true,
+        "aioCategory": "-",
+        "status": "持续",
+        "priority": "P1",
+        "currentRecords": 3,
+        "previousRecords": 6,
+        "change": -3,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
@@ -3995,45 +4415,66 @@
         "keywordCount": 1,
         "bestRank": 5,
         "aioCited": true,
-        "aioCategory": "-",
+        "aioCategory": "来源引用",
         "status": "持续",
         "priority": "P1",
         "currentRecords": 3,
-        "previousRecords": 4,
-        "change": -1,
+        "previousRecords": 3,
+        "change": 0,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
-        "url": "https://www.reddit.com/r/Piracy/comments/1g9j4zs",
-        "title": "Is there a screen recorder app that can't be detected by ...",
-        "subreddit": "Piracy",
-        "brand": "audials",
+        "url": "https://www.reddit.com/r/DataHoarder/comments/1ocueie",
+        "title": "How to Download DRM-Protected Course Videos That Only Play on ...",
+        "subreddit": "DataHoarder",
+        "brand": "playon",
         "keywords": [
-          "screen record skyshowtime movies"
+          "bypass joyn drm",
+          "bypass skyshowtime drm",
+          "bypass starz drm"
         ],
-        "keywordCount": 1,
-        "bestRank": 4,
+        "keywordCount": 3,
+        "bestRank": null,
         "aioCited": true,
         "aioCategory": "来源引用",
-        "status": "消失",
+        "status": "持续",
         "priority": "P1",
-        "currentRecords": 0,
-        "previousRecords": 2,
-        "change": -2,
+        "currentRecords": 1,
+        "previousRecords": 4,
+        "change": -3,
         "action": "查看来源并优先评估回复/内容机会"
+      },
+      {
+        "url": "https://www.reddit.com/r/PlayOn/comments/1ncpiad",
+        "title": "Fandango : r/PlayOn - Reddit",
+        "subreddit": "PlayOn",
+        "brand": "playon",
+        "keywords": [
+          "screen record fandango movies"
+        ],
+        "keywordCount": 1,
+        "bestRank": 2,
+        "aioCited": false,
+        "aioCategory": "-",
+        "status": "消失",
+        "priority": "P3",
+        "currentRecords": 0,
+        "previousRecords": 4,
+        "change": -4,
+        "action": "持续观察"
       }
     ],
     "insights": [
-      "PlayOn 占本周独立竞品帖子的 80%。",
-      "发现 5 个 P1 机会，优先查看 AIO 引用、高排名或多关键词覆盖的来源。",
-      "声量集中于 5 个 URL，重复曝光系数为 4。",
-      "数据仅覆盖至 2026-08-09，本周期不完整，周环比仅供参考。"
+      "PlayOn 占本周独立竞品帖子的 75%。",
+      "发现 4 个 P1 机会，优先查看 AIO 引用、高排名或多关键词覆盖的来源。",
+      "声量集中于 4 个 URL，重复曝光系数为 2.5。",
+      "数据仅覆盖至 2026-08-14，本周期不完整，周环比仅供参考。"
     ],
-    "currentTotal": 20,
-    "previousTotal": 21,
-    "totalChange": -1,
-    "totalChangePct": -4.8,
-    "currentWeekRecordCount": 6
+    "currentTotal": 10,
+    "previousTotal": 20,
+    "totalChange": -10,
+    "totalChangePct": -50,
+    "currentWeekRecordCount": 3
   },
   "aioBo": {
     "streamfab": {
@@ -4282,7 +4723,7 @@
       {
         "source": "competitorMonitoring",
         "level": "warning",
-        "message": "竞品当前周期（2026-08-03 至 2026-08-09）缺少 2026-08-03 的原始记录；周环比仅供参考"
+        "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-13、2026-08-15、2026-08-16 的原始记录；周环比仅供参考"
       },
       {
         "source": "aioBo.streamfab",
@@ -4295,6 +4736,6 @@
         "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
       }
     ],
-    "checkedAt": "2026-08-10T05:14:54.655Z"
+    "checkedAt": "2026-08-14T03:27:03.271Z"
   }
 }

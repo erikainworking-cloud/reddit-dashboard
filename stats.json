@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-14T20:01:53.510Z",
+  "updatedAt": "2026-08-15T03:59:28.780Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1596,
@@ -1164,29 +1164,25 @@
   "brandMonitoring": {
     "streamfab": {
       "label": "StreamFab",
-      "total": 496,
+      "total": 497,
       "processed": 73,
-      "generated": 15,
+      "generated": 16,
       "pending": 259,
       "noAction": 148,
       "statusCount": {
         "待处理": 259,
         "已处理": 73,
         "无需处理": 148,
-        "已生成": 15
+        "已生成": 16
       },
       "problemType": {
         "正向夸奖": 99,
         "严重故障": 138,
-        "咨询请求": 174,
+        "咨询请求": 175,
         "体验吐槽": 84
       },
       "avgQualityScore": "1.4",
       "scrapingTrend": [
-        [
-          "2026-05-31",
-          4
-        ],
         [
           "2026-06-01",
           3
@@ -1422,6 +1418,10 @@
         [
           "2026-08-14",
           4
+        ],
+        [
+          "2026-08-15",
+          1
         ]
       ],
       "processingTrend": [
@@ -1568,6 +1568,10 @@
         [
           "2026-08-14",
           4
+        ],
+        [
+          "2026-08-15",
+          1
         ]
       ],
       "statusByDate": {
@@ -1961,6 +1965,9 @@
         },
         "2026-08-14": {
           "已生成": 4
+        },
+        "2026-08-15": {
+          "已生成": 1
         }
       },
       "problemByDate": {
@@ -2472,6 +2479,9 @@
         "2026-08-14": {
           "正向夸奖": 2,
           "体验吐槽": 2
+        },
+        "2026-08-15": {
+          "咨询请求": 1
         }
       },
       "problemStatusByDate": {
@@ -3565,6 +3575,11 @@
           "体验吐槽": {
             "已生成": 2
           }
+        },
+        "2026-08-15": {
+          "咨询请求": {
+            "已生成": 1
+          }
         }
       },
       "problemStatusCross": {
@@ -3583,7 +3598,7 @@
           "待处理": 99,
           "已处理": 28,
           "无需处理": 45,
-          "已生成": 2
+          "已生成": 3
         },
         "体验吐槽": {
           "待处理": 36,
@@ -3595,22 +3610,22 @@
     },
     "dvdfab": {
       "label": "DVDFab",
-      "total": 71,
+      "total": 72,
       "processed": 6,
-      "generated": 24,
+      "generated": 25,
       "pending": 2,
       "noAction": 39,
       "statusCount": {
         "无需处理": 39,
         "待处理": 2,
-        "已生成": 24,
+        "已生成": 25,
         "已处理": 6
       },
       "problemType": {
         "严重故障": 12,
         "体验吐槽": 10,
         "咨询请求": 24,
-        "正向夸奖": 25
+        "正向夸奖": 26
       },
       "avgQualityScore": "8.3",
       "scrapingTrend": [
@@ -3669,6 +3684,10 @@
         [
           "2026-08-14",
           7
+        ],
+        [
+          "2026-08-15",
+          1
         ]
       ],
       "processingTrend": [
@@ -3727,6 +3746,10 @@
         [
           "2026-08-14",
           7
+        ],
+        [
+          "2026-08-15",
+          1
         ]
       ],
       "statusByDate": {
@@ -3782,6 +3805,9 @@
         "2026-08-14": {
           "已生成": 6,
           "无需处理": 1
+        },
+        "2026-08-15": {
+          "已生成": 1
         }
       },
       "problemByDate": {
@@ -3850,6 +3876,9 @@
           "正向夸奖": 3,
           "体验吐槽": 2,
           "咨询请求": 1
+        },
+        "2026-08-15": {
+          "正向夸奖": 1
         }
       },
       "problemStatusByDate": {
@@ -4002,6 +4031,11 @@
           "咨询请求": {
             "无需处理": 1
           }
+        },
+        "2026-08-15": {
+          "正向夸奖": {
+            "已生成": 1
+          }
         }
       },
       "problemStatusCross": {
@@ -4021,7 +4055,7 @@
           "已处理": 1
         },
         "正向夸奖": {
-          "已生成": 12,
+          "已生成": 13,
           "无需处理": 12,
           "已处理": 1
         }
@@ -4059,14 +4093,13 @@
       "end": "2026-08-09"
     },
     "dataStatus": {
-      "sourceUpdatedAt": "2026-08-14",
-      "calculatedAt": "2026-08-14T20:01:53.582Z",
-      "dataThrough": "2026-08-14",
+      "sourceUpdatedAt": "2026-08-15",
+      "calculatedAt": "2026-08-15T03:59:28.846Z",
+      "dataThrough": "2026-08-15",
       "periodComplete": false,
       "missingDates": [
         "2026-08-10",
         "2026-08-13",
-        "2026-08-15",
         "2026-08-16"
       ],
       "quality": {
@@ -4077,10 +4110,10 @@
       }
     },
     "metrics": {
-      "uniqueUrls": 4,
-      "keywordUrlPairs": 4,
-      "rawRecords": 10,
-      "exposureCoefficient": 2.5,
+      "uniqueUrls": 5,
+      "keywordUrlPairs": 5,
+      "rawRecords": 13,
+      "exposureCoefficient": 2.6,
       "attentionItems": 4
     },
     "previousMetrics": {
@@ -4093,9 +4126,9 @@
         "key": "playon",
         "label": "PlayOn",
         "current": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 7
+          "uniqueUrls": 4,
+          "keywordUrlPairs": 4,
+          "rawRecords": 10
         },
         "previous": {
           "uniqueUrls": 4,
@@ -4103,14 +4136,14 @@
           "rawRecords": 17
         },
         "change": {
-          "uniqueUrls": -1,
-          "keywordUrlPairs": -3,
-          "rawRecords": -10
+          "uniqueUrls": 0,
+          "keywordUrlPairs": -2,
+          "rawRecords": -7
         },
         "changePct": {
-          "uniqueUrls": -25,
-          "keywordUrlPairs": -50,
-          "rawRecords": -58.8
+          "uniqueUrls": 0,
+          "keywordUrlPairs": -33.3,
+          "rawRecords": -41.2
         }
       },
       {
@@ -4339,9 +4372,9 @@
         "currentDate": "2026-08-15",
         "previousDate": "2026-08-08",
         "current": {
-          "uniqueUrls": 0,
-          "keywordUrlPairs": 0,
-          "rawRecords": 0
+          "uniqueUrls": 3,
+          "keywordUrlPairs": 3,
+          "rawRecords": 3
         },
         "previous": {
           "uniqueUrls": 5,
@@ -4367,25 +4400,6 @@
     ],
     "opportunities": [
       {
-        "url": "https://www.reddit.com/r/appletv/comments/1lxoaeb",
-        "title": "Apple TV downloading? : r/appletv",
-        "subreddit": "appletv",
-        "brand": "keeprix",
-        "keywords": [
-          "apple tv downloader"
-        ],
-        "keywordCount": 1,
-        "bestRank": 8,
-        "aioCited": true,
-        "aioCategory": "来源引用",
-        "status": "持续",
-        "priority": "P1",
-        "currentRecords": 3,
-        "previousRecords": 3,
-        "change": 0,
-        "action": "查看来源并优先评估回复/内容机会"
-      },
-      {
         "url": "https://www.reddit.com/r/PlayOn/comments/1grcrh8",
         "title": "Not able to record Vudu/Fandango : r/PlayOn",
         "subreddit": "PlayOn",
@@ -4399,9 +4413,9 @@
         "aioCategory": "-",
         "status": "持续",
         "priority": "P1",
-        "currentRecords": 3,
+        "currentRecords": 4,
         "previousRecords": 6,
-        "change": -3,
+        "change": -2,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
@@ -4414,6 +4428,25 @@
         ],
         "keywordCount": 1,
         "bestRank": 5,
+        "aioCited": true,
+        "aioCategory": "来源引用",
+        "status": "持续",
+        "priority": "P1",
+        "currentRecords": 4,
+        "previousRecords": 3,
+        "change": 1,
+        "action": "查看来源并优先评估回复/内容机会"
+      },
+      {
+        "url": "https://www.reddit.com/r/appletv/comments/1lxoaeb",
+        "title": "Apple TV downloading? : r/appletv",
+        "subreddit": "appletv",
+        "brand": "keeprix",
+        "keywords": [
+          "apple tv downloader"
+        ],
+        "keywordCount": 1,
+        "bestRank": 8,
         "aioCited": true,
         "aioCategory": "来源引用",
         "status": "持续",
@@ -4456,25 +4489,25 @@
         "bestRank": 2,
         "aioCited": false,
         "aioCategory": "-",
-        "status": "消失",
+        "status": "持续",
         "priority": "P3",
-        "currentRecords": 0,
+        "currentRecords": 1,
         "previousRecords": 4,
-        "change": -4,
+        "change": -3,
         "action": "持续观察"
       }
     ],
     "insights": [
-      "PlayOn 占本周独立竞品帖子的 75%。",
+      "PlayOn 占本周独立竞品帖子的 80%。",
       "发现 4 个 P1 机会，优先查看 AIO 引用、高排名或多关键词覆盖的来源。",
-      "声量集中于 4 个 URL，重复曝光系数为 2.5。",
-      "数据仅覆盖至 2026-08-14，本周期不完整，周环比仅供参考。"
+      "声量集中于 5 个 URL，重复曝光系数为 2.6。",
+      "数据仅覆盖至 2026-08-15，本周期不完整，周环比仅供参考。"
     ],
-    "currentTotal": 10,
+    "currentTotal": 13,
     "previousTotal": 20,
-    "totalChange": -10,
-    "totalChangePct": -50,
-    "currentWeekRecordCount": 3
+    "totalChange": -7,
+    "totalChangePct": -35,
+    "currentWeekRecordCount": 4
   },
   "aioBo": {
     "streamfab": {
@@ -4721,9 +4754,19 @@
     "status": "warning",
     "checks": [
       {
+        "source": "streamfab.precise",
+        "level": "warning",
+        "message": "最近 3 天无抓取记录，请检查监控任务是否正常运行"
+      },
+      {
+        "source": "dvdfab.precise",
+        "level": "warning",
+        "message": "最近 3 天无抓取记录，请检查监控任务是否正常运行"
+      },
+      {
         "source": "competitorMonitoring",
         "level": "warning",
-        "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-13、2026-08-15、2026-08-16 的原始记录；周环比仅供参考"
+        "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-13、2026-08-16 的原始记录；周环比仅供参考"
       },
       {
         "source": "aioBo.streamfab",
@@ -4736,6 +4779,6 @@
         "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
       }
     ],
-    "checkedAt": "2026-08-14T20:01:53.588Z"
+    "checkedAt": "2026-08-15T03:59:28.850Z"
   }
 }

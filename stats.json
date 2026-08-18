@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-18T04:09:58.016Z",
+  "updatedAt": "2026-08-18T11:00:30.613Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1595,
@@ -4184,7 +4184,7 @@
       "旧帖": 5
     },
     "survive1day": {
-      "是": 3,
+      "是": 4,
       "否": 6
     },
     "survive7day": {
@@ -4205,7 +4205,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-18",
-      "calculatedAt": "2026-08-18T04:09:58.085Z",
+      "calculatedAt": "2026-08-18T11:00:30.682Z",
       "dataThrough": "2026-08-18",
       "periodComplete": false,
       "missingDates": [
@@ -4891,6 +4891,6 @@
         "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
       }
     ],
-    "checkedAt": "2026-08-18T04:09:58.090Z"
+    "checkedAt": "2026-08-18T11:00:30.685Z"
   }
 }

@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-08-17T19:18:07.738Z",
+  "updatedAt": "2026-08-18T04:09:58.016Z",
   "streamfab": {
     "label": "StreamFab",
-    "total": 1596,
+    "total": 1595,
     "published": 3,
-    "posts": 1035,
+    "posts": 1034,
     "comments": 561,
     "statusCount": {
       "已忽略": 1044,
@@ -14,7 +14,7 @@
       "需要复核": 64,
       "待处理": 10,
       "暂不回复": 4,
-      "已生成": 333
+      "已生成": 332
     },
     "intentCount": {
       "方案探索": 226,
@@ -22,7 +22,7 @@
       "技术求助": 31,
       "概念或假设讨论": 21,
       "一般需求讨论": 12,
-      "明确技术求助": 41,
+      "明确技术求助": 40,
       "功能随口提及": 9,
       "高意向用户": 14,
       "高意向工具寻找": 44,
@@ -32,7 +32,7 @@
       "暂不处理": 22
     },
     "brandMention": {
-      "YES": 142,
+      "YES": 141,
       "NO": 658
     },
     "topKeywords": [
@@ -42,7 +42,7 @@
       ],
       [
         "netflix downloader",
-        289
+        288
       ],
       [
         "record now",
@@ -303,7 +303,6 @@
         "download streaming video": 1
       },
       "2026-08-11": {
-        "netflix downloader": 1,
         "download netflix video": 2,
         "record netflix": 3,
         "record amazon": 2,
@@ -401,7 +400,7 @@
       ],
       [
         "2026-08-11",
-        33
+        32
       ]
     ],
     "statusByDate": {
@@ -481,7 +480,7 @@
         "需要复核": 7
       },
       "2026-08-11": {
-        "已生成": 29,
+        "已生成": 28,
         "需要复核": 4
       }
     },
@@ -569,9 +568,9 @@
         "竞品用户流失": 1
       },
       "2026-08-11": {
-        "明确技术求助": 3,
         "暂不处理": 22,
         "高意向工具寻找": 6,
+        "明确技术求助": 2,
         "现有工具替代": 1,
         "官方下载受限": 1
       }
@@ -630,7 +629,7 @@
         "NO": 1
       },
       "2026-08-11": {
-        "YES": 33
+        "YES": 32
       }
     },
     "typeByDate": {
@@ -701,7 +700,7 @@
         "评论": 54
       },
       "2026-08-11": {
-        "帖子": 18,
+        "帖子": 17,
         "评论": 15
       }
     }
@@ -1164,29 +1163,25 @@
   "brandMonitoring": {
     "streamfab": {
       "label": "StreamFab",
-      "total": 500,
+      "total": 501,
       "processed": 73,
-      "generated": 19,
+      "generated": 20,
       "pending": 259,
       "noAction": 148,
       "statusCount": {
         "待处理": 259,
         "已处理": 73,
         "无需处理": 148,
-        "已生成": 19
+        "已生成": 20
       },
       "problemType": {
         "正向夸奖": 100,
         "严重故障": 139,
         "咨询请求": 176,
-        "体验吐槽": 84
+        "体验吐槽": 85
       },
-      "avgQualityScore": "1.4",
+      "avgQualityScore": "1.5",
       "scrapingTrend": [
-        [
-          "2026-06-03",
-          4
-        ],
         [
           "2026-06-04",
           4
@@ -1422,6 +1417,10 @@
         [
           "2026-08-16",
           3
+        ],
+        [
+          "2026-08-18",
+          1
         ]
       ],
       "processingTrend": [
@@ -1576,6 +1575,10 @@
         [
           "2026-08-16",
           3
+        ],
+        [
+          "2026-08-18",
+          1
         ]
       ],
       "statusByDate": {
@@ -1975,6 +1978,9 @@
         },
         "2026-08-16": {
           "已生成": 3
+        },
+        "2026-08-18": {
+          "已生成": 1
         }
       },
       "problemByDate": {
@@ -2494,6 +2500,9 @@
           "咨询请求": 1,
           "正向夸奖": 1,
           "严重故障": 1
+        },
+        "2026-08-18": {
+          "体验吐槽": 1
         }
       },
       "problemStatusByDate": {
@@ -3603,6 +3612,11 @@
           "严重故障": {
             "已生成": 1
           }
+        },
+        "2026-08-18": {
+          "体验吐槽": {
+            "已生成": 1
+          }
         }
       },
       "problemStatusCross": {
@@ -3628,30 +3642,30 @@
           "待处理": 36,
           "无需处理": 25,
           "已处理": 15,
-          "已生成": 8
+          "已生成": 9
         }
       }
     },
     "dvdfab": {
       "label": "DVDFab",
-      "total": 75,
+      "total": 82,
       "processed": 6,
-      "generated": 28,
+      "generated": 35,
       "pending": 2,
       "noAction": 39,
       "statusCount": {
         "无需处理": 39,
         "待处理": 2,
-        "已生成": 28,
+        "已生成": 35,
         "已处理": 6
       },
       "problemType": {
-        "严重故障": 13,
-        "体验吐槽": 11,
-        "咨询请求": 24,
-        "正向夸奖": 27
+        "严重故障": 14,
+        "体验吐槽": 12,
+        "咨询请求": 26,
+        "正向夸奖": 30
       },
-      "avgQualityScore": "8.4",
+      "avgQualityScore": "8.5",
       "scrapingTrend": [
         [
           "2026-07-30",
@@ -3720,6 +3734,10 @@
         [
           "2026-08-17",
           2
+        ],
+        [
+          "2026-08-18",
+          7
         ]
       ],
       "processingTrend": [
@@ -3790,6 +3808,10 @@
         [
           "2026-08-17",
           2
+        ],
+        [
+          "2026-08-18",
+          7
         ]
       ],
       "statusByDate": {
@@ -3854,6 +3876,9 @@
         },
         "2026-08-17": {
           "已生成": 2
+        },
+        "2026-08-18": {
+          "已生成": 7
         }
       },
       "problemByDate": {
@@ -3932,6 +3957,12 @@
         "2026-08-17": {
           "体验吐槽": 1,
           "严重故障": 1
+        },
+        "2026-08-18": {
+          "严重故障": 1,
+          "咨询请求": 2,
+          "正向夸奖": 3,
+          "体验吐槽": 1
         }
       },
       "problemStatusByDate": {
@@ -4102,26 +4133,40 @@
           "严重故障": {
             "已生成": 1
           }
+        },
+        "2026-08-18": {
+          "严重故障": {
+            "已生成": 1
+          },
+          "咨询请求": {
+            "已生成": 2
+          },
+          "正向夸奖": {
+            "已生成": 3
+          },
+          "体验吐槽": {
+            "已生成": 1
+          }
         }
       },
       "problemStatusCross": {
         "严重故障": {
           "无需处理": 4,
           "已处理": 4,
-          "已生成": 5
+          "已生成": 6
         },
         "体验吐槽": {
           "无需处理": 5,
-          "已生成": 6
+          "已生成": 7
         },
         "咨询请求": {
           "无需处理": 18,
           "待处理": 2,
-          "已生成": 3,
+          "已生成": 5,
           "已处理": 1
         },
         "正向夸奖": {
-          "已生成": 14,
+          "已生成": 17,
           "无需处理": 12,
           "已处理": 1
         }
@@ -4151,21 +4196,25 @@
     "version": 2,
     "sourceUrl": "https://i6a1sqw3p2.feishu.cn/base/Y1uAbFprUawDWKsSoOucyvhPnrc?table=tblJ98nNIyyxI1KL&view=vewSBgAnvb",
     "currentWeek": {
+      "start": "2026-08-17",
+      "end": "2026-08-23"
+    },
+    "previousWeek": {
       "start": "2026-08-10",
       "end": "2026-08-16"
     },
-    "previousWeek": {
-      "start": "2026-08-03",
-      "end": "2026-08-09"
-    },
     "dataStatus": {
-      "sourceUpdatedAt": "2026-08-16",
-      "calculatedAt": "2026-08-17T19:18:07.810Z",
-      "dataThrough": "2026-08-16",
+      "sourceUpdatedAt": "2026-08-18",
+      "calculatedAt": "2026-08-18T04:09:58.085Z",
+      "dataThrough": "2026-08-18",
       "periodComplete": false,
       "missingDates": [
-        "2026-08-10",
-        "2026-08-13"
+        "2026-08-17",
+        "2026-08-19",
+        "2026-08-20",
+        "2026-08-21",
+        "2026-08-22",
+        "2026-08-23"
       ],
       "quality": {
         "invalidDates": 0,
@@ -4175,40 +4224,40 @@
       }
     },
     "metrics": {
-      "uniqueUrls": 5,
-      "keywordUrlPairs": 6,
-      "rawRecords": 18,
-      "exposureCoefficient": 3.6,
-      "attentionItems": 4
+      "uniqueUrls": 4,
+      "keywordUrlPairs": 4,
+      "rawRecords": 4,
+      "exposureCoefficient": 1,
+      "attentionItems": 3
     },
     "previousMetrics": {
       "uniqueUrls": 5,
-      "keywordUrlPairs": 7,
-      "rawRecords": 20
+      "keywordUrlPairs": 6,
+      "rawRecords": 18
     },
     "brands": [
       {
         "key": "playon",
         "label": "PlayOn",
         "current": {
+          "uniqueUrls": 3,
+          "keywordUrlPairs": 3,
+          "rawRecords": 3
+        },
+        "previous": {
           "uniqueUrls": 4,
           "keywordUrlPairs": 5,
           "rawRecords": 15
         },
-        "previous": {
-          "uniqueUrls": 4,
-          "keywordUrlPairs": 6,
-          "rawRecords": 17
-        },
         "change": {
-          "uniqueUrls": 0,
-          "keywordUrlPairs": -1,
-          "rawRecords": -2
+          "uniqueUrls": -1,
+          "keywordUrlPairs": -2,
+          "rawRecords": -12
         },
         "changePct": {
-          "uniqueUrls": 0,
-          "keywordUrlPairs": -16.7,
-          "rawRecords": -11.8
+          "uniqueUrls": -25,
+          "keywordUrlPairs": -40,
+          "rawRecords": -80
         }
       },
       {
@@ -4217,7 +4266,7 @@
         "current": {
           "uniqueUrls": 1,
           "keywordUrlPairs": 1,
-          "rawRecords": 3
+          "rawRecords": 1
         },
         "previous": {
           "uniqueUrls": 1,
@@ -4227,12 +4276,12 @@
         "change": {
           "uniqueUrls": 0,
           "keywordUrlPairs": 0,
-          "rawRecords": 0
+          "rawRecords": -2
         },
         "changePct": {
           "uniqueUrls": 0,
           "keywordUrlPairs": 0,
-          "rawRecords": 0
+          "rawRecords": -66.7
         }
       },
       {
@@ -4358,9 +4407,9 @@
     ],
     "dailyTrend": [
       {
-        "label": "08-10",
-        "currentDate": "2026-08-10",
-        "previousDate": "2026-08-03",
+        "label": "08-17",
+        "currentDate": "2026-08-17",
+        "previousDate": "2026-08-10",
         "current": {
           "uniqueUrls": 0,
           "keywordUrlPairs": 0,
@@ -4373,97 +4422,116 @@
         }
       },
       {
-        "label": "08-11",
-        "currentDate": "2026-08-11",
-        "previousDate": "2026-08-04",
-        "current": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
-        },
-        "previous": {
-          "uniqueUrls": 2,
-          "keywordUrlPairs": 2,
-          "rawRecords": 2
-        }
-      },
-      {
-        "label": "08-12",
-        "currentDate": "2026-08-12",
-        "previousDate": "2026-08-05",
-        "current": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
-        },
-        "previous": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
-        }
-      },
-      {
-        "label": "08-13",
-        "currentDate": "2026-08-13",
-        "previousDate": "2026-08-06",
-        "current": {
-          "uniqueUrls": 0,
-          "keywordUrlPairs": 0,
-          "rawRecords": 0
-        },
-        "previous": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
-        }
-      },
-      {
-        "label": "08-14",
-        "currentDate": "2026-08-14",
-        "previousDate": "2026-08-07",
+        "label": "08-18",
+        "currentDate": "2026-08-18",
+        "previousDate": "2026-08-11",
         "current": {
           "uniqueUrls": 4,
           "keywordUrlPairs": 4,
           "rawRecords": 4
         },
         "previous": {
+          "uniqueUrls": 3,
+          "keywordUrlPairs": 3,
+          "rawRecords": 3
+        }
+      },
+      {
+        "label": "08-19",
+        "currentDate": "2026-08-19",
+        "previousDate": "2026-08-12",
+        "current": {
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
+        },
+        "previous": {
+          "uniqueUrls": 3,
+          "keywordUrlPairs": 3,
+          "rawRecords": 3
+        }
+      },
+      {
+        "label": "08-20",
+        "currentDate": "2026-08-20",
+        "previousDate": "2026-08-13",
+        "current": {
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
+        },
+        "previous": {
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
+        }
+      },
+      {
+        "label": "08-21",
+        "currentDate": "2026-08-21",
+        "previousDate": "2026-08-14",
+        "current": {
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
+        },
+        "previous": {
           "uniqueUrls": 4,
           "keywordUrlPairs": 4,
           "rawRecords": 4
         }
       },
       {
-        "label": "08-15",
-        "currentDate": "2026-08-15",
-        "previousDate": "2026-08-08",
+        "label": "08-22",
+        "currentDate": "2026-08-22",
+        "previousDate": "2026-08-15",
         "current": {
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
+        },
+        "previous": {
           "uniqueUrls": 3,
           "keywordUrlPairs": 3,
           "rawRecords": 3
-        },
-        "previous": {
-          "uniqueUrls": 5,
-          "keywordUrlPairs": 5,
-          "rawRecords": 5
         }
       },
       {
-        "label": "08-16",
-        "currentDate": "2026-08-16",
-        "previousDate": "2026-08-09",
+        "label": "08-23",
+        "currentDate": "2026-08-23",
+        "previousDate": "2026-08-16",
         "current": {
+          "uniqueUrls": 0,
+          "keywordUrlPairs": 0,
+          "rawRecords": 0
+        },
+        "previous": {
           "uniqueUrls": 4,
           "keywordUrlPairs": 5,
           "rawRecords": 5
-        },
-        "previous": {
-          "uniqueUrls": 3,
-          "keywordUrlPairs": 3,
-          "rawRecords": 3
         }
       }
     ],
     "opportunities": [
+      {
+        "url": "https://www.reddit.com/r/appletv/comments/1lxoaeb",
+        "title": "Apple TV downloading? : r/appletv",
+        "subreddit": "appletv",
+        "brand": "keeprix",
+        "keywords": [
+          "apple tv downloader"
+        ],
+        "keywordCount": 1,
+        "bestRank": 9,
+        "aioCited": true,
+        "aioCategory": "来源引用",
+        "status": "持续",
+        "priority": "P1",
+        "currentRecords": 1,
+        "previousRecords": 3,
+        "change": -2,
+        "action": "查看来源并优先评估回复/内容机会"
+      },
       {
         "url": "https://www.reddit.com/r/PlayOn/comments/1grcrh8",
         "title": "Not able to record Vudu/Fandango : r/PlayOn",
@@ -4478,9 +4546,9 @@
         "aioCategory": "-",
         "status": "持续",
         "priority": "P1",
-        "currentRecords": 5,
-        "previousRecords": 6,
-        "change": -1,
+        "currentRecords": 1,
+        "previousRecords": 5,
+        "change": -4,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
@@ -4494,31 +4562,12 @@
         "keywordCount": 1,
         "bestRank": 5,
         "aioCited": true,
-        "aioCategory": "来源引用",
+        "aioCategory": "-",
         "status": "持续",
         "priority": "P1",
-        "currentRecords": 5,
-        "previousRecords": 3,
-        "change": 2,
-        "action": "查看来源并优先评估回复/内容机会"
-      },
-      {
-        "url": "https://www.reddit.com/r/appletv/comments/1lxoaeb",
-        "title": "Apple TV downloading? : r/appletv",
-        "subreddit": "appletv",
-        "brand": "keeprix",
-        "keywords": [
-          "apple tv downloader"
-        ],
-        "keywordCount": 1,
-        "bestRank": 8,
-        "aioCited": true,
-        "aioCategory": "来源引用",
-        "status": "持续",
-        "priority": "P1",
-        "currentRecords": 3,
-        "previousRecords": 3,
-        "change": 0,
+        "currentRecords": 1,
+        "previousRecords": 5,
+        "change": -4,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
@@ -4528,18 +4577,17 @@
         "brand": "playon",
         "keywords": [
           "bypass joyn drm",
-          "bypass skyshowtime drm",
           "bypass starz drm"
         ],
-        "keywordCount": 3,
+        "keywordCount": 2,
         "bestRank": null,
         "aioCited": true,
         "aioCategory": "来源引用",
-        "status": "持续",
+        "status": "消失",
         "priority": "P1",
-        "currentRecords": 3,
-        "previousRecords": 4,
-        "change": -1,
+        "currentRecords": 0,
+        "previousRecords": 3,
+        "change": -3,
         "action": "查看来源并优先评估回复/内容机会"
       },
       {
@@ -4551,28 +4599,27 @@
           "screen record fandango movies"
         ],
         "keywordCount": 1,
-        "bestRank": 2,
+        "bestRank": 4,
         "aioCited": false,
         "aioCategory": "-",
         "status": "持续",
         "priority": "P3",
-        "currentRecords": 2,
-        "previousRecords": 4,
-        "change": -2,
+        "currentRecords": 1,
+        "previousRecords": 2,
+        "change": -1,
         "action": "持续观察"
       }
     ],
     "insights": [
-      "PlayOn 占本周独立竞品帖子的 80%。",
-      "发现 4 个 P1 机会，优先查看 AIO 引用、高排名或多关键词覆盖的来源。",
-      "声量集中于 5 个 URL，重复曝光系数为 3.6。",
-      "数据仅覆盖至 2026-08-16，本周期不完整，周环比仅供参考。"
+      "PlayOn 占本周独立竞品帖子的 75%。",
+      "发现 3 个 P1 机会，优先查看 AIO 引用、高排名或多关键词覆盖的来源。",
+      "数据仅覆盖至 2026-08-18，本周期不完整，周环比仅供参考。"
     ],
-    "currentTotal": 18,
-    "previousTotal": 20,
-    "totalChange": -2,
-    "totalChangePct": -10,
-    "currentWeekRecordCount": 5
+    "currentTotal": 4,
+    "previousTotal": 18,
+    "totalChange": -14,
+    "totalChangePct": -77.8,
+    "currentWeekRecordCount": 1
   },
   "aioBo": {
     "streamfab": {
@@ -4831,7 +4878,7 @@
       {
         "source": "competitorMonitoring",
         "level": "warning",
-        "message": "竞品当前周期（2026-08-10 至 2026-08-16）缺少 2026-08-10、2026-08-13 的原始记录；周环比仅供参考"
+        "message": "竞品当前周期（2026-08-17 至 2026-08-23）缺少 2026-08-17、2026-08-19、2026-08-20、2026-08-21、2026-08-22、2026-08-23 的原始记录；周环比仅供参考"
       },
       {
         "source": "aioBo.streamfab",
@@ -4844,6 +4891,6 @@
         "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
       }
     ],
-    "checkedAt": "2026-08-17T19:18:07.813Z"
+    "checkedAt": "2026-08-18T04:09:58.090Z"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-18T11:00:30.613Z",
+  "updatedAt": "2026-08-18T19:19:16.122Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1595,
@@ -4205,7 +4205,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-18",
-      "calculatedAt": "2026-08-18T11:00:30.682Z",
+      "calculatedAt": "2026-08-18T19:19:16.197Z",
       "dataThrough": "2026-08-18",
       "periodComplete": false,
       "missingDates": [
@@ -4891,6 +4891,6 @@
         "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
       }
     ],
-    "checkedAt": "2026-08-18T11:00:30.685Z"
+    "checkedAt": "2026-08-18T19:19:16.201Z"
   }
 }

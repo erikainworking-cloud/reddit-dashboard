@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-22T19:03:37.887Z",
+  "updatedAt": "2026-08-23T04:12:19.401Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1595,
@@ -4256,7 +4256,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-19",
-      "calculatedAt": "2026-08-22T19:03:37.964Z",
+      "calculatedAt": "2026-08-23T04:12:19.474Z",
       "dataThrough": "2026-08-19",
       "periodComplete": false,
       "missingDates": [
@@ -4927,6 +4927,16 @@
         "message": "最近 3 天无抓取记录，请检查监控任务是否正常运行"
       },
       {
+        "source": "brandMonitoring.streamfab",
+        "level": "warning",
+        "message": "最近 3 天无抓取记录"
+      },
+      {
+        "source": "brandMonitoring.dvdfab",
+        "level": "warning",
+        "message": "最近 3 天无抓取记录"
+      },
+      {
         "source": "competitorMonitoring",
         "level": "warning",
         "message": "竞品当前周期（2026-08-17 至 2026-08-23）缺少 2026-08-17、2026-08-20、2026-08-21、2026-08-22、2026-08-23 的原始记录；周环比仅供参考"
@@ -4942,6 +4952,6 @@
         "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
       }
     ],
-    "checkedAt": "2026-08-22T19:03:37.968Z"
+    "checkedAt": "2026-08-23T04:12:19.478Z"
   }
 }

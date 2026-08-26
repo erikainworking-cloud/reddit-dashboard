@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-26T04:24:12.899Z",
+  "updatedAt": "2026-08-26T11:16:34.695Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1595,
@@ -4225,13 +4225,13 @@
     }
   },
   "paidAccounts": {
-    "total": 11,
+    "total": 12,
     "byBrand": {
       "DVDFab": 8,
-      "StreamFab": 3
+      "StreamFab": 4
     },
     "byType": {
-      "新帖": 6,
+      "新帖": 7,
       "旧帖": 5
     },
     "survive1day": {
@@ -4239,8 +4239,8 @@
       "否": 7
     },
     "survive7day": {
-      "否": 8,
-      "是": 1
+      "否": 9,
+      "是": 2
     }
   },
   "competitorMonitoring": {
@@ -4256,7 +4256,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-19",
-      "calculatedAt": "2026-08-26T04:24:12.968Z",
+      "calculatedAt": "2026-08-26T11:16:34.773Z",
       "dataThrough": "2026-08-19",
       "periodComplete": false,
       "missingDates": [
@@ -4952,6 +4952,6 @@
         "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
       }
     ],
-    "checkedAt": "2026-08-26T04:24:12.972Z"
+    "checkedAt": "2026-08-26T11:16:34.777Z"
   }
 }

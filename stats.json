@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-04T20:20:25.837Z",
+  "updatedAt": "2026-09-05T06:43:19.029Z",
   "streamfab": {
     "label": "StreamFab",
     "total": 1595,
@@ -4256,7 +4256,7 @@
     },
     "dataStatus": {
       "sourceUpdatedAt": "2026-08-19",
-      "calculatedAt": "2026-09-04T20:20:25.913Z",
+      "calculatedAt": "2026-09-05T06:43:19.100Z",
       "dataThrough": "2026-08-19",
       "periodComplete": false,
       "missingDates": [
@@ -4944,7 +4944,7 @@
       {
         "source": "aioBo.streamfab",
         "level": "warning",
-        "message": "AIO-BO 数据已 21 天未更新（最后：2026-08-14）"
+        "message": "AIO-BO 数据已 22 天未更新（最后：2026-08-14）"
       },
       {
         "source": "aioBo.streamfab",
@@ -4954,7 +4954,7 @@
       {
         "source": "aioBo.dvdfab",
         "level": "warning",
-        "message": "AIO-BO 数据已 21 天未更新（最后：2026-08-14）"
+        "message": "AIO-BO 数据已 22 天未更新（最后：2026-08-14）"
       },
       {
         "source": "aioBo.dvdfab",
@@ -4962,6 +4962,6 @@
         "message": "最近 2 个周次实际值为空，AIO-BO 可能未按时更新"
       }
     ],
-    "checkedAt": "2026-09-04T20:20:25.917Z"
+    "checkedAt": "2026-09-05T06:43:19.104Z"
   }
 }
